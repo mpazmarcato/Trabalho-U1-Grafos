@@ -23,3 +23,22 @@ Analise a complexidade dos algoritmos das questões 1 e 2.
 - [ ] 1. Implemente o algoritmo para a busca em largura com matriz de adjacência e sem recorrência;
 - [ ] 2. Implemente o algoritmo para a busca em largura com arestas de retorno e classificando as arestas como pai, tio, irmão ou primo;
 - [ ] 3. Implemente o algoritmo para a busca em largura com lista de adjacência e com recorrência, salvando o predecessor;
+
+## 4. Biconectividade
+
+- [ ] 1. Implemente a Aplicação do algoritmo de percurso em profundidade para a determinação de blocos, usando a função Lowpt(w) e a árvore de profundidade. Seu algoritmo deve imprimir os vértices pertencentes a cada bloco.
+- [ ] 2. Implementar uma função que determine se determinada aresta do grafo é uma ponte.
+
+# Estrutura do repositório em Rust
+
+Unidade1-Grafos/
+│
+├── README.md
+├── .gitignore
+└── src/
+    ├── main.rs
+    └── graphs /
+        ├── mod.rs
+        ├── adjacency_list.rs
+        ├── ...
+        └── adjacency_matrix.rs
