@@ -1,14 +1,24 @@
-pub fn list_matrix(matrix: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
-    let n = matrix.len();
-    let mut adjacency_list: Vec<Vec<i32>> = vec![Vec::new(); n];
+use crate::graphs::AdjacencyMatrix;
 
-    for i in 0..n {
-        for j in 0..n {
-            if matrix[i][j] != 0 {
-                adjacency_list[i].push(j as i32);
-            }
+// FIXME: ideally the struct field should be private.
+#[derive(Debug, Clone)]
+pub struct AdjacencyList(pub Vec<Vec<usize>>);
+
+impl AdjacencyList {
+    pub fn from_adjacency_matrix(matrix: &AdjacencyMatrix) -> Self {
+        let mut adjacency_list = vec![Vec::new(); matrix.0.len()];
+        for (i, row) in matrix.0.iter().enumerate() {
+            adjacency_list[i].extend(row.iter().enumerate().filter_map(|(j, &val)| {
+                if val != 0 {
+                    Some(j)
+                } else {
+                    None
+                }
+            }));
         }
+        AdjacencyList(adjacency_list)
     }
-
-    adjacency_list
 }
+
+// TODO: Implement the Graph trait
+// impl Graph for AdjacencyList {}
