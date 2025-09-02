@@ -5,7 +5,7 @@
 ## 1. Estruturas de Dados Básicas
 
 - [ ] 1. Crie um programa para criação e manipulação de um grafo simples, incluindo as funções de inserir vértice, excluir vértice e imprimir grafo. Execute a instância do primeiro exemplo desta aula.
-- [ ] 2. Dada uma representação de um grafo não direcionado por matriz de adjacência, faça um algoritmo que represente o grafo em lista de adjacência.
+- [x] 2. Dada uma representação de um grafo não direcionado por matriz de adjacência, faça um algoritmo que represente o grafo em lista de adjacência.
 - [ ] 3. Dada uma representação de um grafo direcionado por matriz de adjacência, faça um algoritmo que represente o grafo em matriz de incidência.
 - [ ] 4. Dada uma representação de um grafo direcionado por matriz de adjacência, faça um algoritmo que represente o grafo em estrela direta.
 
@@ -31,14 +31,16 @@ Analise a complexidade dos algoritmos das questões 1 e 2.
 
 # Estrutura do repositório em Rust
 
+```bash
 Unidade1-Grafos/
 │
 ├── README.md
 ├── .gitignore
 └── src/
     ├── main.rs
-    └── graphs /
+    └── graphs/
         ├── mod.rs
         ├── adjacency_list.rs
-        ├── ...
-        └── adjacency_matrix.rs
+        ├── adjacency_matrix.rs
+        └── ...          # outros módulos de grafos
+```
