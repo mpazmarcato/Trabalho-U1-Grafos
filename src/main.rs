@@ -15,7 +15,14 @@ fn main() {
         println!("{i} -> {neighbours:?}")
     }
 
-    let m2= AdjacencyMatrix(vec![vec![0, 0, 0, 0, 0, 0], vec![0, 0, 0, 0,0, 0], vec![0, 1, 0,0,0 ,0], vec![1,1,1,0,0,0], vec![0,0,0,1,0,1], vec![0,0,0,1,0,0]]);
+    let m2 = AdjacencyMatrix(vec![
+        vec![0, 0, 0, 0, 0, 0],
+        vec![0, 0, 0, 0, 0, 0],
+        vec![0, 1, 0, 0, 0, 0],
+        vec![1, 1, 1, 0, 0, 0],
+        vec![0, 0, 0, 1, 0, 1],
+        vec![0, 0, 0, 1, 0, 0],
+    ]);
     let incidence = IncidenceMatrix::from_adjacency_matrix(&m2);
 
     println!("Incidence matrix: ");
@@ -25,5 +32,4 @@ fn main() {
         }
         println!();
     }
-
 }
