@@ -8,5 +8,6 @@ pub trait Graph {
     fn add_edge(&mut self, n: usize, m: usize);
     fn remove_edge(&mut self, n: usize, m: usize);
     fn neighbors(&self, n: usize) -> Vec<usize>;
+    fn has_edge(&self, n:usize, m:usize) -> bool;
     // TODO: add more methods like, DFS, BFS, etc.
 }
