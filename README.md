@@ -13,7 +13,7 @@ Analise a complexidade dos algoritmos das questões 2 a 4.
 
 ## 2. Busca em Profundidade
 
-- [ ] 1. Implemente o algoritmo para a busca em profundidade com matriz de adjacência e sem recorrência;
+- [x] 1. Implemente o algoritmo para a busca em profundidade com matriz de adjacência e sem recorrência;
 - [ ] 2. Implemente o algoritmo para a busca em profundidade com lista de adjacência e com recorrência;
 - [ ] 3. Implemente o algoritmo para a busca em profundidade com lista de adjacência e com recorrência, salvando o predecessor;
 
