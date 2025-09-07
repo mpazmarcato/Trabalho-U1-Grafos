@@ -7,72 +7,63 @@ pub struct AdjacencyMatrix(pub Vec<Vec<i32>>);
 
 #[derive(Debug)]
 pub struct Node {
-    value: i32,
+    value: usize,
     visited: bool,
-    ancestor: i32,
+    ancestor: Option<usize>,
 }
 
 impl AdjacencyMatrix {
-    pub fn dfs(graph: Vec<Vec<i32>>) -> i32 {
-        let mut vertices: Vec<Node> = Vec::new();
-        for i in 0..graph.len() {
-            vertices.push(Node {
-                value: i as i32,
+    pub fn dfs(&self) -> i32 {
+        let mut vertices: Vec<Node> = (0..self.0.len())
+            .map(|i| Node {
+                value: i,
                 visited: false,
-                ancestor: -1,
-            });
-        }
+                ancestor: None,
+            })
+            .collect();
 
         let mut stack: Vec<usize> = Vec::new();
-        let initial: usize = rand::rng().random_range(0..graph.len());
+        let initial: usize = rand::rng().random_range(0..self.0.len());
+
         stack.push(initial);
         vertices[initial].visited = true;
 
-        while let Some(&row) = stack.last() {
-            let mut found_unvisited = false;
+        while let Some(row) = stack.last().copied() {
+            let unvisited: Option<usize> = self.0[row]
+                .iter()
+                .enumerate()
+                .find(|&(idx, &val)| val == 1 && !vertices[idx].visited)
+                .map(|(i, _)| i);
 
-            for (i, &val) in graph[row].iter().enumerate() {
-                if val == 1 {
-                    if let Some(vertex) = vertices.iter_mut().find(|v| v.value == i as i32) {
-                        if !vertex.visited {
-                            vertex.visited = true;
-                            vertex.ancestor = row as i32;
-                            stack.push(i);
-                            found_unvisited = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if !found_unvisited {
+            if let Some(node) = unvisited {
+                vertices[node].visited = true;
+                vertices[node].ancestor = Some(row);
+                stack.push(node);
+            } else {
                 stack.pop();
             }
         }
         println!("indo escrever");
         println!("{vertices:?}");
-        AdjacencyMatrix::write_graph_to_dot(vertices, String::from("teste.dot"));
+        AdjacencyMatrix::write_graph_to_dot(&vertices, String::from("teste.dot"));
 
         1
     }
 
-    fn write_graph_to_dot(graph: Vec<Node>, path: String) -> io::Result<()> {
+    fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
         let mut file: File = File::create(path)?;
 
         writeln!(file, "digraph G {{")?;
         writeln!(file, "  rankdir=LR;")?;
         writeln!(file, "  node [shape=circle];")?;
 
-        for node in &graph {
+        for node in graph {
             writeln!(file, "  {}", node.value)?;
         }
 
-        for (i, node) in graph.iter().enumerate() {
-            if node.ancestor != -1 && i != (node.ancestor as i32).try_into().unwrap() {
-                writeln!(
-                    file,
-                    "  {} -> {};",
-                    graph[node.ancestor as usize].value, node.value
-                )?;
+        for node in graph {
+            if let Some(ancestor_idx) = node.ancestor {
+                writeln!(file, "  {} -> {};", graph[ancestor_idx].value, node.value)?;
             }
         }
 
