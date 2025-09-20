@@ -1,7 +1,5 @@
 # Trabalho Unidade 1 Grafos
 
-TODO: Adicionar comando para compilar documento em $\LaTeX$.
-
 # Lista de atividades dos colaboradores
 
 ## 1. Estruturas de Dados Básicas
