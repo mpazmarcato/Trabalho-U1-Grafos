@@ -109,6 +109,7 @@ impl Graph<usize> for AdjacencyList {
         todo!()
     }
 
+    #[allow(unreachable_code)]
     fn biconnected_components(&self) -> Vec<impl Graph<usize>> {
         todo!();
         vec![AdjacencyList(Vec::new())]

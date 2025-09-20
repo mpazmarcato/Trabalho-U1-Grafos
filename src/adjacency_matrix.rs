@@ -1,4 +1,3 @@
-use rand::Rng;
 use std::{fs::File, io, io::Write};
 
 // FIXME: ideally the struct field should be private.
@@ -52,6 +51,7 @@ impl AdjacencyMatrix {
         visited_count
     }
 
+    #[allow(dead_code)]
     fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
         let mut file: File = File::create(path)?;
 

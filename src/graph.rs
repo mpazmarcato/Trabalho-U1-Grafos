@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 pub trait Graph<Node: Copy + Eq + std::hash::Hash> {
     fn nodes(&self) -> usize;
     fn edges(&self) -> usize;
