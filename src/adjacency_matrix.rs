@@ -14,6 +14,10 @@ pub struct Node {
 
 impl AdjacencyMatrix {
     pub fn dfs(&self) -> i32 {
+        self.dfs_from_node(0)
+    }
+
+    pub fn dfs_from_node(&self, start: usize) -> i32 {
         let mut vertices: Vec<Node> = (0..self.0.len())
             .map(|i| Node {
                 value: i,
@@ -23,10 +27,11 @@ impl AdjacencyMatrix {
             .collect();
 
         let mut stack: Vec<usize> = Vec::new();
-        let initial: usize = rand::rng().random_range(0..self.0.len());
+        let initial: usize = if start < self.0.len() { start } else { 0 };
 
         stack.push(initial);
         vertices[initial].visited = true;
+        let mut visited_count = 1;
 
         while let Some(row) = stack.last().copied() {
             let unvisited: Option<usize> = self.0[row]
@@ -39,15 +44,12 @@ impl AdjacencyMatrix {
                 vertices[node].visited = true;
                 vertices[node].ancestor = Some(row);
                 stack.push(node);
+                visited_count += 1;
             } else {
                 stack.pop();
             }
         }
-        println!("indo escrever");
-        println!("{vertices:?}");
-        AdjacencyMatrix::write_graph_to_dot(&vertices, String::from("teste.dot"));
-
-        1
+        visited_count
     }
 
     fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
@@ -71,6 +73,3 @@ impl AdjacencyMatrix {
         Ok(())
     }
 }
-
-// TODO: Implement the Graph trait
-// impl Graph for AdjacencyMatrix {}
