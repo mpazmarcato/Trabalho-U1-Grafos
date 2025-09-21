@@ -1,3 +1,5 @@
+use rand::random_range;
+
 use crate::Graph;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 
@@ -24,11 +26,11 @@ impl AdjacencyList {
 }
 
 impl Graph<usize> for AdjacencyList {
-    fn nodes(&self) -> usize {
+    fn order(&self) -> usize {
         self.0.len()
     }
 
-    fn edges(&self) -> usize {
+    fn size(&self) -> usize {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
     }
 
@@ -37,7 +39,7 @@ impl Graph<usize> for AdjacencyList {
         self.0.push(Vec::new());
     }
 
-    fn remove_node(&mut self, n: usize) {
+    fn remove_node(&mut self, &n: &usize) {
         if n < self.0.len() {
             self.0.remove(n);
             for neighbors in self.0.iter_mut() {
@@ -60,53 +62,27 @@ impl Graph<usize> for AdjacencyList {
         }
     }
 
-    fn remove_edge(&mut self, n: usize, m: usize) {
+    fn remove_edge(&mut self, &n: &usize, &m: &usize) {
         if let Some(edges) = self.0.get_mut(n) {
             edges.retain(|&x| x != m);
         }
     }
 
-    fn neighbors(&self, n: usize) -> Vec<usize> {
-        if let Some(edges) = self.0.get(n) {
-            edges.clone()
-        } else {
-            Vec::new()
-        }
-    }
+    type Neighbors<'a>
+        = std::slice::Iter<'a, usize>
+    where
+        Self: 'a,
+        usize: 'a;
 
-    fn has_edge(&self, n: usize, m: usize) -> bool {
-        if let Some(edges) = self.0.get(n) {
-            edges.contains(&m)
-        } else {
-            false
-        }
-    }
-
-    fn dfs(&self, start: usize) -> usize {
-        fn component_size(g: &[Vec<usize>], n: usize, visited: &mut [bool]) -> Option<usize> {
-            *visited.get_mut(n)? = true;
-            let mut count = 1;
-            for &m in g.get(n)? {
-                if !*visited.get(m)? {
-                    count += component_size(g, m, visited)?;
-                }
-            }
-            Some(count)
-        }
-        component_size(&self.0, start, &mut vec![false; self.0.len()]).unwrap_or(0)
-    }
-
-    fn bfs(&self, start: usize) -> usize {
-        _ = start;
-        todo!()
-    }
-
-    fn node_degree(&self, n: usize) -> Option<usize> {
-        Some(self.0.get(n)?.len())
+    fn neighbors<'a>(&'a self, &n: &usize) -> Self::Neighbors<'a> {
+        self.0
+            .get(n)
+            .map(|edges| edges.iter())
+            .unwrap_or_else(|| [].iter())
     }
 
     fn connected(&self) -> bool {
-        todo!()
+        self.order() == self.dfs(&random_range(0..self.order())).count()
     }
 
     fn biparted(&self) -> bool {
@@ -114,8 +90,26 @@ impl Graph<usize> for AdjacencyList {
     }
 
     #[allow(unreachable_code)]
-    fn biconnected_components(&self) -> Vec<impl Graph<usize>> {
+    fn biconnected_components(&self) -> &[Vec<&usize>] {
         todo!();
-        vec![AdjacencyList(Vec::new())]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn connected_graph() {
+        // Graph: 2 ── 0 ── 1
+        // should be connected.
+        assert!(AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]).connected())
+    }
+
+    #[test]
+    fn unconnected_graph() {
+        // Graph: 2    0 ── 1
+        // should be not connected.
+        assert!(!AdjacencyList(vec![vec![1], vec![0], vec![]]).connected())
     }
 }

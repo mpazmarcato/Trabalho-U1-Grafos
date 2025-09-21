@@ -33,7 +33,7 @@ fn bench_dfs_list(c: &mut Criterion) {
         c.bench_with_input(
             BenchmarkId::new("dfs_adjacency_list", size),
             &size,
-            |b, _| b.iter(|| list.dfs(0)),
+            |b, _| b.iter(|| list.dfs(&0).for_each(|_| ())),
         );
     }
 }
