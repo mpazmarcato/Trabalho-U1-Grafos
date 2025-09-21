@@ -17,3 +17,5 @@ target/
 *.vrb
 *.dvi
 *.ps
+*.lot
+*.lof
