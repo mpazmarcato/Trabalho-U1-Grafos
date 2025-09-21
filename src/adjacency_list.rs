@@ -1,5 +1,5 @@
 use crate::Graph;
-use crate::graphs::AdjacencyMatrix;
+use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 
 #[derive(Debug, Clone)]
 pub struct AdjacencyList(Vec<Vec<usize>>);
@@ -16,6 +16,10 @@ impl AdjacencyList {
             );
         }
         AdjacencyList(adjacency_list)
+    }
+
+    pub fn from_incidence_matrix(_matrix: &IncidenceMatrix) -> Self {
+        todo!()
     }
 }
 

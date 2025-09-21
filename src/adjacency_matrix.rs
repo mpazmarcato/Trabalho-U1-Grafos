@@ -1,5 +1,7 @@
 use std::{fs::File, io, io::Write};
 
+use crate::graphs::{AdjacencyList, IncidenceMatrix};
+
 // FIXME: ideally the struct field should be private.
 #[derive(Debug, Clone)]
 pub struct AdjacencyMatrix(pub Vec<Vec<i32>>);
@@ -12,6 +14,14 @@ pub struct Node {
 }
 
 impl AdjacencyMatrix {
+    pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
+        todo!()
+    }
+
+    pub fn from_incidency_matrix(_matrix: &IncidenceMatrix) -> Self {
+        todo!()
+    }
+
     pub fn dfs(&self) -> i32 {
         self.dfs_from_node(0)
     }
