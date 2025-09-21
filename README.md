@@ -1,36 +1,6 @@
 # Trabalho Unidade 1 Grafos
 
-# Lista de atividades dos colaboradores
-
-## 1. Estruturas de Dados Básicas
-
-- [ ] 1. Crie um programa para criação e manipulação de um grafo simples, incluindo as funções de inserir vértice, excluir vértice e imprimir grafo. Execute a instância do primeiro exemplo desta aula.
-- [x] 2. Dada uma representação de um grafo não direcionado por matriz de adjacência, faça um algoritmo que represente o grafo em lista de adjacência.
-- [x] 3. Dada uma representação de um grafo direcionado por matriz de adjacência, faça um algoritmo que represente o grafo em matriz de incidência.
-- [ ] 4. Dada uma representação de um grafo direcionado por matriz de adjacência, faça um algoritmo que represente o grafo em estrela direta.
-
-Analise a complexidade dos algoritmos das questões 2 a 4.
-
-## 2. Busca em Profundidade
-
-- [x] 1. Implemente o algoritmo para a busca em profundidade com matriz de adjacência e sem recorrência;
-- [ ] 2. Implemente o algoritmo para a busca em profundidade com lista de adjacência e com recorrência;
-- [ ] 3. Implemente o algoritmo para a busca em profundidade com lista de adjacência e com recorrência, salvando o predecessor;
-
-Analise a complexidade dos algoritmos das questões 1 e 2.
-
-## 3. Busca em Largura
-
-- [ ] 1. Implemente o algoritmo para a busca em largura com matriz de adjacência e sem recorrência;
-- [ ] 2. Implemente o algoritmo para a busca em largura com arestas de retorno e classificando as arestas como pai, tio, irmão ou primo;
-- [ ] 3. Implemente o algoritmo para a busca em largura com lista de adjacência e com recorrência, salvando o predecessor;
-
-## 4. Biconectividade
-
-- [ ] 1. Implemente a Aplicação do algoritmo de percurso em profundidade para a determinação de blocos, usando a função Lowpt(w) e a árvore de profundidade. Seu algoritmo deve imprimir os vértices pertencentes a cada bloco.
-- [ ] 2. Implementar uma função que determine se determinada aresta do grafo é uma ponte.
-
-# Estrutura do repositório em Rust 🦀
+## Estrutura do repositório em Rust 🦀
 
 ```bash
 Unidade1-Grafos/
@@ -107,3 +77,61 @@ make distclean
 # Limpa e compila novamente
 make rebuild
 ```
+
+## TODOs
+
+> [!NOTE]
+>
+> - Essa seção reflete parte das issues criadas no repositório, servindo como guideline.
+> - As que não pedem a implementação específica em uma ou mais estruturas podem ser interpretadas como "a implementação em pelo menos uma estrutura". Por exemplo, na tarefa "(5) Função que calcula o grau de cada vértice" ficaria implícito que basta implementar uma função do trait `Graph` (nesse caso `neighbors`) para apenas uma das estruturas `AdjacencyList`, `AdjacencyMatrix` e `IncidenceMatrix`.
+> - O checkbox aqui é opcional, acho que o importante é a criação e o fechamento das issues que são essenciais para o trabalho.
+
+A. Para GRAFOS (as opcionais possuem a sigla OPC ao final da função)
+
+- [x] (1) Criação do Grafo a partir da Lista de Adjacências.
+- [x] (2) Criação do Grafo a partir da Matriz de Adjacências.
+- [x] (3) Criação do Grafo a partir da Matriz de Incidência.
+- [ ] (4) Conversão de matriz de adjacência para lista de Adjacências e vice-versa.
+- [ ] (5) Função que calcula o grau de cada vértice.
+- [ ] (6) Função que determina se dois vértices são adjacentes.
+- [ ] (7) Função que determina o número total de vértices.
+- [ ] (8) Função que determina o número total de arestas.
+- [ ] (9) Inclusão de um novo vértice usando Lista de Adjacências e Matriz de Adjacências.
+- [ ] (10) Exclusão de um vértice existente usando Lista de Adjacências e Matriz de Adjacências.
+- [ ] (11) Função que determina se um grafo é conexo ou não.
+- [ ] (12) Determinar se um grafo é bipartido (OPC = 1,0 ponto).
+- [ ] (13) Busca em Largura, a partir de um vértice específico.
+- [ ] (14) Busca em Profundidade, com determinação de arestas de retorno, a partir de um vértice em específico.
+- [ ] (15) Determinação de articulações e blocos (biconectividade), utilizando obrigatoriamente a função lowpt.
+
+B. Para DIGRAFOS (as opcionais possuem a sigla OPC ao final da função)
+
+- [x] (16) Representação do Digrafo a partir da Matriz de Adjacências.
+- [ ] (17) Representação do Digrafo a partir da Matriz de Incidência.
+- [ ] (18) Determinação do Grafo subjacente (OPC= 0,5 ponto)
+- [ ] (19) Busca em largura. (equivalente ao 13)
+- [ ] (20) Busca em profundidade, com determinação de profundidade de entrada e de saída de cada vértice, e arestas de árvore, retorno, avanço e cruzamento.
+
+D. Relatório
+
+- [ ] (30) Introdução: Sumário, objetivo do trabalho.
+- [ ] (31) Definições: Definição de grafos, vértices, arestas, grau, grafos direcionados, etc.
+- [ ] (32) Representações de Grafos: Explicação teórica, vantagens e desvantagens.
+- [ ] (33) Algoritmos: Descrição dos algoritmos implementados.
+- [ ] (34) Implementação: Linguagem de programação, estrutura do projeto, detalhes da implementação.
+- [ ] (35) Testes: Testes elaborados, hardware e resultados dos testes.
+- [ ] (36) Referências: Listar referências usadas no bibtex.
+
+### Extra
+
+C. Implementação de testes de benchmark para comparar performance das implementações dos grafos.
+
+- [ ] (21) Comparação de performance de `has_edge()` entre as três implementações em grafos de diferentes densidades (esparso, médio, denso).
+- [ ] (22) Comparação de performance de `neighbors()` entre as três implementações para nós com diferentes graus de conectividade.
+- [ ] (23) Comparação de performance de `add_node()` e `remove_node()` entre as implementações com grafos de diferentes tamanhos.
+- [ ] (24) Comparação de performance de `add_edge()` e `remove_edge()` entre as implementações.
+- [ ] (25) Comparação da performance do BFS entre as implementações em grafos esparsos vs densos.
+- [ ] (26) Comparação da performance do DFS entre as implementações em grafos esparsos vs densos.
+- [ ] (27) Comparação da performance da detecção de biconectividade entre as implementações.
+- [ ] (28) Comparação da performance da detecção de grafo bipartido entre as implementações.
+- [ ] (29) Comparação da performance da verificação de conectividade entre as implementações.
