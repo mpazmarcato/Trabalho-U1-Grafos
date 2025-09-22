@@ -1,4 +1,4 @@
-use graphs_algorithms::graphs::{AdjacencyMatrix, IncidenceMatrix, AdjacencyList};
+use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
 
 fn main() {
     let m1 = AdjacencyMatrix(vec![
@@ -35,11 +35,7 @@ fn main() {
     m2.dfs();
 
     // Test conversion between adjacency matrix and adjacency list
-    let matrix = AdjacencyMatrix(vec![
-        vec![0, 1, 1],
-        vec![1, 0, 0],
-        vec![1, 0, 0],
-    ]);
+    let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
 
     println!("\nOriginal adjacency matrix:");
     for row in &matrix.0 {

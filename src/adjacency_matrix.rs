@@ -1,6 +1,6 @@
 use std::{fs::File, io, io::Write};
 
-use crate::{graphs::{AdjacencyList, IncidenceMatrix}};
+use crate::graphs::{AdjacencyList, IncidenceMatrix};
 
 // FIXME: ideally the struct field should be private.
 #[derive(Debug, Clone)]
@@ -104,35 +104,17 @@ mod tests {
         let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
         let matrix = AdjacencyMatrix::from_adjacency_list(&list);
 
-        assert_eq!(
-            matrix.0,
-            vec![
-                vec![0, 1, 1],
-                vec![1, 0, 0],
-                vec![1, 0, 0]
-            ]
-        );
+        assert_eq!(matrix.0, vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
     }
 
     #[test]
     fn matrix_to_list() {
         // Mesmo grafo de cima, mas em matriz
-        let matrix = AdjacencyMatrix(vec![
-            vec![0, 1, 1],
-            vec![1, 0, 0],
-            vec![1, 0, 0],
-        ]);
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
 
         let list = AdjacencyList::from_adjacency_matrix(&matrix);
 
-        assert_eq!(
-            list.0,
-            vec![
-                vec![1, 2],
-                vec![0],
-                vec![0]
-            ]
-        );
+        assert_eq!(list.0, vec![vec![1, 2], vec![0], vec![0]]);
     }
 
     #[test]
