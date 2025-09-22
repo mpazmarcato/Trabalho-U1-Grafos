@@ -79,16 +79,13 @@ impl<'a, Node: Eq + Hash, G: Graph<Node>> Iterator for DfsIter<'a, Node, G> {
     type Item = &'a Node;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(node) = self.stack.pop() {
-            for neighbor in self.graph.neighbors(node) {
-                if self.visited.insert(neighbor) {
-                    self.stack.push(neighbor);
-                }
+        let node = self.stack.pop()?;
+        for neighbor in self.graph.neighbors(node) {
+            if self.visited.insert(neighbor) {
+                self.stack.push(neighbor);
             }
-            Some(node)
-        } else {
-            None
         }
+        Some(node)
     }
 }
 
