@@ -2,7 +2,7 @@ use crate::Graph;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 
 #[derive(Debug, Clone)]
-pub struct AdjacencyList(Vec<Vec<usize>>);
+pub struct AdjacencyList(pub Vec<Vec<usize>>);
 
 impl AdjacencyList {
     pub fn from_adjacency_matrix(matrix: &AdjacencyMatrix) -> Self {

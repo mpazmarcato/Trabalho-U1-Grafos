@@ -8,7 +8,8 @@ pub use graph::Graph;
 
 pub mod graphs {
     pub use crate::{
-        adjacency_list::AdjacencyList, adjacency_matrix::AdjacencyMatrix,
+        adjacency_list::AdjacencyList, 
+        adjacency_matrix::AdjacencyMatrix,
         incidence_matrix::IncidenceMatrix,
     };
 }
