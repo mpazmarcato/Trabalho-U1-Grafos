@@ -15,7 +15,15 @@ pub struct Node {
 
 impl AdjacencyMatrix {
     pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
-        todo!()
+        let n = _list.0.len();
+        let mut adjacency_matrix: Vec<Vec<i32>> = vec![vec![0; n]; n];
+
+        for (i, neighbors) in _list.0.iter().enumerate() {
+            for &j in neighbors {
+                adjacency_matrix[i][j] = 1;
+            }
+        }
+        AdjacencyMatrix(adjacency_matrix)
     }
 
     pub fn from_incidency_matrix(_matrix: &IncidenceMatrix) -> Self {
@@ -81,5 +89,41 @@ impl AdjacencyMatrix {
 
         writeln!(file, " }}")?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn adjacency_list_to_matrix() {
+        // Grafo: 0 ── 1
+        //        │
+        //        2
+        let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
+        let matrix = AdjacencyMatrix::from_adjacency_list(&list);
+
+        assert_eq!(matrix.0, vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
+    }
+
+    #[test]
+    fn matrix_to_list() {
+        // Mesmo grafo de cima, mas em matriz
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
+
+        let list = AdjacencyList::from_adjacency_matrix(&matrix);
+
+        assert_eq!(list.0, vec![vec![1, 2], vec![0], vec![0]]);
+    }
+
+    #[test]
+    fn round_trip_conversion() {
+        // Grafo: 0 ── 1 ── 2
+        let original_list = AdjacencyList(vec![vec![1], vec![0, 2], vec![1]]);
+        let matrix = AdjacencyMatrix::from_adjacency_list(&original_list);
+        let converted_list = AdjacencyList::from_adjacency_matrix(&matrix);
+
+        assert_eq!(original_list.0, converted_list.0);
     }
 }
