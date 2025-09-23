@@ -1,4 +1,4 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::hash::Hash;
 
 pub enum Edge<Node> {
@@ -52,8 +52,11 @@ pub trait Graph<Node: Eq + Hash> {
         BfsIter::new(self, start)
     }
 
-    fn back_edges<'a>(&'a self, _start: &'a Node) -> Vec<Edge<&'a Node>> {
-        todo!()
+    fn dfs_edges<'a>(&'a self, start: &'a Node) -> DfsEdgesIter<'a, Node, Self>
+    where
+        Self: Sized,
+    {
+        DfsEdgesIter::new(self, start)
     }
 }
 
@@ -119,6 +122,64 @@ impl<'a, Node: Eq + Hash, G: Graph<Node>> Iterator for BfsIter<'a, Node, G> {
     }
 }
 
-// TODO: Implement necessary functions for digraph
+pub struct DfsEdgesIter<'a, Node, G> {
+    graph: &'a G,
+    visited: HashSet<&'a Node>,
+    discovery: HashMap<&'a Node, usize>,
+    finish: HashMap<&'a Node, usize>,
+    time: usize,
+    stack_hash: HashSet<&'a Node>,
+    pending_edges: VecDeque<Edge<&'a Node>>,
+}
+
+impl<'a, Node: Eq + Hash, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
+    fn new(graph: &'a G, start: &'a Node) -> Self {
+        let mut iter = Self {
+            graph,
+            visited: HashSet::with_capacity(graph.order()),
+            discovery: HashMap::with_capacity(graph.order()),
+            finish: HashMap::with_capacity(graph.order()),
+            time: 0,
+            stack_hash: HashSet::with_capacity(graph.order()),
+            pending_edges: VecDeque::with_capacity(graph.size()),
+        };
+
+        iter.dfs(start);
+        iter
+    }
+
+    fn dfs(&mut self, start: &'a Node) {
+        self.visited.insert(start);
+        self.discovery.insert(start, self.time);
+        self.time += 1;
+        self.stack_hash.insert(start);
+
+        for neighbor in self.graph.neighbors(start) {
+            if !self.visited.contains(neighbor) {
+                self.pending_edges.push_back(Edge::Tree((start, neighbor)));
+                self.dfs(neighbor);
+            } else if self.stack_hash.contains(neighbor) {
+                self.pending_edges.push_back(Edge::Back((start, neighbor)));
+            } else if self.discovery[start] < self.discovery[neighbor] {
+                self.pending_edges
+                    .push_back(Edge::Foward((start, neighbor)));
+            } else {
+                self.pending_edges.push_back(Edge::Cross((start, neighbor)));
+            }
+        }
+
+        self.stack_hash.remove(start);
+        self.finish.insert(start, self.time);
+        self.time += 1;
+    }
+}
+
+impl<'a, Node: Eq + Hash, G: Graph<Node>> Iterator for DfsEdgesIter<'a, Node, G> {
+    type Item = Edge<&'a Node>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.pending_edges.pop_front()
+    }
+}
+
 #[allow(dead_code)]
 pub trait Digraph<Node: Copy + Eq + Hash>: Graph<Node> {}
