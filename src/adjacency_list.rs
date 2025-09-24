@@ -100,7 +100,6 @@ impl Graph<usize> for AdjacencyList {
 
 #[cfg(test)]
 mod tests {
-    use crate::graph::Edge;
 
     use super::*;
 
@@ -116,68 +115,5 @@ mod tests {
         // Graph: 2    0 ── 1
         // should be not connected.
         assert!(!AdjacencyList(vec![vec![1], vec![0], vec![]]).connected())
-    }
-
-    #[test]
-    fn dfs_edges_test() {
-        let g = AdjacencyList(vec![
-            vec![7, 2, 1],
-            vec![3],
-            vec![],
-            vec![4, 2],
-            vec![5, 1],
-            vec![3],
-            vec![7, 5],
-            vec![6],
-            vec![8, 4],
-            vec![],
-        ]);
-        fn m(&i: &usize) -> char {
-            match i {
-                0 => 's',
-                1 => 'a',
-                2 => 'b',
-                3 => 'c',
-                4 => 'd',
-                5 => 'e',
-                6 => 'f',
-                7 => 'g',
-                8 => 'h',
-                9 => 'i',
-                _ => panic!(),
-            }
-        }
-
-        for e in g.dfs_edges(&0) {
-            match e {
-                Edge::Tree((v, u)) => println!("Tree: {} -> {}", m(v), m(u)),
-                Edge::Back((v, u)) => println!("Back: {} -> {}", m(v), m(u)),
-                Edge::Foward((v, u)) => println!("Foward: {} -> {}", m(v), m(u)),
-                Edge::Cross((v, u)) => println!("Cross: {} -> {}", m(v), m(u)),
-            }
-        }
-    }
-
-    #[test]
-    fn dfs_edges_test1() {
-        let g = AdjacencyList(vec![
-            vec![2, 1],
-            vec![3],
-            vec![4],
-            vec![5],
-            vec![3, 7, 6],
-            vec![1],
-            vec![],
-            vec![],
-        ]);
-
-        for e in g.dfs_edges(&0) {
-            match e {
-                Edge::Tree((v, u)) => println!("Tree: {} -> {}", v + 1, u + 1),
-                Edge::Back((v, u)) => println!("Back: {} -> {}", v + 1, u + 1),
-                Edge::Foward((v, u)) => println!("Foward: {} -> {}", v + 1, u + 1),
-                Edge::Cross((v, u)) => println!("Cross: {} -> {}", v + 1, u + 1),
-            }
-        }
     }
 }
