@@ -4,6 +4,7 @@ mod adjacency_list;
 mod adjacency_matrix;
 mod incidence_matrix;
 
+pub use graph::Edge;
 pub use graph::Graph;
 
 pub mod graphs {
