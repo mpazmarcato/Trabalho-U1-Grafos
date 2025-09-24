@@ -37,7 +37,7 @@ impl Graph<usize> for AdjacencyList {
         self.0.push(Vec::new());
     }
 
-    fn remove_node(&mut self, &n: &usize) {
+    fn remove_node(&mut self, n: usize) {
         if n < self.0.len() {
             self.0.remove(n);
             for neighbors in self.0.iter_mut() {
@@ -60,28 +60,24 @@ impl Graph<usize> for AdjacencyList {
         }
     }
 
-    fn remove_edge(&mut self, &n: &usize, &m: &usize) {
+    fn remove_edge(&mut self, n: usize, m: usize) {
         if let Some(edges) = self.0.get_mut(n) {
             edges.retain(|&x| x != m);
         }
     }
 
-    type Neighbors<'a>
-        = std::slice::Iter<'a, usize>
-    where
-        Self: 'a,
-        usize: 'a;
+    type Neighbors<'a> = Box<dyn Iterator<Item = usize> + 'a>;
 
-    fn neighbors<'a>(&'a self, &n: &usize) -> Self::Neighbors<'a> {
-        self.0
-            .get(n)
-            .map(|edges| edges.iter())
-            .unwrap_or_else(|| [].iter())
+    fn neighbors<'a>(&'a self, n: usize) -> Self::Neighbors<'a> {
+        match self.0.get(n) {
+            Some(edges) => Box::new(edges.iter().copied()),
+            None => Box::new(std::iter::empty()),
+        }
     }
 
     fn connected(&self) -> bool {
         for i in 0..self.order() {
-            if self.dfs(&i).count() != self.order() {
+            if self.dfs(i).count() != self.order() {
                 return false;
             }
         }
@@ -93,7 +89,7 @@ impl Graph<usize> for AdjacencyList {
     }
 
     #[allow(unreachable_code)]
-    fn biconnected_components(&self) -> &[Vec<&usize>] {
+    fn biconnected_components(&self) -> &[Vec<usize>] {
         todo!();
     }
 }
