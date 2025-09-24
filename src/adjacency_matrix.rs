@@ -96,7 +96,7 @@ impl Graph<usize> for AdjacencyMatrix {
 impl AdjacencyMatrix {
     pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
         let n = _list.0.len();
-        let mut adjacency_matrix: Vec<Vec<i32>> = vec![vec![0; n]; n];
+        let mut adjacency_matrix: Vec<Vec<usize>> = vec![vec![0; n]; n];
 
         for (i, neighbors) in _list.0.iter().enumerate() {
             for &j in neighbors {
@@ -206,12 +206,6 @@ mod tests {
 
         assert_eq!(original_list.0, converted_list.0);
     }
-}
-
-// TODO: >>TESTS<<!!
-#[cfg(test)]
-mod tests {
-    use super::*;
 
     #[test]
     fn add_new_node() {
