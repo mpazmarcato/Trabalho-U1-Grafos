@@ -1,16 +1,96 @@
-use std::{fs::File, io, io::Write};
+use std::{
+    fs::File,
+    io::{self, Write},
+};
 
-use crate::graphs::{AdjacencyList, IncidenceMatrix};
-
-// FIXME: ideally the struct field should be private.
-#[derive(Debug, Clone)]
-pub struct AdjacencyMatrix(pub Vec<Vec<i32>>);
-
+use crate::{
+    Graph,
+    graphs::{AdjacencyList, IncidenceMatrix},
+};
+// TODO: remove this!
 #[derive(Debug)]
 pub struct Node {
     value: usize,
     visited: bool,
     ancestor: Option<usize>,
+}
+
+#[derive(Debug, Clone)]
+pub struct AdjacencyMatrix(pub Vec<Vec<usize>>);
+
+impl Graph<usize> for AdjacencyMatrix {
+    fn add_node(&mut self, _n: usize) {
+        self.0.push(Vec::new());
+        let new_order = self.order();
+
+        for r in &mut self.0 {
+            while r.len() < new_order {
+                r.push(0);
+            }
+        }
+    }
+
+    /// Adds a new edge between two nodes `n` and `m`
+    fn add_edge(&mut self, n: usize, m: usize) {
+        // Catch edges loops
+        if n == m {
+            match self.0.get_mut(n) {
+                Some(edges) => edges[n] = 1,
+                None => todo!(),
+            }
+        } else {
+            let (a, b) = if n < m { (n, m) } else { (m, n) }; // Re-order
+            let (left, right) = self.0.split_at_mut(b);
+
+            match (left.get_mut(a), right.get_mut(0)) {
+                (None, None) => panic!(), // TODO: should treat?
+                (None, Some(_)) => panic!(),
+                (Some(_), None) => panic!(),
+                (Some(n_edges), Some(m_edges)) => {
+                    n_edges[b] = 1;
+                    m_edges[a] = 1;
+                }
+            }
+        }
+    }
+
+    fn order(&self) -> usize {
+        self.0.len()
+    }
+
+    fn size(&self) -> usize {
+        todo!()
+    }
+
+    fn remove_node(&mut self, n: &usize) {
+        todo!()
+    }
+
+    fn remove_edge(&mut self, n: &usize, m: &usize) {
+        todo!()
+    }
+
+    fn connected(&self) -> bool {
+        todo!()
+    }
+
+    fn biconnected_components(&self) -> &[Vec<&usize>] {
+        todo!()
+    }
+
+    fn biparted(&self) -> bool {
+        todo!()
+    }
+
+    type Neighbors<'a>
+        = std::slice::Iter<'a, usize>
+    where
+        Self: 'a,
+        usize: 'a;
+
+    fn neighbors<'a>(&'a self, n: &usize) -> Self::Neighbors<'a> {
+        todo!()
+    }
 }
 
 impl AdjacencyMatrix {
@@ -81,5 +161,30 @@ impl AdjacencyMatrix {
 
         writeln!(file, " }}")?;
         Ok(())
+    }
+}
+
+// TODO: >>TESTS<<!!
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn add_new_node() {
+        // Graph: 0 - 2 - 1
+        let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![1, 1, 0]]);
+        m.add_node(3);
+        // Graph: 0 - 2 - 1  3
+        assert!(m.order() == 4);
+    }
+
+    #[test]
+    fn add_new_node_and_edge() {
+        // Graph: 0 - 2 - 1
+        let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![1, 1, 0]]);
+        m.add_node(3);
+        m.add_edge(1, 3);
+        // Graph: 0 - 2 - 1 - 3
+        // assert!(m.has_edge(&1, &3)); TODO: use when neighbors is implemented..
     }
 }
