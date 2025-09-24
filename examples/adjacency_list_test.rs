@@ -23,4 +23,8 @@ fn main() {
     println!("Edge 1 - 2");
     l1.add_edge(1, 2);
     print_list(&l1);
+
+    println!("Edge 3 - 3");
+    l1.add_edge(3, 3);
+    print_list(&l1);
 }

@@ -173,7 +173,7 @@ mod tests {
         //       /   \      \    /
         //      4     5       -
         assert!(list.order() == 6);
-        // assert!(list.size() == 6);
+        // assert!(list.size() == 6); // FIXME: uncomment this later when size() is corrected
         assert!(list.has_edge(&3, &5));
         assert!(list.has_edge(&2, &2));
     }
