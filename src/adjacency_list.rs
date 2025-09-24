@@ -107,6 +107,7 @@ impl Graph<usize> for AdjacencyList {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[test]
