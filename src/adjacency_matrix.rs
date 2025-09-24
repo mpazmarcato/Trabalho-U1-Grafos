@@ -1,5 +1,6 @@
 use std::{fs::File, io, io::Write};
 
+use crate::Graph;
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
 
 // FIXME: ideally the struct field should be private.
@@ -89,6 +90,56 @@ impl AdjacencyMatrix {
 
         writeln!(file, " }}")?;
         Ok(())
+    }
+}
+
+impl Graph<usize> for AdjacencyMatrix {
+    fn order(&self) -> usize {
+        self.0.len()
+    }
+
+    fn size(&self) -> usize {
+        todo!()
+    }
+
+    fn add_node(&mut self, _n: usize) {
+        todo!()
+    }
+
+    fn remove_node(&mut self, _n: usize) {
+        todo!()
+    }
+
+    fn add_edge(&mut self, _n: usize, _m: usize) {
+        todo!()
+    }
+
+    fn remove_edge(&mut self, _n: usize, _m: usize) {
+        todo!()
+    }
+
+    type Neighbors<'a> = Box<dyn Iterator<Item = usize> + 'a>;
+    fn neighbors<'a>(&'a self, n: usize) -> Self::Neighbors<'a> {
+        match self.0.get(n) {
+            Some(row) => Box::new(
+                row.iter()
+                    .enumerate()
+                    .filter_map(|(i, &weight)| if weight != 0 { Some(i) } else { None }),
+            ),
+            None => Box::new(std::iter::empty()),
+        }
+    }
+
+    fn connected(&self) -> bool {
+        todo!()
+    }
+
+    fn biconnected_components(&self) -> &[Vec<usize>] {
+        todo!()
+    }
+
+    fn biparted(&self) -> bool {
+        todo!()
     }
 }
 
