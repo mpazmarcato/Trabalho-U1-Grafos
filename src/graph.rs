@@ -52,11 +52,11 @@ pub trait Graph<Node: Eq + Hash> {
         BfsIter::new(self, start)
     }
 
-    fn dfs_edges<'a>(&'a self, start: &'a Node) -> DfsEdgesIter<'a, Node, Self>
+    fn dfs_edges<'a>(&'a self, start_nodes: &[&'a Node]) -> DfsEdgesIter<'a, Node, Self>
     where
         Self: Sized,
     {
-        DfsEdgesIter::new(self, start)
+        DfsEdgesIter::new(self, start_nodes)
     }
 }
 
@@ -133,7 +133,19 @@ pub struct DfsEdgesIter<'a, Node, G> {
 }
 
 impl<'a, Node: Eq + Hash, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
-    fn new(graph: &'a G, start: &'a Node) -> Self {
+    /// Performs a depth-first search (DFS) starting from the given nodes,
+    /// recording discovery and finish times for each visited node.
+    pub fn times(
+        &mut self,
+        start_nodes: &[&'a Node],
+    ) -> (&HashMap<&'a Node, usize>, &HashMap<&'a Node, usize>) {
+        for n in start_nodes {
+            self.dfs(n);
+        }
+        (&self.discovery, &self.finish)
+    }
+
+    fn new(graph: &'a G, start_nodes: &[&'a Node]) -> Self {
         let mut iter = Self {
             graph,
             visited: HashSet::with_capacity(graph.order()),
@@ -144,7 +156,9 @@ impl<'a, Node: Eq + Hash, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
             pending_edges: VecDeque::with_capacity(graph.size()),
         };
 
-        iter.dfs(start);
+        for n in start_nodes {
+            iter.dfs(n);
+        }
         iter
     }
 
