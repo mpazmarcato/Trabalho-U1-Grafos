@@ -15,7 +15,7 @@ fn main() {
         vec![4, 9],
         vec![],
     ]);
-    fn m(&i: &usize) -> char {
+    fn m(i: usize) -> char {
         match i {
             0 => 's',
             1 => 'a',
@@ -30,7 +30,7 @@ fn main() {
             _ => panic!(),
         }
     }
-    for e in g.dfs_edges(&[&0, &8]) {
+    for e in g.dfs_edges(&[0, 8]) {
         match e {
             Edge::Tree((v, u)) => println!("Tree: {} -> {}", m(v), m(u)),
             Edge::Back((v, u)) => println!("Back: {} -> {}", m(v), m(u)),
