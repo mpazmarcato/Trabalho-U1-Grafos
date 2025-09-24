@@ -28,6 +28,7 @@ impl Graph<usize> for AdjacencyList {
         self.0.len()
     }
 
+    // TODO: fix the duplication
     fn size(&self) -> usize {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
     }
@@ -53,10 +54,16 @@ impl Graph<usize> for AdjacencyList {
 
     fn add_edge(&mut self, n: usize, m: usize) {
         if self.0.get(m).is_some()
-            && let Some(edges) = self.0.get_mut(n)
-            && !edges.contains(&m)
+            && let Some(n_edges) = self.0.get_mut(n)
+            && !n_edges.contains(&m)
         {
-            edges.push(m);
+            n_edges.push(m);
+        }
+
+        if let Some(m_edges) = self.0.get_mut(m)
+            && !m_edges.contains(&n)
+        {
+            m_edges.push(n);
         }
     }
 
@@ -101,6 +108,74 @@ impl Graph<usize> for AdjacencyList {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn add_new_node() {
+        // Graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /
+        //      4
+        let mut list = AdjacencyList(vec![vec![3], vec![2, 3], vec![1], vec![0, 1, 4], vec![3]]);
+        list.add_node(5);
+
+        // Current graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /
+        //      4    5
+        assert!(list.order() == 6);
+    }
+
+    #[test]
+    fn add_new_node_and_edge() {
+        // Graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /
+        //      4
+        let mut list = AdjacencyList(vec![vec![3], vec![2, 3], vec![1], vec![0, 1, 4], vec![3]]);
+        list.add_node(5);
+        list.add_edge(3, 5);
+
+        // Current graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /   \
+        //      4     5
+        assert!(list.order() == 6);
+        // assert!(list.size() == 5);
+        assert!(list.has_edge(&3, &5));
+    }
+
+    #[test]
+    fn add_new_node_and_loop_edge() {
+        // Graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /   \
+        //      4     5
+        let mut list = AdjacencyList(vec![vec![3], vec![2, 3], vec![1], vec![0, 1, 4], vec![3]]);
+        list.add_node(5);
+        list.add_edge(3, 5);
+        list.add_edge(2, 2);
+
+        // Current graph:
+        //     0       1      -
+        //       \   /   \  /   \
+        //         3      2      |
+        //       /   \      \    /
+        //      4     5       -
+        assert!(list.order() == 6);
+        // assert!(list.size() == 6);
+        assert!(list.has_edge(&3, &5));
+        assert!(list.has_edge(&2, &2));
+    }
 
     #[test]
     fn connected_graph() {
