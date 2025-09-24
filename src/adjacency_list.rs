@@ -1,10 +1,8 @@
-use rand::random_range;
-
 use crate::Graph;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 
 #[derive(Debug, Clone)]
-pub struct AdjacencyList(Vec<Vec<usize>>);
+pub struct AdjacencyList(pub Vec<Vec<usize>>);
 
 impl AdjacencyList {
     pub fn from_adjacency_matrix(matrix: &AdjacencyMatrix) -> Self {
@@ -82,7 +80,12 @@ impl Graph<usize> for AdjacencyList {
     }
 
     fn connected(&self) -> bool {
-        self.order() == self.dfs(&random_range(0..self.order())).count()
+        for i in 0..self.order() {
+            if self.dfs(&i).count() != self.order() {
+                return false;
+            }
+        }
+        true
     }
 
     fn biparted(&self) -> bool {
