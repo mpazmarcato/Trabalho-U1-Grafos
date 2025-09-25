@@ -200,7 +200,6 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsEdgesIter<'a, N
     }
 }
 
-#[allow(dead_code)]
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
     fn add_undirected_edge(&mut self, n: Node, m: Node) {
         self.add_edge(n, m);
