@@ -37,21 +37,21 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         self.neighbors(n).count()
     }
 
-    fn dfs<'a>(&'a self, start: Node) -> DfsIter<'a, Node, Self>
+    fn dfs(&self, start: Node) -> DfsIter<'_, Node, Self>
     where
         Self: Sized,
     {
         DfsIter::new(self, start)
     }
 
-    fn bfs<'a>(&'a self, start: Node) -> BfsIter<'a, Node, Self>
+    fn bfs(&self, start: Node) -> BfsIter<'_, Node, Self>
     where
         Self: Sized,
     {
         BfsIter::new(self, start)
     }
 
-    fn dfs_edges<'a>(&'a self, start_nodes: &[Node]) -> DfsEdgesIter<'a, Node, Self>
+    fn dfs_edges(&self, start_nodes: &[Node]) -> DfsEdgesIter<'_, Node, Self>
     where
         Self: Sized,
     {
@@ -201,10 +201,9 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
         self.add_edge(m, n);
     }
 
-    fn dfs_edges<'a>(&'a self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>> + 'a
+    fn dfs_edges(&self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>>
     where
         Self: Sized,
-        Node: 'a,
     {
         DfsEdgesIter::new(self, start_nodes)
             .filter(|edge| matches!(edge, Edge::Tree(_) | Edge::Back(_)))
