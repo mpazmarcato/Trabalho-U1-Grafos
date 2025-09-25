@@ -206,7 +206,6 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
         self.add_edge(m, n);
     }
 
-    // FIX: add a check to ensure that back edges are not to parents.
     fn dfs_tree_and_back_edges(&self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>>
     where
         Self: Sized,
