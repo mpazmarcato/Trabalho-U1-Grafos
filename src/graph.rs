@@ -195,4 +195,18 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsEdgesIter<'a, N
 }
 
 #[allow(dead_code)]
-pub trait Digraph<Node: Copy + Eq + Hash>: Graph<Node> {}
+pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
+    fn add_undirected_edge(&mut self, n: Node, m: Node) {
+        self.add_edge(n, m);
+        self.add_edge(m, n);
+    }
+
+    fn dfs_edges<'a>(&'a self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>> + 'a
+    where
+        Self: Sized,
+        Node: 'a,
+    {
+        DfsEdgesIter::new(self, start_nodes)
+            .filter(|edge| matches!(edge, Edge::Tree(_) | Edge::Back(_)))
+    }
+}
