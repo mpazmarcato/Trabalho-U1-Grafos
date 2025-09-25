@@ -4,6 +4,7 @@ use std::hash::Hash;
 pub enum Edge<Node> {
     Tree((Node, Node)),
     Back((Node, Node)),
+    ParentBack((Node, Node)),
     Foward((Node, Node)),
     Cross((Node, Node)),
 }
@@ -139,7 +140,7 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
         start_nodes: &[Node],
     ) -> (&HashMap<Node, usize>, &HashMap<Node, usize>) {
         for &n in start_nodes {
-            self.dfs(n);
+            self.dfs(n, None);
         }
         (&self.discovery, &self.finish)
     }
@@ -156,12 +157,12 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
         };
 
         for &n in start_nodes {
-            iter.dfs(n);
+            iter.dfs(n, None);
         }
         iter
     }
 
-    fn dfs(&mut self, start: Node) {
+    fn dfs(&mut self, start: Node, parent: Option<Node>) {
         self.visited.insert(start);
         self.discovery.insert(start, self.time);
         self.time += 1;
@@ -170,9 +171,14 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
         for neighbor in self.graph.neighbors(start) {
             if !self.visited.contains(&neighbor) {
                 self.pending_edges.push_back(Edge::Tree((start, neighbor)));
-                self.dfs(neighbor);
+                self.dfs(neighbor, Some(start));
             } else if self.stack_hash.contains(&neighbor) {
-                self.pending_edges.push_back(Edge::Back((start, neighbor)));
+                if Some(neighbor) == parent {
+                    self.pending_edges
+                        .push_back(Edge::ParentBack((start, neighbor)));
+                } else {
+                    self.pending_edges.push_back(Edge::Back((start, neighbor)));
+                }
             } else if self.discovery[&start] < self.discovery[&neighbor] {
                 self.pending_edges
                     .push_back(Edge::Foward((start, neighbor)));
@@ -201,6 +207,7 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
         self.add_edge(m, n);
     }
 
+    // FIX: add a check to ensure that back edges are not to parents.
     fn dfs_edges(&self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>>
     where
         Self: Sized,
