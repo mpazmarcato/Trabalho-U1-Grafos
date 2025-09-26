@@ -35,11 +35,7 @@ fn main() {
     m2.dfs();
 
     // Test conversion between adjacency matrix and adjacency list
-    let matrix = AdjacencyMatrix(vec![
-        vec![0, 1, 1],
-        vec![1, 0, 0],
-        vec![1, 0, 0],
-    ]);
+    let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
 
     println!("\nOriginal adjacency matrix:");
     for row in &matrix.0 {
@@ -61,12 +57,11 @@ fn main() {
     println!("DFS visit count: {}", matrix.dfs_from_node(0));
     println!("BFS visit count: {}", matrix.bfs_from_node(0));
 
-
     let list = AdjacencyList(vec![
         vec![1, 2], // 0 → 1,2
         vec![0],    // 1 → 0
         vec![0],    // 2 → 0
     ]);
 
-    println!("Visitados no BFS: {}", list.bfs()); 
+    println!("Visitados no BFS: {}", list.bfs());
 }
