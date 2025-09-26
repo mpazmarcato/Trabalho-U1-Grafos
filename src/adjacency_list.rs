@@ -1,4 +1,5 @@
 use crate::Graph;
+use crate::graph::UndirectedGraph;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 
 #[derive(Debug, Clone)]
@@ -93,6 +94,8 @@ impl Graph<usize> for AdjacencyList {
         todo!();
     }
 }
+
+impl UndirectedGraph<usize> for AdjacencyList {}
 
 #[cfg(test)]
 mod tests {
