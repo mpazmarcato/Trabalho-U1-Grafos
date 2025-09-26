@@ -70,6 +70,39 @@ impl AdjacencyMatrix {
         visited_count
     }
 
+    pub fn bfs(&self) -> i32 {
+        self.bfs_from_node(0)
+    }
+
+    pub fn bfs_from_node(&self, start: usize) -> i32 {
+        let mut vertices: Vec<Node> = (0..self.0.len())
+            .map(|i| Node {
+                value: i,
+                visited: false,
+                ancestor: None,
+            })
+            .collect();
+
+        let mut queue: std::collections::VecDeque<usize> = std::collections::VecDeque::new();
+        let initial: usize = if start < self.0.len() { start } else { 0 };
+
+        queue.push_back(initial);
+        vertices[initial].visited = true;
+        let mut visited_count = 1;
+
+        while let Some(node_idx) = queue.pop_front() {
+            for (i, &val) in self.0[node_idx].iter().enumerate() {
+                if val == 1 && !vertices[i].visited {
+                    vertices[i].visited = true;
+                    vertices[i].ancestor = Some(node_idx);
+                    queue.push_back(i);
+                    visited_count += 1;
+                }
+            }
+        }
+        visited_count
+    }
+
     #[allow(dead_code)]
     fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
         let mut file: File = File::create(path)?;
