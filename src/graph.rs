@@ -60,6 +60,77 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     }
 }
 
+pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
+    fn add_undirected_edge(&mut self, n: Node, m: Node) {
+        self.add_edge(n, m);
+        self.add_edge(m, n);
+    }
+
+    fn dfs_tree_and_back_edges(&self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>>
+    where
+        Self: Sized,
+    {
+        DfsEdgesIter::new(self, start_nodes)
+            .filter(|edge| matches!(edge, Edge::Tree(_) | Edge::Back(_)))
+    }
+
+    fn biconnected_components(&self, start_nodes: &[Node]) -> Vec<Vec<(Node, Node)>>
+    where
+        Self: Sized,
+    {
+        fn dfs_biconnected<Node: Eq + Hash + Copy>(
+            &graph: &impl Graph<Node>,
+            start: Node,
+            visited: &mut HashSet<Node>,
+            discovery: &mut HashMap<Node, usize>,
+            low: &mut HashMap<Node, usize>,
+            time: &mut usize,
+            parent: &mut HashMap<Node, Node>,
+            edge_stack: &mut Vec<(Node, Node)>,
+            biconnected_components: &mut Vec<Vec<(Node, Node)>>,
+        ) {
+            visited.insert(start);
+            discovery.insert(start, *time);
+            low.insert(start, *time);
+            *time += 1;
+            let mut children = 0;
+
+            for neighbor in graph.neighbors(start) {
+                if !visited.contains(&neighbor) {
+                    children += 1;
+                    parent.insert(neighbor, start);
+                    edge_stack.push((start, neighbor));
+                }
+            }
+        }
+
+        let mut visited = HashSet::with_capacity(self.order());
+        let mut discovery = HashMap::with_capacity(self.order());
+        let mut low = HashMap::with_capacity(self.order());
+        let mut time = 0;
+        let mut parent = HashMap::with_capacity(self.order());
+        let mut edge_stack = Vec::with_capacity(self.size());
+        let mut biconnected_components = Vec::new();
+
+        for start in start_nodes {
+            if !visited.contains(start) {
+                dfs_biconnected(
+                    self,
+                    *start,
+                    &mut visited,
+                    &mut discovery,
+                    &mut low,
+                    &mut time,
+                    &mut parent,
+                    &mut edge_stack,
+                    &mut biconnected_components,
+                );
+            }
+        }
+        biconnected_components
+    }
+}
+
 pub struct DfsIter<'a, Node, G> {
     graph: &'a G,
     stack: Vec<Node>,
@@ -197,20 +268,5 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsEdgesIter<'a, N
     type Item = Edge<Node>;
     fn next(&mut self) -> Option<Self::Item> {
         self.pending_edges.pop_front()
-    }
-}
-
-pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
-    fn add_undirected_edge(&mut self, n: Node, m: Node) {
-        self.add_edge(n, m);
-        self.add_edge(m, n);
-    }
-
-    fn dfs_tree_and_back_edges(&self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>>
-    where
-        Self: Sized,
-    {
-        DfsEdgesIter::new(self, start_nodes)
-            .filter(|edge| matches!(edge, Edge::Tree(_) | Edge::Back(_)))
     }
 }
