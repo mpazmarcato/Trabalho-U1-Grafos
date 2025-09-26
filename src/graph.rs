@@ -1,13 +1,6 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashSet, VecDeque};
+use std::fmt::Debug;
 use std::hash::Hash;
-
-pub enum Edge<Node> {
-    Tree((Node, Node)),
-    Back((Node, Node)),
-    ParentBack((Node, Node)),
-    Foward((Node, Node)),
-    Cross((Node, Node)),
-}
 
 pub trait Graph<Node: Eq + Hash + Copy> {
     fn order(&self) -> usize;
@@ -51,44 +44,84 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     {
         BfsIter::new(self, start)
     }
+}
 
-    fn dfs_edges(&self, start_nodes: &[Node]) -> DfsEdgesIter<'_, Node, Self>
-    where
-        Self: Sized,
-    {
-        DfsEdgesIter::new(self, start_nodes)
+pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
+    fn add_undirected_edge(&mut self, n: Node, m: Node) {
+        self.add_edge(n, m);
+        self.add_edge(m, n);
+    }
+
+    fn remove_undirected_edge(&mut self, n: Node, m: Node) {
+        self.remove_edge(n, m);
+        self.remove_edge(m, n);
     }
 }
 
-pub struct DfsIter<'a, Node, G> {
+pub struct DfsIter<'a, Node, G>
+where
+    G: Graph<Node>,
+    Node: Eq + Hash + Copy,
+    Self: 'a,
+{
     graph: &'a G,
-    stack: Vec<Node>,
+    stack: Vec<(Node, G::Neighbors<'a>)>,
     visited: HashSet<Node>,
+    start_node: Option<Node>,
 }
 
 impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsIter<'a, Node, G> {
     fn new(graph: &'a G, start: Node) -> Self {
-        let mut visited = HashSet::with_capacity(graph.order());
-        visited.insert(start);
         Self {
             graph,
-            stack: vec![start],
-            visited,
+            stack: vec![],
+            visited: HashSet::with_capacity(graph.order()),
+            start_node: Some(start),
         }
+    }
+
+    fn _new_start(&mut self, start: Node) {
+        self.start_node = Some(start)
     }
 }
 
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsIter<'a, Node, G> {
-    type Item = Node;
+#[derive(Debug)]
+pub enum DfsEvent<Node> {
+    /// A node is discovered for the first time.
+    /// The Option<Node> is the parent in the DFS tree (None for the start Node).
+    Discover(Node, Option<Node>),
+    /// All descendants of a node have been visited.
+    Finish(Node),
+    /// A non-tree edge is found from the first node to the second.
+    NonTreeEdge(Node, Node),
+}
+
+impl<'a, Node: Eq + Hash + Copy + Debug, G: Graph<Node>> Iterator for DfsIter<'a, Node, G> {
+    type Item = DfsEvent<Node>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let node = self.stack.pop()?;
-        for neighbor in self.graph.neighbors(node) {
-            if self.visited.insert(neighbor) {
-                self.stack.push(neighbor);
+        if let Some(start_node) = self.start_node.take() {
+            self.visited.insert(start_node);
+            self.stack
+                .push((start_node, self.graph.neighbors(start_node)));
+            return Some(DfsEvent::Discover(start_node, None));
+        }
+        if let Some((node, mut neighbors)) = self.stack.pop() {
+            if let Some(neighbor) = neighbors.next() {
+                self.stack.push((node, neighbors));
+
+                if self.visited.insert(neighbor) {
+                    self.stack.push((neighbor, self.graph.neighbors(neighbor)));
+                    return Some(DfsEvent::Discover(neighbor, Some(node)));
+                } else {
+                    return Some(DfsEvent::NonTreeEdge(node, neighbor));
+                }
+            } else {
+                return Some(DfsEvent::Finish(node));
             }
         }
-        Some(node)
+
+        None
     }
 }
 
@@ -124,100 +157,61 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for BfsIter<'a, Node, 
     }
 }
 
-pub struct DfsEdgesIter<'a, Node, G> {
-    graph: &'a G,
-    visited: HashSet<Node>,
-    discovery: HashMap<Node, usize>,
-    finish: HashMap<Node, usize>,
-    time: usize,
-    stack_hash: HashSet<Node>,
-    pending_edges: VecDeque<Edge<Node>>,
-}
+#[cfg(test)]
+mod test {
+    use crate::{DfsEvent, Graph, graphs::AdjacencyList};
 
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
-    /// Performs a depth-first search (DFS) starting from the given nodes,
-    /// recording discovery and finish times for each visited node.
-    pub fn times(
-        &mut self,
-        start_nodes: &[Node],
-    ) -> (&HashMap<Node, usize>, &HashMap<Node, usize>) {
-        for &n in start_nodes {
-            self.dfs(n, None);
-        }
-        (&self.discovery, &self.finish)
+    #[test]
+    fn test_dfs_with_cycle() {
+        let mut g = AdjacencyList::default();
+        g.add_node(0);
+        g.add_node(1);
+        g.add_node(2);
+        g.add_edge(0, 1);
+        g.add_edge(1, 2);
+        g.add_edge(2, 0); // Cycle
+
+        let mut dfs = g.dfs(0);
+
+        assert!(matches!(dfs.next(), Some(DfsEvent::Discover(0, None))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Discover(1, Some(0)))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Discover(2, Some(1)))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::NonTreeEdge(2, 0))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Finish(2))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Finish(1))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Finish(0))));
+        assert!(dfs.next().is_none());
     }
 
-    fn new(graph: &'a G, start_nodes: &[Node]) -> Self {
-        let mut iter = Self {
-            graph,
-            visited: HashSet::with_capacity(graph.order()),
-            discovery: HashMap::with_capacity(graph.order()),
-            finish: HashMap::with_capacity(graph.order()),
-            time: 0,
-            stack_hash: HashSet::with_capacity(graph.order()),
-            pending_edges: VecDeque::with_capacity(graph.size()),
-        };
+    #[test]
+    fn test_dfs_simple_path() {
+        let mut g = AdjacencyList::default();
+        g.add_node(0);
+        g.add_node(1);
+        g.add_node(2);
+        g.add_edge(0, 1);
+        g.add_edge(1, 2);
 
-        for &n in start_nodes {
-            iter.dfs(n, None);
-        }
-        iter
+        let mut dfs = g.dfs(0);
+
+        assert!(matches!(dfs.next(), Some(DfsEvent::Discover(0, None))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Discover(1, Some(0)))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Discover(2, Some(1)))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Finish(2))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Finish(1))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Finish(0))));
+        assert!(dfs.next().is_none());
     }
 
-    fn dfs(&mut self, start: Node, parent: Option<Node>) {
-        self.visited.insert(start);
-        self.discovery.insert(start, self.time);
-        self.time += 1;
-        self.stack_hash.insert(start);
+    #[test]
+    fn single_node_dfs() {
+        let mut g = AdjacencyList::default();
+        g.add_node(0);
 
-        for neighbor in self.graph.neighbors(start) {
-            if !self.visited.contains(&neighbor) {
-                self.pending_edges.push_back(Edge::Tree((start, neighbor)));
-                self.dfs(neighbor, Some(start));
-            } else if self.stack_hash.contains(&neighbor) {
-                if Some(neighbor) == parent {
-                    self.pending_edges
-                        .push_back(Edge::ParentBack((start, neighbor)));
-                } else {
-                    self.pending_edges.push_back(Edge::Back((start, neighbor)));
-                }
-            } else if self.discovery[&start] < self.discovery[&neighbor] {
-                self.pending_edges
-                    .push_back(Edge::Foward((start, neighbor)));
-            } else {
-                self.pending_edges.push_back(Edge::Cross((start, neighbor)));
-            }
-        }
+        let mut dfs = g.dfs(0);
 
-        self.stack_hash.remove(&start);
-        self.finish.insert(start, self.time);
-        self.time += 1;
-    }
-}
-
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsEdgesIter<'a, Node, G> {
-    type Item = Edge<Node>;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.pending_edges.pop_front()
-    }
-}
-
-pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
-    fn add_undirected_edge(&mut self, n: Node, m: Node) {
-        self.add_edge(n, m);
-        self.add_edge(m, n);
-    }
-
-    fn remove_undirected_edge(&mut self, n: Node, m: Node) {
-        self.remove_edge(n, m);
-        self.remove_edge(m, n);
-    }
-
-    fn dfs_tree_and_back_edges(&self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>>
-    where
-        Self: Sized,
-    {
-        DfsEdgesIter::new(self, start_nodes)
-            .filter(|edge| matches!(edge, Edge::Tree(_) | Edge::Back(_)))
+        assert!(matches!(dfs.next(), Some(DfsEvent::Discover(0, None))));
+        assert!(matches!(dfs.next(), Some(DfsEvent::Finish(0))));
+        assert!(dfs.next().is_none());
     }
 }

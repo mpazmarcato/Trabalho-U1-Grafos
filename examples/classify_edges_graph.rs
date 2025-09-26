@@ -1,9 +1,7 @@
-use graphs_algorithms::Edge;
-use graphs_algorithms::Graph;
 use graphs_algorithms::graphs::AdjacencyList;
 
 fn main() {
-    let digraph = AdjacencyList(vec![
+    let _digraph = AdjacencyList(vec![
         vec![1, 2, 7],
         vec![3],
         vec![],
@@ -15,7 +13,7 @@ fn main() {
         vec![4, 9],
         vec![],
     ]);
-    fn m(i: usize) -> char {
+    fn _m(i: usize) -> char {
         match i {
             0 => 's',
             1 => 'a',
@@ -30,12 +28,5 @@ fn main() {
             _ => panic!(),
         }
     }
-    for e in digraph.dfs_edges(&[0, 8]) {
-        match e {
-            Edge::Tree((v, u)) => println!("Tree: {} -> {}", m(v), m(u)),
-            Edge::Back((v, u)) | Edge::ParentBack((v, u)) => println!("Back: {} -> {}", m(v), m(u)),
-            Edge::Foward((v, u)) => println!("Foward: {} -> {}", m(v), m(u)),
-            Edge::Cross((v, u)) => println!("Cross: {} -> {}", m(v), m(u)),
-        }
-    }
+    todo!()
 }
