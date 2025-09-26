@@ -1,8 +1,8 @@
 use crate::Graph;
-use crate::graph::UndirectedGraph;
+use crate::graph::{DfsEvent, UndirectedGraph};
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct AdjacencyList(pub Vec<Vec<usize>>);
 
 impl AdjacencyList {
@@ -122,7 +122,12 @@ impl Graph<usize> for AdjacencyList {
     // TODO: Only working for undirected graphs...
     fn connected(&self) -> bool {
         for i in 0..self.order() {
-            if self.dfs(i).count() != self.order() {
+            if self
+                .dfs(i)
+                .filter(|event| matches!(event, DfsEvent::Discover(_, _)))
+                .count()
+                != self.order()
+            {
                 return false;
             }
         }
