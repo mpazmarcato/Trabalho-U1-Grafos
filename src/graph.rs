@@ -114,11 +114,13 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for BfsIter<'a, Node, 
     type Item = Node;
 
     fn next(&mut self) -> Option<Self::Item> {
-        _ = self.graph;
-        _ = self.queue;
-        _ = self.visited;
-        // Tip: The iterator should return Some(next item) or None in case there's no item.
-        todo!("BFS iterator")
+       let node = self.queue.pop_front()?;
+         for neighbor in self.graph.neighbors(node) {
+              if self.visited.insert(neighbor) {
+                self.queue.push_back(neighbor);
+              }
+         }
+         Some(node)
     }
 }
 

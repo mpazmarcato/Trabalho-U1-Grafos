@@ -22,6 +22,36 @@ impl AdjacencyList {
     pub fn from_incidence_matrix(_matrix: &IncidenceMatrix) -> Self {
         todo!()
     }
+
+    pub fn bfs(&self) -> i32 {
+        self.bfs_from_node(0)
+    }
+
+    pub fn bfs_from_node(&self, start: usize) -> i32 {
+        if start >= self.0.len() {
+            return 0; // nó inválido
+        }
+
+        let mut visited = vec![false; self.0.len()];
+        let mut queue = std::collections::VecDeque::new();
+        let mut count = 0;
+
+        visited[start] = true;
+        queue.push_back(start);
+
+        while let Some(node) = queue.pop_front() {
+            count += 1;
+
+            for &neighbor in &self.0[node] {
+                if !visited[neighbor] {
+                    visited[neighbor] = true;
+                    queue.push_back(neighbor);
+                }
+            }
+        }
+
+        count
+    }
 }
 
 impl Graph<usize> for AdjacencyList {
