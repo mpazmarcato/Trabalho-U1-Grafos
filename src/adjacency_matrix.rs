@@ -148,6 +148,21 @@ impl Graph<usize> for AdjacencyMatrix {
         stack.len()
     }
 
+    fn underlying_graph(&self) -> Self {
+        let mut matrix: AdjacencyMatrix =
+            AdjacencyMatrix(vec![vec![0; self.0.len()]; self.0.len()]);
+
+        for (idx_r, row) in self.0.iter().enumerate() {
+            for (idx_c, col) in row.iter().enumerate() {
+                if *col == 1 && !matrix.has_edge(idx_c, idx_r) {
+                    matrix.add_undirected_edge(idx_r, idx_c);
+                }
+            }
+        }
+
+        matrix
+    }
+
     fn add_node(&mut self, _n: usize) {
         self.0.push(Vec::new());
         let new_order = self.order();
@@ -280,6 +295,31 @@ mod tests {
         let converted_list = AdjacencyList::from_adjacency_matrix(&matrix);
 
         assert_eq!(original_list.0, converted_list.0);
+    }
+
+    #[test]
+    fn underlying_graph_conversion() {
+        // Graph:
+        // 0 -> 1 -> 2 <- 3
+        //      \    ^
+        //       \   |
+        //       ->  4
+        let original_graph = AdjacencyMatrix(vec![
+            vec![0, 1, 0, 0, 0],
+            vec![0, 0, 1, 0, 1],
+            vec![0, 0, 0, 0, 0],
+            vec![0, 0, 1, 0, 0],
+            vec![0, 0, 1, 0, 0],
+        ]);
+
+        // Current graph:
+        // 0 -- 1 -- 2 -- 3
+        //      \    |
+        //       \   |
+        //        -  4
+        let underlying_graph = original_graph.underlying_graph();
+        assert_eq!(original_graph.order(), underlying_graph.order());
+        assert_eq!(original_graph.size(), underlying_graph.size());
     }
 
     #[test]

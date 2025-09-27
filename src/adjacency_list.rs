@@ -64,6 +64,11 @@ impl Graph<usize> for AdjacencyList {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
     }
 
+    fn underlying_graph(&self) -> Self {
+        let mut list = AdjacencyList(vec![Vec::new(); self.0.len()]);
+        list
+    }
+
     fn add_node(&mut self, _n: usize) {
         self.0.push(Vec::new());
     }
