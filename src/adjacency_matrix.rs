@@ -1,11 +1,10 @@
-use std::{fs::File, io, io::Write};
+use std::{
+    fs::File,
+    io::{self, Write},
+};
 
-use crate::Graph;
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
-
-// FIXME: ideally the struct field should be private.
-#[derive(Debug, Clone)]
-pub struct AdjacencyMatrix(pub Vec<Vec<i32>>);
+use crate::{Graph, UndirectedGraph};
 
 #[derive(Debug)]
 pub struct Node {
@@ -14,10 +13,13 @@ pub struct Node {
     ancestor: Option<usize>,
 }
 
+#[derive(Debug, Clone)]
+pub struct AdjacencyMatrix(pub Vec<Vec<usize>>);
+
 impl AdjacencyMatrix {
     pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
         let n = _list.0.len();
-        let mut adjacency_matrix: Vec<Vec<i32>> = vec![vec![0; n]; n];
+        let mut adjacency_matrix: Vec<Vec<usize>> = vec![vec![0; n]; n];
 
         for (i, neighbors) in _list.0.iter().enumerate() {
             for &j in neighbors {
@@ -136,14 +138,29 @@ impl Graph<usize> for AdjacencyMatrix {
     }
 
     fn add_node(&mut self, _n: usize) {
-        todo!()
+        self.0.push(Vec::new());
+        let new_order = self.order();
+
+        for r in &mut self.0 {
+            while r.len() < new_order {
+                r.push(0);
+            }
+        }
+    }
+
+    /// Adds a new edge between two nodes `n` and `m`
+    fn add_edge(&mut self, n: usize, m: usize) {
+        if let Some(edges) = self.0.get_mut(n)
+            && let Some(edge) = edges.get_mut(m)
+        {
+            if *edge == 1 {
+                return;
+            }
+            *edge = 1;
+        }
     }
 
     fn remove_node(&mut self, _n: usize) {
-        todo!()
-    }
-
-    fn add_edge(&mut self, _n: usize, _m: usize) {
         todo!()
     }
 
@@ -175,6 +192,8 @@ impl Graph<usize> for AdjacencyMatrix {
         todo!()
     }
 }
+
+impl UndirectedGraph<usize> for AdjacencyMatrix {}
 
 #[cfg(test)]
 mod tests {
@@ -209,5 +228,36 @@ mod tests {
         let converted_list = AdjacencyList::from_adjacency_matrix(&matrix);
 
         assert_eq!(original_list.0, converted_list.0);
+    }
+
+    #[test]
+    fn graph_add_new_node() {
+        // Graph: 0 - 2 - 1
+        let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![1, 1, 0]]);
+        m.add_node(3);
+        // Graph: 0 - 2 - 1  3
+        assert!(m.order() == 4);
+    }
+
+    #[test]
+    fn graph_add_new_node_and_edge() {
+        // Graph: 0 -> 2 <- 1
+        let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![0, 0, 0]]);
+        m.add_node(3);
+        m.add_edge(1, 3);
+        // Graph: 0 -> 2 <- 1 -> 3
+        assert!(m.has_edge(1, 3));
+        assert!(!m.has_edge(3, 1));
+    }
+
+    #[test]
+    fn undirected_graph_add_new_node_and_edge() {
+        // Graph: 0 - 2 - 1
+        let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![1, 1, 0]]);
+        m.add_node(3);
+        m.add_undirected_edge(1, 3);
+        // Graph: 0 - 2 - 1 - 3
+        assert!(m.has_edge(1, 3));
+        assert!(m.has_edge(3, 1));
     }
 }
