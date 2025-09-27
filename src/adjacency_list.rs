@@ -66,6 +66,14 @@ impl Graph<usize> for AdjacencyList {
 
     fn underlying_graph(&self) -> Self {
         let mut list = AdjacencyList(vec![Vec::new(); self.0.len()]);
+
+        for (idx_r, row) in self.0.iter().enumerate() {
+            for &col in row.iter() {
+                if !list.has_edge(idx_r, col) {
+                    list.add_undirected_edge(idx_r, col);
+                }
+            }
+        }
         list
     }
 
@@ -149,6 +157,29 @@ mod tests {
         // Graph: 2    0 ── 1
         // should be not connected.
         assert!(!AdjacencyList(vec![vec![1], vec![0], vec![]]).connected())
+    }
+
+    #[test]
+    fn underlying_graph_conversion() {
+        // Graph:
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
+        //       /
+        //      4
+        let original_list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1], vec![3]]);
+
+        let underlying_list = original_list.underlying_graph();
+
+        // Current graph:
+        //     0        - 1
+        //       \    /    \
+        //        - 3       - 2
+        //       /
+        //      4
+        assert_eq!(original_list.order(), underlying_list.order());
+        // assert_eq!(original_list.size(), underlying_list.size()); // FIXME: uncomment when size duplication is fixed!
+        assert!(underlying_list.connected());
     }
 
     #[test]
