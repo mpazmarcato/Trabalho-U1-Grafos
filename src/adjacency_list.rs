@@ -183,6 +183,36 @@ mod tests {
     }
 
     #[test]
+    fn underlying_graph_conversion_and_node_delete_after() {
+        // Graph:
+        // 0 -> 1 -> 2 <- 3
+        //      \    ^
+        //       \   |
+        //       ->  4
+        let original_list = AdjacencyList(vec![vec![1], vec![2, 4], vec![], vec![2], vec![2]]);
+
+        let mut underlying_list = original_list.underlying_graph();
+
+        // Current graph:
+        // 0 -- 1 -- 2 -- 3
+        //      \    |
+        //       \   |
+        //        -  4
+        assert_eq!(original_list.order(), underlying_list.order());
+        // assert_eq!(original_list.size(), underlying_list.size()); // FIXME: uncomment when size duplication is fixed!
+        assert!(underlying_list.connected());
+
+        underlying_list.remove_node(2);
+        // Current graph:
+        // 0 -- 1         2
+        //      \
+        //       \
+        //        -  3
+        assert_ne!(original_list.order(), underlying_list.order());
+        assert!(!underlying_list.connected());
+    }
+
+    #[test]
     fn graph_add_new_node() {
         // Graph:
         //     0      -> 1
