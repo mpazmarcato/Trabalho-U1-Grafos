@@ -59,7 +59,7 @@ impl Graph<usize> for AdjacencyList {
         self.0.len()
     }
 
-    // TODO: fix the duplication
+    // FIXME: fix the duplication!! Only working for digraphs.
     fn size(&self) -> usize {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
     }
@@ -106,6 +106,7 @@ impl Graph<usize> for AdjacencyList {
         }
     }
 
+    // TODO: Only working for undirected graphs...
     fn connected(&self) -> bool {
         for i in 0..self.order() {
             if self.dfs(i).count() != self.order() {
@@ -129,31 +130,165 @@ impl UndirectedGraph<usize> for AdjacencyList {}
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
-    fn add_new_node() {
+    fn connected_undirected_graph() {
+        // Graph: 2 ── 0 ── 1
+        // should be connected.
+        assert!(AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]).connected())
+    }
+
+    #[test]
+    fn unconnected_undirected_graph() {
+        // Graph: 2    0 ── 1
+        // should be not connected.
+        assert!(!AdjacencyList(vec![vec![1], vec![0], vec![]]).connected())
+    }
+
+    #[test]
+    fn graph_add_new_node() {
         // Graph:
-        //     0       1
-        //       \   /   \
-        //         3      2
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
         //       /
         //      4
-        let mut list = AdjacencyList(vec![vec![3], vec![2, 3], vec![1], vec![0, 1, 4], vec![3]]);
+        let mut list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1], vec![3]]);
         list.add_node(5);
 
         // Current graph:
-        //     0       1
-        //       \   /   \
-        //         3      2
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
         //       /
         //      4    5
         assert!(list.order() == 6);
+        assert!(list.size() == 4);
+        assert!(!list.connected());
     }
 
     #[test]
-    fn add_new_node_and_edge() {
+    fn graph_add_new_node_and_edge() {
+        // Graph:
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
+        //       /
+        //      4
+        let mut list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1], vec![3]]);
+        list.add_node(5);
+        list.add_edge(3, 5);
+
+        // Current graph:
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
+        //       /    \
+        //      4      -> 5
+        assert!(list.order() == 6);
+        assert!(list.size() == 5);
+        assert!(list.has_edge(3, 5));
+        // assert!(list.connected()); // FIXME: implementar uma conversão de digrafo para seu subjacente para que funcione
+    }
+
+    #[test]
+    fn graph_add_new_node_and_loop_edge() {
+        // Graph:
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
+        //       /
+        //      4
+        let mut list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1], vec![3]]);
+        list.add_node(5);
+        list.add_edge(3, 5);
+        list.add_edge(2, 2);
+
+        // Current graph:
+        //     0      -> 1      ---
+        //       \    /   \    /   \
+        //        -> 3     -> 2    |
+        //       /    \        ^   /
+        //      4      -> 5    \--
+        assert!(list.order() == 6);
+        assert!(list.size() == 6);
+        assert!(list.has_edge(3, 5));
+        assert!(list.has_edge(2, 2));
+    }
+
+    #[test]
+    fn graph_remove_edge() {
+        // Graph:
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
+        //       /    \
+        //      4      -> 5
+        let mut list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1, 5], vec![3], vec![]]);
+
+        list.remove_edge(0, 3);
+        // Current graph:
+        //     0       -> 1
+        //           /   \
+        //          3     -> 2
+        //       /    \
+        //      4      -> 5
+        assert!(list.size() == 4);
+        assert!(!list.has_edge(0, 3));
+        assert!(list.has_edge(4, 3));
+        assert!(!list.connected());
+    }
+
+    #[test]
+    fn graph_remove_edge_loop() {
+        // Graph:
+        //     0      -> 1      ---
+        //       \    /   \    /   \
+        //        -> 3     -> 2    |
+        //       /    \        ^   /
+        //      4      -> 5    \--
+        let mut list = AdjacencyList(vec![vec![3], vec![2], vec![2], vec![1, 5], vec![3], vec![]]);
+        list.remove_edge(2, 2);
+
+        // Current graph:
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
+        //       /    \
+        //      4      -> 5
+        assert!(list.size() == 5);
+        assert!(!list.has_edge(2, 2));
+        assert!(list.has_edge(1, 2));
+        // assert!(list.connected()); // FIXME: implementar uma conversão de digrafo para seu subjacente para que funcione
+    }
+
+    #[test]
+    fn graph_remove_node() {
+        // Graph:
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
+        //       /    \
+        //      4      -> 5
+        let mut list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1, 5], vec![3], vec![]]);
+        list.remove_node(3);
+
+        // Current graph:
+        //     0      1
+        //              \
+        //               -> 2
+        //
+        //      3       4
+        assert!(list.order() == 5);
+        assert!(list.size() == 1);
+        assert!(!list.has_edge(0, 3));
+        assert!(list.has_edge(1, 2));
+        assert!(!list.connected());
+    }
+
+    #[test]
+    fn undirected_graph_add_new_node() {
         // Graph:
         //     0       1
         //       \   /   \
@@ -162,7 +297,29 @@ mod tests {
         //      4
         let mut list = AdjacencyList(vec![vec![3], vec![2, 3], vec![1], vec![0, 1, 4], vec![3]]);
         list.add_node(5);
-        list.add_edge(3, 5);
+
+        // Current graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /
+        //      4     5
+        assert!(list.order() == 6);
+        // assert!(list.size() == 4);// TODO: uncomment when fixed
+        assert!(!list.connected());
+    }
+
+    #[test]
+    fn undirected_graph_add_new_node_and_edge() {
+        // Graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /
+        //      4
+        let mut list = AdjacencyList(vec![vec![3], vec![2, 3], vec![1], vec![0, 1, 4], vec![3]]);
+        list.add_node(5);
+        list.add_undirected_edge(3, 5);
 
         // Current graph:
         //     0       1
@@ -171,22 +328,23 @@ mod tests {
         //       /   \
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 5);
+        // assert!(list.size() == 5); // TODO: uncomment when fixed
         assert!(list.has_edge(3, 5));
+        assert!(list.connected());
     }
 
     #[test]
-    fn add_new_node_and_loop_edge() {
+    fn undirected_graph_add_new_node_and_loop_edge() {
         // Graph:
         //     0       1
         //       \   /   \
         //         3      2
-        //       /   \
-        //      4     5
+        //       /
+        //      4
         let mut list = AdjacencyList(vec![vec![3], vec![2, 3], vec![1], vec![0, 1, 4], vec![3]]);
         list.add_node(5);
-        list.add_edge(3, 5);
-        list.add_edge(2, 2);
+        list.add_undirected_edge(3, 5);
+        list.add_undirected_edge(2, 2);
 
         // Current graph:
         //     0       1      -
@@ -195,22 +353,130 @@ mod tests {
         //       /   \      \    /
         //      4     5       -
         assert!(list.order() == 6);
-        // assert!(list.size() == 6); // FIXME: uncomment this later when size() is corrected
+        // assert!(list.size() == 6);// TODO: uncomment when fixed
+        assert!(list.connected());
         assert!(list.has_edge(3, 5));
         assert!(list.has_edge(2, 2));
     }
 
     #[test]
-    fn connected_graph() {
-        // Graph: 2 ── 0 ── 1
-        // should be connected.
-        assert!(AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]).connected())
+    fn undirected_graph_remove_edge() {
+        // Graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /   \
+        //      4     5
+        let mut list = AdjacencyList(vec![
+            vec![3],
+            vec![2, 3],
+            vec![1],
+            vec![0, 1, 4, 5],
+            vec![3],
+            vec![3],
+        ]);
+        list.remove_undirected_edge(1, 3);
+
+        // Current graph:
+        //     0       1
+        //       \       \
+        //         3      2
+        //       /   \
+        //      4     5
+        assert!(list.order() == 6);
+        // assert!(list.size() == 4); // TODO: uncomment when fixed
+        assert!(!list.has_edge(3, 1));
+        assert!(!list.connected());
     }
 
     #[test]
-    fn unconnected_graph() {
-        // Graph: 2    0 ── 1
-        // should be not connected.
-        assert!(!AdjacencyList(vec![vec![1], vec![0], vec![]]).connected())
+    fn undirected_graph_remove_edge_loop() {
+        // Graph:
+        //     0       1      -
+        //       \   /   \  /   \
+        //         3      2      |
+        //       /   \      \    /
+        //      4     5       -
+        let mut list = AdjacencyList(vec![
+            vec![3],
+            vec![2, 3],
+            vec![1, 2],
+            vec![0, 1, 4, 5],
+            vec![3],
+            vec![3],
+        ]);
+        list.remove_undirected_edge(2, 2);
+
+        // Current graph:
+        //     0       1
+        //       \    /  \
+        //         3      2
+        //       /   \
+        //      4     5
+        assert!(list.order() == 6);
+        // assert!(list.size() == 5); // TODO: uncomment when fixed
+        assert!(!list.has_edge(2, 2));
+        assert!(list.has_edge(2, 1));
+        assert!(list.connected());
+    }
+
+    #[test]
+    fn undirected_graph_remove_node_3() {
+        // Graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /   \
+        //      4     5
+        let mut list = AdjacencyList(vec![
+            vec![3],
+            vec![2, 3],
+            vec![1],
+            vec![0, 1, 4, 5],
+            vec![3],
+            vec![3],
+        ]);
+        list.remove_node(3);
+
+        // Current graph:
+        //     0       1
+        //              \
+        //               2
+        //
+        //       3    4
+        assert!(list.order() == 5);
+        // assert!(list.size() == 1); // TODO: uncomment when fixed
+        assert!(!list.has_edge(0, 3));
+        assert!(list.has_edge(2, 1));
+        assert!(!list.connected());
+    }
+    #[test]
+    fn undirected_graph_remove_node_4() {
+        // Graph:
+        //     0       1
+        //       \   /   \
+        //         3      2
+        //       /   \
+        //      4     5
+        let mut list = AdjacencyList(vec![
+            vec![3],
+            vec![2, 3],
+            vec![1],
+            vec![0, 1, 4, 5],
+            vec![3],
+            vec![3],
+        ]);
+        list.remove_node(4);
+
+        // Current graph:
+        //     0       1
+        //       \    /  \
+        //         3      2
+        //          \
+        //           4
+        assert!(list.order() == 5);
+        // assert!(list.size() == 4); // TODO: uncomment when fixed
+        assert!(list.has_edge(0, 3));
+        assert!(list.connected());
     }
 }

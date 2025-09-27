@@ -208,6 +208,11 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
         self.add_edge(m, n);
     }
 
+    fn remove_undirected_edge(&mut self, n: Node, m: Node) {
+        self.remove_edge(n, m);
+        self.remove_edge(m, n);
+    }
+
     fn dfs_tree_and_back_edges(&self, start_nodes: &[Node]) -> impl Iterator<Item = Edge<Node>>
     where
         Self: Sized,
