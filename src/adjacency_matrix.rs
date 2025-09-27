@@ -134,7 +134,18 @@ impl Graph<usize> for AdjacencyMatrix {
     }
 
     fn size(&self) -> usize {
-        todo!()
+        let mut stack: Vec<(usize, usize)> = Vec::new();
+
+        for (idx_r, row) in self.0.iter().enumerate() {
+            for (idx_c, col) in row.iter().enumerate() {
+                if *col == 1 && !stack.contains(&(idx_r, idx_c)) && !stack.contains(&(idx_c, idx_r))
+                {
+                    stack.push((idx_r, idx_c));
+                }
+            }
+        }
+
+        stack.len()
     }
 
     fn add_node(&mut self, _n: usize) {
@@ -160,12 +171,25 @@ impl Graph<usize> for AdjacencyMatrix {
         }
     }
 
-    fn remove_node(&mut self, _n: usize) {
-        todo!()
+    // Removes a node and its edges by its index
+    fn remove_node(&mut self, n: usize) {
+        if n < self.0.len() {
+            self.0.remove(n);
+            for row in self.0.iter_mut() {
+                for idx in n + 1..row.len() {
+                    row[idx - 1] = row[idx];
+                }
+                row.pop();
+            }
+        }
     }
 
-    fn remove_edge(&mut self, _n: usize, _m: usize) {
-        todo!()
+    fn remove_edge(&mut self, n: usize, m: usize) {
+        if let Some(edges) = self.0.get_mut(n)
+            && let Some(edge) = edges.get_mut(m)
+        {
+            *edge = 0;
+        }
     }
 
     type Neighbors<'a> = Box<dyn Iterator<Item = usize> + 'a>;
@@ -197,7 +221,35 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {}
 
 #[cfg(test)]
 mod tests {
+    use std::vec;
+
     use super::*;
+
+    #[test]
+    fn undirected_graph_matrix_size() {
+        let undirected_m = AdjacencyMatrix(vec![
+            vec![1, 1, 0, 1, 0, 0],
+            vec![1, 0, 1, 1, 0, 0],
+            vec![0, 1, 0, 1, 0, 0],
+            vec![1, 1, 1, 0, 1, 1],
+            vec![0, 0, 0, 1, 0, 1],
+            vec![0, 0, 0, 1, 1, 0],
+        ]);
+        assert!(undirected_m.size() == 9);
+    }
+
+    #[test]
+    fn graph_matrix_size() {
+        let directed_m = AdjacencyMatrix(vec![
+            vec![1, 0, 0, 0, 0, 0],
+            vec![1, 0, 0, 0, 0, 0],
+            vec![0, 1, 0, 0, 0, 0],
+            vec![1, 1, 1, 0, 0, 0],
+            vec![0, 0, 0, 1, 0, 1],
+            vec![0, 0, 0, 1, 0, 0],
+        ]);
+        assert!(directed_m.size() == 9);
+    }
 
     #[test]
     fn adjacency_list_to_matrix() {
@@ -232,10 +284,10 @@ mod tests {
 
     #[test]
     fn graph_add_new_node() {
-        // Graph: 0 - 2 - 1
-        let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![1, 1, 0]]);
+        // Graph: 0 -> 2 <- 1
+        let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![0, 0, 0]]);
         m.add_node(3);
-        // Graph: 0 - 2 - 1  3
+        // Graph: 0 -> 2 <- 1  3
         assert!(m.order() == 4);
     }
 
@@ -259,5 +311,149 @@ mod tests {
         // Graph: 0 - 2 - 1 - 3
         assert!(m.has_edge(1, 3));
         assert!(m.has_edge(3, 1));
+        assert!(m.size() == 3);
+    }
+
+    #[test]
+    fn graph_remove_edge() {
+        // Graph:
+        // 0 -> 1 -> 2 <- 3
+        //      \    ^
+        //       \   |
+        //       ->  4
+        let mut m = AdjacencyMatrix(vec![
+            vec![0, 1, 0, 0, 0],
+            vec![0, 0, 1, 0, 1],
+            vec![0, 0, 0, 0, 0],
+            vec![0, 0, 1, 0, 0],
+            vec![0, 0, 1, 0, 0],
+        ]);
+
+        m.remove_edge(1, 4);
+        assert!(!m.has_edge(1, 4));
+        assert!(!m.has_edge(4, 1));
+        assert!(m.size() == 4);
+    }
+
+    #[test]
+    fn graph_duplicate_remove_edge() {
+        // Graph:
+        // 0 -> 1 -> 2 <- 3
+        //      \    ^
+        //       \   |
+        //       ->  4
+        let mut m = AdjacencyMatrix(vec![
+            vec![0, 1, 0, 0, 0],
+            vec![0, 0, 1, 0, 1],
+            vec![0, 0, 0, 0, 0],
+            vec![0, 0, 1, 0, 0],
+            vec![0, 0, 1, 0, 0],
+        ]);
+
+        m.remove_edge(1, 4);
+        m.remove_edge(1, 4);
+        assert!(!m.has_edge(1, 4));
+        assert!(!m.has_edge(4, 1));
+        assert!(m.size() == 4);
+    }
+
+    #[test]
+    fn graph_remove_node() {
+        // Graph:
+        // 0 -> 1 -> 2 <- 3
+        //      \    ^
+        //       \   |
+        //       ->  4
+        let mut m = AdjacencyMatrix(vec![
+            vec![0, 1, 0, 0, 0],
+            vec![0, 0, 1, 0, 1],
+            vec![0, 0, 0, 0, 0],
+            vec![0, 0, 1, 0, 0],
+            vec![0, 0, 1, 0, 0],
+        ]);
+
+        m.remove_node(2);
+        assert!(m.order() == 4);
+        assert!(m.size() == 2);
+        assert!(!m.has_edge(3, 2));
+        assert!(!m.has_edge(1, 2));
+        assert!(!m.has_edge(4, 2));
+    }
+
+    #[test]
+    fn graph_remove_node_and_add_new() {
+        // Graph:
+        // 0 -> 1 -> 2 <- 3
+        //      \    ^
+        //       \   |
+        //       ->  4
+        let mut m = AdjacencyMatrix(vec![
+            vec![0, 1, 0, 0, 0],
+            vec![0, 0, 1, 0, 1],
+            vec![0, 0, 0, 0, 0],
+            vec![0, 0, 1, 0, 0],
+            vec![0, 0, 1, 0, 0],
+        ]);
+
+        m.remove_node(2);
+
+        m.add_node(0);
+
+        m.add_edge(2, 4);
+        m.add_edge(2, 3);
+
+        // Graph:
+        // 0 -> 1     2
+        //   \        | \
+        //   \       |  \
+        //   -> 3 <-     -> 4
+        assert!(m.order() == 5);
+        assert!(m.size() == 4);
+        assert!(m.has_edge(1, 3));
+        assert!(m.has_edge(2, 3));
+        assert!(m.has_edge(2, 4));
+        assert!(!m.has_edge(4, 2));
+    }
+
+    #[test]
+    fn undirected_graph_remove_edge() {
+        // Graph:
+        // 0 -- 1 -- 2 -- 3
+        //      \    |
+        //       \   |
+        //       --  4
+        let mut m = AdjacencyMatrix(vec![
+            vec![0, 1, 0, 0, 0],
+            vec![1, 0, 1, 0, 1],
+            vec![0, 1, 0, 1, 1],
+            vec![0, 0, 1, 0, 0],
+            vec![0, 1, 1, 0, 0],
+        ]);
+
+        m.remove_undirected_edge(2, 4);
+        assert!(!m.has_edge(2, 4));
+        assert!(!m.has_edge(4, 2));
+        assert!(m.size() == 4);
+    }
+
+    #[test]
+    fn undirected_graph_remove_node() {
+        // Graph:
+        // 0 -- 1 -- 2 -- 3
+        //      \    |
+        //       \   |
+        //       --  4
+        let mut m = AdjacencyMatrix(vec![
+            vec![0, 1, 0, 0, 0],
+            vec![1, 0, 1, 0, 1],
+            vec![0, 1, 0, 1, 1],
+            vec![0, 0, 1, 0, 0],
+            vec![0, 1, 1, 0, 0],
+        ]);
+
+        m.remove_node(4);
+        assert!(m.size() == 3);
+        assert!(!m.has_edge(2, 4));
+        assert!(!m.has_edge(1, 4));
     }
 }
