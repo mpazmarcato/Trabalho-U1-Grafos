@@ -163,7 +163,7 @@ mod test {
     use crate::{DfsEvent, Graph, graphs::AdjacencyList};
 
     #[test]
-    fn test_dfs_with_cycle() {
+    fn dfs_with_cycle() {
         let mut g = AdjacencyList::default();
         g.add_node(0);
         g.add_node(1);
@@ -185,7 +185,7 @@ mod test {
     }
 
     #[test]
-    fn test_dfs_simple_path() {
+    fn dfs_simple_path() {
         let mut g = AdjacencyList::default();
         g.add_node(0);
         g.add_node(1);
