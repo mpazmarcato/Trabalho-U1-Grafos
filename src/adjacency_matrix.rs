@@ -3,11 +3,9 @@ use std::{
     io::{self, Write},
 };
 
-use crate::{
-    Graph,
-    graphs::{AdjacencyList, IncidenceMatrix},
-};
-// TODO: remove this!
+use crate::graphs::{AdjacencyList, IncidenceMatrix};
+use crate::{Graph, UndirectedGraph};
+
 #[derive(Debug)]
 pub struct Node {
     value: usize,
@@ -17,81 +15,6 @@ pub struct Node {
 
 #[derive(Debug, Clone)]
 pub struct AdjacencyMatrix(pub Vec<Vec<usize>>);
-
-impl Graph<usize> for AdjacencyMatrix {
-    fn add_node(&mut self, _n: usize) {
-        self.0.push(Vec::new());
-        let new_order = self.order();
-
-        for r in &mut self.0 {
-            while r.len() < new_order {
-                r.push(0);
-            }
-        }
-    }
-
-    /// Adds a new edge between two nodes `n` and `m`
-    fn add_edge(&mut self, n: usize, m: usize) {
-        // Catch edges loops
-        if n == m {
-            match self.0.get_mut(n) {
-                Some(edges) => edges[n] = 1,
-                None => todo!(),
-            }
-        } else {
-            let (a, b) = if n < m { (n, m) } else { (m, n) }; // Re-order
-            let (left, right) = self.0.split_at_mut(b);
-
-            match (left.get_mut(a), right.get_mut(0)) {
-                (None, None) => panic!(), // TODO: should treat?
-                (None, Some(_)) => panic!(),
-                (Some(_), None) => panic!(),
-                (Some(n_edges), Some(m_edges)) => {
-                    n_edges[b] = 1;
-                    m_edges[a] = 1;
-                }
-            }
-        }
-    }
-
-    fn order(&self) -> usize {
-        self.0.len()
-    }
-
-    fn size(&self) -> usize {
-        todo!()
-    }
-
-    fn remove_node(&mut self, n: &usize) {
-        todo!()
-    }
-
-    fn remove_edge(&mut self, n: &usize, m: &usize) {
-        todo!()
-    }
-
-    fn connected(&self) -> bool {
-        todo!()
-    }
-
-    fn biconnected_components(&self) -> &[Vec<&usize>] {
-        todo!()
-    }
-
-    fn biparted(&self) -> bool {
-        todo!()
-    }
-
-    type Neighbors<'a>
-        = std::slice::Iter<'a, usize>
-    where
-        Self: 'a,
-        usize: 'a;
-
-    fn neighbors<'a>(&'a self, n: &usize) -> Self::Neighbors<'a> {
-        todo!()
-    }
-}
 
 impl AdjacencyMatrix {
     pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
@@ -149,6 +72,39 @@ impl AdjacencyMatrix {
         visited_count
     }
 
+    pub fn bfs(&self) -> i32 {
+        self.bfs_from_node(0)
+    }
+
+    pub fn bfs_from_node(&self, start: usize) -> i32 {
+        let mut vertices: Vec<Node> = (0..self.0.len())
+            .map(|i| Node {
+                value: i,
+                visited: false,
+                ancestor: None,
+            })
+            .collect();
+
+        let mut queue: std::collections::VecDeque<usize> = std::collections::VecDeque::new();
+        let initial: usize = if start < self.0.len() { start } else { 0 };
+
+        queue.push_back(initial);
+        vertices[initial].visited = true;
+        let mut visited_count = 1;
+
+        while let Some(node_idx) = queue.pop_front() {
+            for (i, &val) in self.0[node_idx].iter().enumerate() {
+                if val == 1 && !vertices[i].visited {
+                    vertices[i].visited = true;
+                    vertices[i].ancestor = Some(node_idx);
+                    queue.push_back(i);
+                    visited_count += 1;
+                }
+            }
+        }
+        visited_count
+    }
+
     #[allow(dead_code)]
     fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
         let mut file: File = File::create(path)?;
@@ -171,6 +127,73 @@ impl AdjacencyMatrix {
         Ok(())
     }
 }
+
+impl Graph<usize> for AdjacencyMatrix {
+    fn order(&self) -> usize {
+        self.0.len()
+    }
+
+    fn size(&self) -> usize {
+        todo!()
+    }
+
+    fn add_node(&mut self, _n: usize) {
+        self.0.push(Vec::new());
+        let new_order = self.order();
+
+        for r in &mut self.0 {
+            while r.len() < new_order {
+                r.push(0);
+            }
+        }
+    }
+
+    /// Adds a new edge between two nodes `n` and `m`
+    fn add_edge(&mut self, n: usize, m: usize) {
+        if let Some(edges) = self.0.get_mut(n)
+            && let Some(edge) = edges.get_mut(m)
+        {
+            if *edge == 1 {
+                return;
+            }
+            *edge = 1;
+        }
+    }
+
+    fn remove_node(&mut self, _n: usize) {
+        todo!()
+    }
+
+    fn remove_edge(&mut self, _n: usize, _m: usize) {
+        todo!()
+    }
+
+    type Neighbors<'a> = Box<dyn Iterator<Item = usize> + 'a>;
+    fn neighbors<'a>(&'a self, n: usize) -> Self::Neighbors<'a> {
+        match self.0.get(n) {
+            Some(row) => Box::new(
+                row.iter()
+                    .enumerate()
+                    .filter_map(|(i, &weight)| if weight != 0 { Some(i) } else { None }),
+            ),
+            None => Box::new(std::iter::empty()),
+        }
+    }
+
+    fn connected(&self) -> bool {
+        todo!()
+    }
+
+    fn biconnected_components(&self) -> &[Vec<usize>] {
+        todo!()
+    }
+
+    fn biparted(&self) -> bool {
+        todo!()
+    }
+}
+
+impl UndirectedGraph<usize> for AdjacencyMatrix {}
 
 #[cfg(test)]
 mod tests {
@@ -208,7 +231,7 @@ mod tests {
     }
 
     #[test]
-    fn add_new_node() {
+    fn graph_add_new_node() {
         // Graph: 0 - 2 - 1
         let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![1, 1, 0]]);
         m.add_node(3);
@@ -217,12 +240,24 @@ mod tests {
     }
 
     #[test]
-    fn add_new_node_and_edge() {
+    fn graph_add_new_node_and_edge() {
+        // Graph: 0 -> 2 <- 1
+        let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![0, 0, 0]]);
+        m.add_node(3);
+        m.add_edge(1, 3);
+        // Graph: 0 -> 2 <- 1 -> 3
+        assert!(m.has_edge(1, 3));
+        assert!(!m.has_edge(3, 1));
+    }
+
+    #[test]
+    fn undirected_graph_add_new_node_and_edge() {
         // Graph: 0 - 2 - 1
         let mut m = AdjacencyMatrix(vec![vec![0, 0, 1], vec![0, 0, 1], vec![1, 1, 0]]);
         m.add_node(3);
-        m.add_edge(1, 3);
+        m.add_undirected_edge(1, 3);
         // Graph: 0 - 2 - 1 - 3
-        // assert!(m.has_edge(&1, &3)); TODO: use when neighbors is implemented..
+        assert!(m.has_edge(1, 3));
+        assert!(m.has_edge(3, 1));
     }
 }

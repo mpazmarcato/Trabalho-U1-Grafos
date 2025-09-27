@@ -1,4 +1,5 @@
 use crate::Graph;
+use crate::graph::UndirectedGraph;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 
 #[derive(Debug, Clone)]
@@ -21,6 +22,36 @@ impl AdjacencyList {
     pub fn from_incidence_matrix(_matrix: &IncidenceMatrix) -> Self {
         todo!()
     }
+
+    pub fn bfs(&self) -> i32 {
+        self.bfs_from_node(0)
+    }
+
+    pub fn bfs_from_node(&self, start: usize) -> i32 {
+        if start >= self.0.len() {
+            return 0; // nó inválido
+        }
+
+        let mut visited = vec![false; self.0.len()];
+        let mut queue = std::collections::VecDeque::new();
+        let mut count = 0;
+
+        visited[start] = true;
+        queue.push_back(start);
+
+        while let Some(node) = queue.pop_front() {
+            count += 1;
+
+            for &neighbor in &self.0[node] {
+                if !visited[neighbor] {
+                    visited[neighbor] = true;
+                    queue.push_back(neighbor);
+                }
+            }
+        }
+
+        count
+    }
 }
 
 impl Graph<usize> for AdjacencyList {
@@ -33,12 +64,11 @@ impl Graph<usize> for AdjacencyList {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
     }
 
-    // TODO: review the semantics of this.
     fn add_node(&mut self, _n: usize) {
         self.0.push(Vec::new());
     }
 
-    fn remove_node(&mut self, &n: &usize) {
+    fn remove_node(&mut self, n: usize) {
         if n < self.0.len() {
             self.0.remove(n);
             for neighbors in self.0.iter_mut() {
@@ -59,36 +89,26 @@ impl Graph<usize> for AdjacencyList {
         {
             n_edges.push(m);
         }
-
-        if let Some(m_edges) = self.0.get_mut(m)
-            && !m_edges.contains(&n)
-        {
-            m_edges.push(n);
-        }
     }
 
-    fn remove_edge(&mut self, &n: &usize, &m: &usize) {
+    fn remove_edge(&mut self, n: usize, m: usize) {
         if let Some(edges) = self.0.get_mut(n) {
             edges.retain(|&x| x != m);
         }
     }
 
-    type Neighbors<'a>
-        = std::slice::Iter<'a, usize>
-    where
-        Self: 'a,
-        usize: 'a;
+    type Neighbors<'a> = Box<dyn Iterator<Item = usize> + 'a>;
 
-    fn neighbors<'a>(&'a self, &n: &usize) -> Self::Neighbors<'a> {
-        self.0
-            .get(n)
-            .map(|edges| edges.iter())
-            .unwrap_or_else(|| [].iter())
+    fn neighbors<'a>(&'a self, n: usize) -> Self::Neighbors<'a> {
+        match self.0.get(n) {
+            Some(edges) => Box::new(edges.iter().copied()),
+            None => Box::new(std::iter::empty()),
+        }
     }
 
     fn connected(&self) -> bool {
         for i in 0..self.order() {
-            if self.dfs(&i).count() != self.order() {
+            if self.dfs(i).count() != self.order() {
                 return false;
             }
         }
@@ -100,10 +120,12 @@ impl Graph<usize> for AdjacencyList {
     }
 
     #[allow(unreachable_code)]
-    fn biconnected_components(&self) -> &[Vec<&usize>] {
+    fn biconnected_components(&self) -> &[Vec<usize>] {
         todo!();
     }
 }
+
+impl UndirectedGraph<usize> for AdjacencyList {}
 
 #[cfg(test)]
 mod tests {
@@ -150,7 +172,7 @@ mod tests {
         //      4     5
         assert!(list.order() == 6);
         // assert!(list.size() == 5);
-        assert!(list.has_edge(&3, &5));
+        assert!(list.has_edge(3, 5));
     }
 
     #[test]
@@ -174,8 +196,8 @@ mod tests {
         //      4     5       -
         assert!(list.order() == 6);
         // assert!(list.size() == 6); // FIXME: uncomment this later when size() is corrected
-        assert!(list.has_edge(&3, &5));
-        assert!(list.has_edge(&2, &2));
+        assert!(list.has_edge(3, 5));
+        assert!(list.has_edge(2, 2));
     }
 
     #[test]

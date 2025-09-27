@@ -53,4 +53,15 @@ fn main() {
     for row in &matrix2.0 {
         println!("{:?}", row);
     }
+
+    println!("DFS visit count: {}", matrix.dfs_from_node(0));
+    println!("BFS visit count: {}", matrix.bfs_from_node(0));
+
+    let list = AdjacencyList(vec![
+        vec![1, 2], // 0 → 1,2
+        vec![0],    // 1 → 0
+        vec![0],    // 2 → 0
+    ]);
+
+    println!("Visitados no BFS: {}", list.bfs());
 }
