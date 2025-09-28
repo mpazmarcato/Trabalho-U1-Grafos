@@ -36,26 +36,20 @@ impl IncidenceMatrix {
             return 0;
         }
 
-        self.0.iter()
-            .filter(|row| row[vertex] != 0)
-            .count() / 2
+        self.0.iter().filter(|row| row[vertex] != 0).count() / 2
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;    
+    use super::*;
 
     #[test]
     fn node_degree_incidence_matrix() {
         // Grafo: 0 ── 1
         //        │
         //        2
-        let matrix = AdjacencyMatrix(vec![
-            vec![0, 1, 1],
-            vec![1, 0, 0],
-            vec![1, 0, 0],
-        ]);
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
 
         let incidence = IncidenceMatrix::from_adjacency_matrix(&matrix);
 
