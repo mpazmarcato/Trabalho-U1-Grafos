@@ -97,7 +97,7 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsIter<'a, Node, G> {
         }
     }
 
-    fn _new_start(&mut self, start: Node) {
+    pub fn new_start(&mut self, start: Node) {
         self.start_node = Some(start)
     }
 }
@@ -117,8 +117,9 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsIter<'a, Node, 
     type Item = DfsEvent<Node>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(start_node) = self.start_node.take() {
-            self.visited.insert(start_node);
+        if let Some(start_node) = self.start_node.take()
+            && self.visited.insert(start_node)
+        {
             self.stack
                 .push((start_node, self.graph.neighbors(start_node)));
             return Some(DfsEvent::Discover(start_node, None));
@@ -208,6 +209,10 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
             parent: HashMap::with_capacity(graph.order()),
             stack_hash: HashSet::with_capacity(graph.order()),
         }
+    }
+
+    pub fn new_start(&mut self, start: Node) {
+        self.iter.new_start(start);
     }
 }
 
