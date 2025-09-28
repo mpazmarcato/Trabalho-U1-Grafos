@@ -1,4 +1,4 @@
-use graphs_algorithms::Graph;
+use graphs_algorithms::UndirectedGraph;
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
 
 fn main() {
@@ -10,7 +10,7 @@ fn main() {
     // Gerando a matriz de incidência a partir da matriz de adjacência
     let incidencia = IncidenceMatrix::from_adjacency_matrix(&adjacency_matrix);
 
-    println!("Número de vértices (lista): {}", lista.order());
-    println!("Número de vértices (matriz): {}", matriz.order());
+    println!("Número de vértices (lista): {}", lista.undirected_order());
+    println!("Número de vértices (matriz): {}", matriz.undirected_order());
     println!("Número de vértices (incidência): {}", incidencia.order());
 }
