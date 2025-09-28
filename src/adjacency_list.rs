@@ -535,11 +535,27 @@ mod tests {
 
     #[test]
     fn node_degree_adjacency_list() {
-        // Grafo: 0 ── 1 ── 2
+        // Graph: 0 ── 1 ── 2
         let graph = AdjacencyList(vec![vec![1], vec![0, 2], vec![1]]);
 
         assert_eq!(graph.node_degree(0), 1);
         assert_eq!(graph.node_degree(1), 2);
         assert_eq!(graph.node_degree(2), 1);
+    }
+
+    #[test]
+    fn adjacency_list_order() {
+        // Graph: 0 ── 1
+        //        │
+        //        2
+        let list = AdjacencyList(vec![
+            vec![1, 2], 
+            vec![0],    
+            vec![0],   
+        ]);
+        assert_eq!(list.order(), 3);
+
+        let empty_list = AdjacencyList(vec![]);
+        assert_eq!(empty_list.order(), 0); // empty list -> 0 nodes
     }
 }
