@@ -1,4 +1,5 @@
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
+use graphs_algorithms::{DfsEvent, Graph};
 
 fn main() {
     let m1 = AdjacencyMatrix(vec![
@@ -32,7 +33,7 @@ fn main() {
         vec![0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
         vec![0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0],
     ]);
-    m2.dfs();
+    m2.dfs(0);
 
     // Test conversion between adjacency matrix and adjacency list
     let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
@@ -54,8 +55,20 @@ fn main() {
         println!("{:?}", row);
     }
 
-    println!("DFS visit count: {}", matrix.dfs_from_node(0));
-    println!("BFS visit count: {}", matrix.bfs_from_node(0));
+    println!(
+        "DFS visit count: {}",
+        matrix
+            .dfs(0)
+            .filter(|e| matches!(e, DfsEvent::Discover(_, _)))
+            .count()
+    );
+    println!(
+        "BFS visit count: {}",
+        matrix
+            .dfs(0)
+            .filter(|e| matches!(e, DfsEvent::Discover(_, _)))
+            .count()
+    );
 
     let list = AdjacencyList(vec![
         vec![1, 2], // 0 → 1,2
