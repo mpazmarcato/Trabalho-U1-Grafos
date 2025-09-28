@@ -5,6 +5,7 @@ mod adjacency_matrix;
 mod incidence_matrix;
 
 pub use graph::DfsEvent;
+pub use graph::Edge;
 pub use graph::Graph;
 pub use graph::UndirectedGraph;
 
