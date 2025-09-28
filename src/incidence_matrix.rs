@@ -27,6 +27,10 @@ impl IncidenceMatrix {
         IncidenceMatrix(inc)
     }
 
+    pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
+        todo!()
+    }
+
     pub fn node_degree(&self, vertex: usize) -> usize {
         if self.0.is_empty() || vertex >= self.0[0].len() {
             return 0;
@@ -36,7 +40,7 @@ impl IncidenceMatrix {
             .filter(|row| row[vertex] != 0)
             .count() / 2
     }
-}    
+}
 
 #[cfg(test)]
 mod tests {

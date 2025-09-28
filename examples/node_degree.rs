@@ -30,7 +30,7 @@ fn main() {
     let incidence_matrix = IncidenceMatrix::from_adjacency_matrix(&adjacency_matrix);
 
     println!("Grau de cada vértice (Matriz de Incidência):");
-    for i in 0..incidence_matrix.0[0].len() {
+    for i in 0..matrix.order() {
         println!("Vértice {}: {}", i, incidence_matrix.node_degree(i));
     }
 }
