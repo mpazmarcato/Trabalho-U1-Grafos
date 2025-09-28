@@ -507,6 +507,9 @@ mod tests {
 
     #[test]
     fn node_degree_adjacency_matrix() {
+        // Grafo: 0 ─ 1 
+        //        │ / 
+        //        2
         let matrix = AdjacencyMatrix(vec![
             vec![0, 1, 1],
             vec![1, 0, 1],

@@ -27,7 +27,36 @@ impl IncidenceMatrix {
         IncidenceMatrix(inc)
     }
 
-    pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
-        todo!()
+    pub fn node_degree(&self, vertex: usize) -> usize {
+        if self.0.is_empty() || vertex >= self.0[0].len() {
+            return 0;
+        }
+
+        self.0.iter()
+            .filter(|row| row[vertex] != 0)
+            .count() / 2
+    }
+}    
+
+#[cfg(test)]
+mod tests {
+    use super::*;    
+
+    #[test]
+    fn node_degree_incidence_matrix() {
+        // Grafo: 0 ── 1
+        //        │
+        //        2
+        let matrix = AdjacencyMatrix(vec![
+            vec![0, 1, 1],
+            vec![1, 0, 0],
+            vec![1, 0, 0],
+        ]);
+
+        let incidence = IncidenceMatrix::from_adjacency_matrix(&matrix);
+
+        assert_eq!(incidence.node_degree(0), 2);
+        assert_eq!(incidence.node_degree(1), 1);
+        assert_eq!(incidence.node_degree(2), 1);
     }
 }
