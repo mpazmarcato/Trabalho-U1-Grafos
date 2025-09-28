@@ -547,7 +547,7 @@ mod tests {
     }
 
     #[test]
-    fn test_node_degree() {
+    fn node_degree_adjacency_list() {
         // Grafo: 0 ── 1 ── 2
         let graph = AdjacencyList(vec![vec![1], vec![0, 2], vec![1]]);
 
