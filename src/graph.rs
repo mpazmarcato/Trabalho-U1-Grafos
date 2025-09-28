@@ -369,47 +369,46 @@ where
     type Item = Edge<Node>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if let Some(event) = self.iter.next() {
-                match event {
-                    DfsEvent::Discover(node, maybe_parent) => {
-                        self.stack_hash.insert(node);
-                        self.discovery.insert(node, self.time);
-                        self.time += 1;
-                        if let Some(parent) = maybe_parent {
-                            self.parent.insert(node, parent);
-                            return Some(Edge::Tree(parent, node));
-                        }
-                    }
-                    DfsEvent::Finish(node) => {
-                        self.stack_hash.remove(&node);
-                        self.finish.insert(node, self.time);
-                        self.time += 1;
-                    }
-                    DfsEvent::NonTreeEdge(node, neighbor) => {
-                        if self.stack_hash.contains(&neighbor) {
-                            if self
-                                .parent
-                                .get(&node)
-                                .is_some_and(|&parent| parent == neighbor)
-                            {
-                                return Some(Edge::ParentBack(node, neighbor));
-                            } else {
-                                return Some(Edge::Back(node, neighbor));
-                            }
-                        } else if self.discovery.get(&node).is_some_and(|t1| {
-                            self.discovery.get(&neighbor).is_some_and(|t2| t1 < t2)
-                        }) {
-                            return Some(Edge::Foward(node, neighbor));
-                        } else {
-                            return Some(Edge::Cross(node, neighbor));
-                        }
+        while let Some(event) = self.iter.next() {
+            match event {
+                DfsEvent::Discover(node, maybe_parent) => {
+                    self.stack_hash.insert(node);
+                    self.discovery.insert(node, self.time);
+                    self.time += 1;
+                    if let Some(parent) = maybe_parent {
+                        self.parent.insert(node, parent);
+                        return Some(Edge::Tree(parent, node));
                     }
                 }
-            } else {
-                return None;
+                DfsEvent::Finish(node) => {
+                    self.stack_hash.remove(&node);
+                    self.finish.insert(node, self.time);
+                    self.time += 1;
+                }
+                DfsEvent::NonTreeEdge(node, neighbor) => {
+                    if self.stack_hash.contains(&neighbor) {
+                        if self
+                            .parent
+                            .get(&node)
+                            .is_some_and(|&parent| parent == neighbor)
+                        {
+                            return Some(Edge::ParentBack(node, neighbor));
+                        } else {
+                            return Some(Edge::Back(node, neighbor));
+                        }
+                    } else if self
+                        .discovery
+                        .get(&node)
+                        .is_some_and(|t1| self.discovery.get(&neighbor).is_some_and(|t2| t1 < t2))
+                    {
+                        return Some(Edge::Foward(node, neighbor));
+                    } else {
+                        return Some(Edge::Cross(node, neighbor));
+                    }
+                }
             }
         }
+        None
     }
 }
 
