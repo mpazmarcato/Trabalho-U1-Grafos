@@ -38,12 +38,13 @@ impl IncidenceMatrix {
 
         self.0.iter()
             .filter(|row| row[vertex] != 0)
-            .count()
+            .count() / 2
     }
+}    
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::*;    
 
     #[test]
     fn node_degree_incidence_matrix() {
@@ -58,8 +59,8 @@ mod tests {
 
         let incidence = IncidenceMatrix::from_adjacency_matrix(&matrix);
 
-        assert_eq!(incidence.node_degree(0), 2); // 0 possui 2 arestas
-        assert_eq!(incidence.node_degree(1), 1); // 1 possui 1 aresta
-        assert_eq!(incidence.node_degree(2), 1); // 2 possui 1 aresta
+        assert_eq!(incidence.node_degree(0), 2);
+        assert_eq!(incidence.node_degree(1), 1);
+        assert_eq!(incidence.node_degree(2), 1);
     }
 }
