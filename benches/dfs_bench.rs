@@ -19,7 +19,14 @@ fn bench_dfs_matrix(c: &mut Criterion) {
         c.bench_with_input(
             BenchmarkId::new("dfs_adjacency_matrix", size),
             &size,
-            |b, _| b.iter(|| matrix.dfs()),
+            |b, _| {
+                b.iter(|| {
+                    matrix
+                        .dfs(0)
+                        .filter(|e| matches!(e, DfsEvent::Discover(_, _)))
+                        .for_each(|_| ());
+                })
+            },
         );
     }
 }
