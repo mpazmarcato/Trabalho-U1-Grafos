@@ -133,6 +133,7 @@ impl Graph<usize> for AdjacencyMatrix {
         self.0.len()
     }
 
+    // FIXME: There is edge duplication in undirected graphs.
     fn size(&self) -> usize {
         let mut stack: Vec<(usize, usize)> = Vec::new();
 
@@ -219,18 +220,10 @@ impl Graph<usize> for AdjacencyMatrix {
         }
     }
 
-    fn connected(&self) -> bool {
-        todo!()
-    }
-
-    fn biconnected_components(&self) -> &[Vec<usize>] {
-        todo!()
-    }
-
     fn biparted(&self) -> bool {
         todo!()
     }
-
+    
     fn node_degree(&self, node: usize) -> usize {
         if let Some(row) = self.0.get(node) {
             row.iter().filter(|&&val| val != 0).count()
@@ -240,7 +233,15 @@ impl Graph<usize> for AdjacencyMatrix {
     }
 }
 
-impl UndirectedGraph<usize> for AdjacencyMatrix {}
+impl UndirectedGraph<usize> for AdjacencyMatrix {
+    fn connected(&self) -> bool {
+        todo!()
+    }
+
+    fn biconnected_components(&self) -> &[Vec<usize>] {
+        todo!()
+    }
+}
 
 #[cfg(test)]
 mod tests {
