@@ -60,7 +60,12 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
 
     fn connected(&self) -> bool;
 
-    fn biconnected_components(&self) -> &[Vec<Node>];
+    fn biconnected_components(&self, start: Node) -> BiconnectedComponentsIter<'_, Node, Self>
+    where
+        Self: Sized,
+    {
+        BiconnectedComponentsIter::new(self, start)
+    }
 
     fn add_undirected_edge(&mut self, n: Node, m: Node) {
         self.add_edge(n, m);
@@ -384,9 +389,98 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsEdgesIter<'a, N
     }
 }
 
+pub struct BiconnectedComponentsIter<'a, Node, G>
+where
+    G: Graph<Node>,
+    Node: Eq + Hash + Copy,
+    Self: 'a,
+{
+    iter: DfsIter<'a, Node, G>,
+    time: usize,
+    discovery: HashMap<Node, usize>,
+    lowpt: HashMap<Node, usize>,
+    parents: HashMap<Node, Node>,
+    edge_stack: Vec<(Node, Node)>,
+}
+
+impl<'a, Node, G> BiconnectedComponentsIter<'a, Node, G>
+where
+    G: Graph<Node> + 'a,
+    Node: Eq + Hash + Copy + 'a,
+{
+    pub fn new(graph: &'a G, start: Node) -> Self {
+        Self {
+            iter: graph.dfs(start),
+            time: 0,
+            discovery: HashMap::with_capacity(graph.order()),
+            lowpt: HashMap::with_capacity(graph.order()),
+            parents: HashMap::with_capacity(graph.order()),
+            edge_stack: Vec::with_capacity(graph.order()),
+        }
+    }
+
+    fn extract_component(&mut self, u: Node, v: Node) -> Option<Vec<(Node, Node)>> {
+        let mut component = Vec::new();
+        while let Some(edge) = self.edge_stack.pop() {
+            component.push(edge);
+            if edge == (u, v) || edge == (v, u) {
+                break;
+            }
+        }
+        Some(component)
+    }
+}
+
+impl<'a, Node, G> Iterator for BiconnectedComponentsIter<'a, Node, G>
+where
+    G: Graph<Node>,
+    Node: Eq + Hash + Copy,
+{
+    type Item = Vec<(Node, Node)>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(event) = self.iter.next() {
+            match event {
+                DfsEvent::Discover(node, maybe_parent) => {
+                    self.discovery.insert(node, self.time);
+                    self.lowpt.insert(node, self.time);
+                    self.time += 1;
+                    if let Some(parent) = maybe_parent {
+                        self.edge_stack.push((parent, node));
+                        self.parents.insert(node, parent);
+                    }
+                }
+                DfsEvent::Finish(node) => {
+                    if let Some(&parent) = self.parents.get(&node) {
+                        let &node_low = self.lowpt.get(&node).unwrap();
+                        let parent_low = self.lowpt.get_mut(&parent).unwrap();
+
+                        *parent_low = (*parent_low).min(node_low);
+
+                        if self.discovery[&parent] <= self.lowpt[&node] {
+                            return self.extract_component(parent, node);
+                        }
+                    } else if !self.edge_stack.is_empty() {
+                        return Some(std::mem::take(&mut self.edge_stack));
+                    }
+                }
+                DfsEvent::NonTreeEdge(u, v) => {
+                    if Some(&v) != self.parents.get(&u) && self.discovery[&v] < self.discovery[&u] {
+                        self.edge_stack.push((u, v));
+                        self.lowpt
+                            .entry(u)
+                            .and_modify(|u_low| *u_low = (*u_low).min(self.discovery[&v]));
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use crate::{DfsEvent, Graph, graphs::AdjacencyList};
+    use crate::{DfsEvent, Graph, UndirectedGraph, graphs::AdjacencyList};
 
     #[test]
     fn dfs_with_cycle() {
@@ -440,5 +534,30 @@ mod test {
         assert!(matches!(dfs.next(), Some(DfsEvent::Discover(0, None))));
         assert!(matches!(dfs.next(), Some(DfsEvent::Finish(0))));
         assert!(dfs.next().is_none());
+    }
+
+    #[test]
+    fn test_biconnected_components() {
+        // 0 -- 1 -- 4
+        //    /  \
+        //   3 -- 2
+        let mut graph = AdjacencyList::default();
+        graph.add_node(0);
+        graph.add_node(1);
+        graph.add_node(2);
+        graph.add_node(3);
+        graph.add_node(4);
+        graph.add_undirected_edge(1, 4);
+        graph.add_undirected_edge(0, 1);
+        graph.add_undirected_edge(1, 2);
+        graph.add_undirected_edge(1, 3);
+        graph.add_undirected_edge(2, 3);
+
+        let components: Vec<Vec<(usize, usize)>> = graph.biconnected_components(0).collect();
+
+        assert_eq!(components.len(), 3);
+        assert!(components.contains(&vec![(1, 4)]));
+        assert!(components.contains(&vec![(3, 1), (2, 3), (1, 2)]));
+        assert!(components.contains(&vec![(0, 1)]));
     }
 }

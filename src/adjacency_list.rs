@@ -126,10 +126,6 @@ impl UndirectedGraph<usize> for AdjacencyList {
         }
         true
     }
-
-    fn biconnected_components(&self) -> &[Vec<usize>] {
-        todo!();
-    }
 }
 
 #[cfg(test)]

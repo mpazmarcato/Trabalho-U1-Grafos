@@ -167,10 +167,6 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
     fn connected(&self) -> bool {
         todo!()
     }
-
-    fn biconnected_components(&self) -> &[Vec<usize>] {
-        todo!()
-    }
 }
 
 #[cfg(test)]
