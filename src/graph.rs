@@ -74,6 +74,45 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
     }
 }
 
+/// Represents an event that occurs during a depth-first search (DFS) traversal.
+///
+/// This enum is used to describe the different types of events that can be
+/// encountered while performing DFS on a graph. It is generic over the `Node`
+/// type, which represents the nodes in the graph.
+///
+/// # Variants
+/// - `Discover(Node, Option<Node>)`: Indicates that a node has been discovered for the first time.
+///   The `Option<Node>` represents the parent node in the DFS tree (`None` for the start node).
+/// - `Finish(Node)`: Indicates that all descendants of a node have been visited and the node is finished.
+/// - `NonTreeEdge(Node, Node)`: Indicates that a non-tree edge (back, forward, or cross edge) is found
+///   from the first node to the second node.
+#[derive(Debug)]
+pub enum DfsEvent<Node> {
+    Discover(Node, Option<Node>),
+    Finish(Node),
+    NonTreeEdge(Node, Node),
+}
+
+/// Represents a iterator over a depth-first-search (DFS) traversal.
+///
+/// The iteration yields a `DfsEvent<Node>` over each instasse of `next`.
+///
+/// # Examples
+///
+/// ```rust,ignore
+/// // Should print every event that happens
+/// // when you traverse the graph starting from node `u`.
+/// let mut iter = graph.dfs(u);
+/// for e in iter {
+///     println!("{:?}", e);
+/// }
+///
+/// // Should print every event that's a node discovery.
+/// let mut iter = graph.dfs(0);
+/// for e in iter.filter(|e| matches!(e, DfsEvent::Discover(_))) {
+///     println!("{:?}", e);
+/// }
+/// ```
 pub struct DfsIter<'a, Node, G>
 where
     G: Graph<Node>,
@@ -96,20 +135,29 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsIter<'a, Node, G> {
         }
     }
 
+    /// Sets the `start_node` field of a `DfsIter` manually.
+    ///
+    /// This enables starting another DFS while maintaing the inner parts of the iterator
+    /// initialized, like the `visited` dictionary.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,ignore
+    /// // Initializes a iterator to search starting from node `u`.
+    /// let mut iter = graph.dfs(u);
+    /// for e in &mut iter {
+    ///     println!("{e}");
+    /// }
+    ///
+    /// // Does the same for `v`.
+    /// iter.new_start(v);
+    /// for e in &mut iter {
+    ///     println!("{e}");
+    /// }
+    /// ```
     pub fn new_start(&mut self, start: Node) {
         self.start_node = Some(start)
     }
-}
-
-#[derive(Debug)]
-pub enum DfsEvent<Node> {
-    /// A node is discovered for the first time.
-    /// The Option<Node> is the parent in the DFS tree (None for the start Node).
-    Discover(Node, Option<Node>),
-    /// All descendants of a node have been visited.
-    Finish(Node),
-    /// A non-tree edge is found from the first node to the second.
-    NonTreeEdge(Node, Node),
 }
 
 impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsIter<'a, Node, G> {
@@ -175,6 +223,19 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for BfsIter<'a, Node, 
     }
 }
 
+/// Represents the classification of an edge in a graph during a depth-first search (DFS).
+///
+/// This enum is used to categorize edges based on the DFS traversal. It is generic
+/// over the `Node` type, which represents the nodes in the graph. The classification
+/// is based on the relationship between the two nodes connected by the edge in the DFS tree.
+///
+/// # Variants
+/// - `Tree(u, v)`: An edge from a parent `u` to a child `v` in the DFS tree.
+/// - `Back(u, v)`: An edge from a node `u` to its ancestor `v` in the DFS tree. This indicates a cycle.
+/// - `ParentBack(u, v)`: A special case of a back edge where `v` is the direct parent of `u`.
+///   This is common in undirected graphs.
+/// - `Foward(u, v)`: An edge from a node `u` to its descendant `v` that is not a tree edge.
+/// - `Cross(u, v)`: An edge between two nodes `u` and `v` such that neither is an ancestor of the other.
 #[derive(Debug)]
 pub enum Edge<Node> {
     Tree(Node, Node),
@@ -184,6 +245,33 @@ pub enum Edge<Node> {
     Cross(Node, Node),
 }
 
+/// An iterator that performs a depth-first search (DFS) and classifies the edges of the graph.
+///
+/// This iterator wraps a `DfsIter` and uses its events to classify each edge of the
+/// graph into one of the categories defined by the `Edge` enum. It yields an `Edge<Node>`
+/// for each edge encountered during the traversal.
+///
+/// # Examples
+///
+/// ```rust
+/// use graphs_algorithms::{Edge, Graph};
+/// use graphs_algorithms::graphs::AdjacencyList;
+///
+/// let mut graph = AdjacencyList::default();
+/// graph.add_node(0);
+/// graph.add_node(1);
+/// graph.add_node(2);
+/// graph.add_edge(0, 1);
+/// graph.add_edge(1, 2);
+/// graph.add_edge(2, 0); // Cycle
+///
+/// let mut edges_iter = graph.classify_edges(0);
+///
+/// assert!(matches!(edges_iter.next(), Some(Edge::Tree(0, 1))));
+/// assert!(matches!(edges_iter.next(), Some(Edge::Tree(1, 2))));
+/// assert!(matches!(edges_iter.next(), Some(Edge::Back(2, 0))));
+/// assert!(edges_iter.next().is_none());
+/// ```
 pub struct DfsEdgesIter<'a, Node, G>
 where
     G: Graph<Node>,
@@ -210,6 +298,31 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
         }
     }
 
+    /// Sets the `start_node` field of the inner `DfsIter` manually.
+    ///
+    /// This enables classifying edges from another components of a graph.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use graphs_algorithms::graphs::AdjacencyList;
+    /// use graphs_algorithms::{Edge, Graph};
+    ///
+    /// let mut graph = AdjacencyList::default();
+    /// graph.add_node(0);
+    /// graph.add_node(1);
+    /// graph.add_node(2);
+    /// graph.add_edge(0, 1);
+    /// graph.add_edge(2, 0);
+    ///
+    /// let mut iter = graph.classify_edges(0);
+    /// assert!(matches!(iter.next(), Some(Edge::Tree(0, 1))));
+    /// assert!(iter.next().is_none());
+    ///
+    /// iter.new_start(2);
+    /// assert!(matches!(iter.next(), Some(Edge::Cross(2, 0))));
+    /// assert!(iter.next().is_none());
+    /// ```
     pub fn new_start(&mut self, start: Node) {
         self.iter.new_start(start);
     }
