@@ -30,12 +30,22 @@ fn main() {
             _ => panic!(),
         }
     }
-    for e in digraph.dfs_edges(&[0, 8]) {
+    let mut iter = digraph.classify_edges(0);
+    for e in &mut iter {
         match e {
-            Edge::Tree((v, u)) => println!("Tree: {} -> {}", m(v), m(u)),
-            Edge::Back((v, u)) | Edge::ParentBack((v, u)) => println!("Back: {} -> {}", m(v), m(u)),
-            Edge::Foward((v, u)) => println!("Foward: {} -> {}", m(v), m(u)),
-            Edge::Cross((v, u)) => println!("Cross: {} -> {}", m(v), m(u)),
+            Edge::Tree(v, u) => println!("Tree: {} -> {}", m(v), m(u)),
+            Edge::Back(v, u) | Edge::ParentBack(v, u) => println!("Back: {} -> {}", m(v), m(u)),
+            Edge::Foward(v, u) => println!("Foward: {} -> {}", m(v), m(u)),
+            Edge::Cross(v, u) => println!("Cross: {} -> {}", m(v), m(u)),
+        }
+    }
+    iter.new_start(8);
+    for e in &mut iter {
+        match e {
+            Edge::Tree(v, u) => println!("Tree: {} -> {}", m(v), m(u)),
+            Edge::Back(v, u) | Edge::ParentBack(v, u) => println!("Back: {} -> {}", m(v), m(u)),
+            Edge::Foward(v, u) => println!("Foward: {} -> {}", m(v), m(u)),
+            Edge::Cross(v, u) => println!("Cross: {} -> {}", m(v), m(u)),
         }
     }
 }

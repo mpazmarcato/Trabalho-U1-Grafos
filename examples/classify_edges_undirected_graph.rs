@@ -32,11 +32,11 @@ fn main() {
             _ => panic!(),
         }
     }
-    for e in undirected_graph.dfs_tree_and_back_edges(&[0]) {
+    for e in undirected_graph.classify_undirected_edges(0) {
         match e {
-            Edge::Tree((v, u)) => println!("Tree: {} -> {}", m(v), m(u)),
-            Edge::Back((v, u)) => println!("Back: {} -> {}", m(v), m(u)),
-            _ => panic!("Should not get here"),
+            Edge::Tree(v, u) => println!("Tree: {} -> {}", m(v), m(u)),
+            Edge::Back(v, u) => println!("Back: {} -> {}", m(v), m(u)),
+            _ => panic!("should not get here"),
         }
     }
 }

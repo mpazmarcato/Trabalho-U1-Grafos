@@ -1,8 +1,8 @@
 use crate::Graph;
-use crate::graph::UndirectedGraph;
+use crate::graph::{DfsEvent, UndirectedGraph};
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct AdjacencyList(pub Vec<Vec<usize>>);
 
 impl AdjacencyList {
@@ -110,36 +110,39 @@ impl Graph<usize> for AdjacencyList {
         }
     }
 
-    type Neighbors<'a> = Box<dyn Iterator<Item = usize> + 'a>;
+    type Neighbors<'a> = std::iter::Copied<std::slice::Iter<'a, usize>>;
 
     fn neighbors<'a>(&'a self, n: usize) -> Self::Neighbors<'a> {
         match self.0.get(n) {
-            Some(edges) => Box::new(edges.iter().copied()),
-            None => Box::new(std::iter::empty()),
+            Some(edges) => edges.iter().copied(),
+            None => [].iter().copied(),
         }
     }
 
-    // TODO: Only working for undirected graphs...
+    fn biparted(&self) -> bool {
+        todo!()
+    }
+}
+
+impl UndirectedGraph<usize> for AdjacencyList {
     fn connected(&self) -> bool {
         for i in 0..self.order() {
-            if self.dfs(i).count() != self.order() {
+            if self
+                .dfs(i)
+                .filter(|event| matches!(event, DfsEvent::Discover(_, _)))
+                .count()
+                != self.order()
+            {
                 return false;
             }
         }
         true
     }
 
-    fn biparted(&self) -> bool {
-        todo!()
-    }
-
-    #[allow(unreachable_code)]
     fn biconnected_components(&self) -> &[Vec<usize>] {
         todo!();
     }
 }
-
-impl UndirectedGraph<usize> for AdjacencyList {}
 
 #[cfg(test)]
 mod tests {

@@ -1,6 +1,6 @@
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
-use graphs_algorithms::Graph;
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix};
+use graphs_algorithms::{DfsEvent, Graph};
 
 fn create_adjacency_matrix(size: usize) -> AdjacencyMatrix {
     let mut matrix = vec![vec![0; size]; size];
@@ -33,7 +33,13 @@ fn bench_dfs_list(c: &mut Criterion) {
         c.bench_with_input(
             BenchmarkId::new("dfs_adjacency_list", size),
             &size,
-            |b, _| b.iter(|| list.dfs(0).for_each(|_| ())),
+            |b, _| {
+                b.iter(|| {
+                    list.dfs(0)
+                        .filter(|e| matches!(e, DfsEvent::Discover(_, _)))
+                        .for_each(|_| ())
+                })
+            },
         );
     }
 }
