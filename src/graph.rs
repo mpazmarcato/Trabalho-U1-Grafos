@@ -413,6 +413,46 @@ where
     }
 }
 
+/// An iterator that yields the biconnected components of a undirected graph (`UndirectedGraph`).
+///
+/// The iterator identifies the biconnected components during a depth-first-search (DFS) that's
+/// made by a inner iterator, a `DfsIter`.
+///
+/// # Examples
+///
+/// ```rust
+/// use graphs_algorithms::{UndirectedGraph, Graph};
+/// use graphs_algorithms::graphs::AdjacencyList;
+///
+/// let mut graph = AdjacencyList::default();
+/// // This graph is equivalent to:
+/// // 0 -- 1 -- 4
+/// //    /  \
+/// //   3 -- 2
+/// graph.add_node(0);
+/// graph.add_node(1);
+/// graph.add_node(2);
+/// graph.add_node(3);
+/// graph.add_node(4);
+/// graph.add_undirected_edge(1, 4);
+/// graph.add_undirected_edge(0, 1);
+/// graph.add_undirected_edge(1, 2);
+/// graph.add_undirected_edge(1, 3);
+/// graph.add_undirected_edge(2, 3);
+///
+/// let components: Vec<Vec<(usize, usize)>> = graph.biconnected_components(0).collect();
+///
+/// // The biconnected components should be:
+/// // * 0 -- 1
+/// // * 1 -- 4
+/// // *    1
+/// //    /  \
+/// //   3 -- 2
+/// assert_eq!(components.len(), 3);
+/// assert!(components.contains(&vec![(1, 4)]));
+/// assert!(components.contains(&vec![(3, 1), (2, 3), (1, 2)]));
+/// assert!(components.contains(&vec![(0, 1)]));
+/// ```
 pub struct BiconnectedComponentsIter<'a, Node, G>
 where
     G: Graph<Node>,
@@ -432,7 +472,7 @@ where
     G: Graph<Node> + 'a,
     Node: Eq + Hash + Copy + 'a,
 {
-    pub fn new(graph: &'a G, start: Node) -> Self {
+    fn new(graph: &'a G, start: Node) -> Self {
         Self {
             iter: graph.dfs(start),
             time: 0,
