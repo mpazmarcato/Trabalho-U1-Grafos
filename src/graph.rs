@@ -138,7 +138,11 @@ where
     start_node: Option<Node>,
 }
 
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsIter<'a, Node, G> {
+impl<'a, Node, G> DfsIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
     fn new(graph: &'a G, start: Node) -> Self {
         Self {
             graph,
@@ -173,7 +177,11 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsIter<'a, Node, G> {
     }
 }
 
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsIter<'a, Node, G> {
+impl<'a, Node, G> Iterator for DfsIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
     type Item = DfsEvent<Node>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -210,7 +218,11 @@ pub struct BfsIter<'a, Node, G> {
     visited: HashSet<Node>,
 }
 
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> BfsIter<'a, Node, G> {
+impl<'a, Node, G> BfsIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
     fn new(graph: &'a G, start: Node) -> Self {
         let mut visited = HashSet::with_capacity(graph.order());
         visited.insert(start);
@@ -222,7 +234,11 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> BfsIter<'a, Node, G> {
     }
 }
 
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for BfsIter<'a, Node, G> {
+impl<'a, Node, G> Iterator for BfsIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
     type Item = Node;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -299,7 +315,11 @@ where
     stack_hash: HashSet<Node>,
 }
 
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
+impl<'a, Node, G> DfsEdgesIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
     fn new(graph: &'a G, start: Node) -> Self {
         Self {
             iter: DfsIter::new(graph, start),
@@ -341,7 +361,11 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
     }
 }
 
-impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsEdgesIter<'a, Node, G> {
+impl<'a, Node, G> Iterator for DfsEdgesIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
     type Item = Edge<Node>;
 
     fn next(&mut self) -> Option<Self::Item> {
