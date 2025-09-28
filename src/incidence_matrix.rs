@@ -31,15 +31,15 @@ impl IncidenceMatrix {
         todo!()
     }
 
-    // pub fn node_degree(&self, vertex: usize) -> usize {
-    //     if self.0.is_empty() || vertex >= self.0[0].len() {
-    //         return 0;
-    //     }
+    pub fn node_degree(&self, vertex: usize) -> usize {
+        if self.0.is_empty() || vertex >= self.0[0].len() {
+            return 0;
+        }
 
-    //     self.0.iter()
-    //         .filter(|row| row[vertex] != 0)
-    //         .count()
-    // }
+        self.0.iter()
+            .filter(|row| row[vertex] != 0)
+            .count()
+    }
 
 #[cfg(test)]
 mod tests {
