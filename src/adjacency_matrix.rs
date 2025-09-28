@@ -230,6 +230,14 @@ impl Graph<usize> for AdjacencyMatrix {
     fn biparted(&self) -> bool {
         todo!()
     }
+
+    fn node_degree(&self, node: usize) -> usize {
+        if let Some(row) = self.0.get(node) {
+            row.iter().filter(|&&val| val != 0).count()
+        } else {
+            0
+        }
+    }
 }
 
 impl UndirectedGraph<usize> for AdjacencyMatrix {}
@@ -495,5 +503,17 @@ mod tests {
         assert!(m.size() == 3);
         assert!(!m.has_edge(2, 4));
         assert!(!m.has_edge(1, 4));
+    }
+
+    #[test]
+    fn node_degree_adjacency_matrix() {
+        // Grafo: 0 ─ 1
+        //        │ /
+        //        2
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]);
+
+        assert_eq!(matrix.node_degree(0), 2);
+        assert_eq!(matrix.node_degree(1), 2);
+        assert_eq!(matrix.node_degree(2), 2);
     }
 }

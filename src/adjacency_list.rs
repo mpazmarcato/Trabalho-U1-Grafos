@@ -545,4 +545,14 @@ mod tests {
         assert!(list.has_edge(0, 3));
         assert!(list.connected());
     }
+
+    #[test]
+    fn node_degree_adjacency_list() {
+        // Grafo: 0 ── 1 ── 2
+        let graph = AdjacencyList(vec![vec![1], vec![0, 2], vec![1]]);
+
+        assert_eq!(graph.node_degree(0), 1);
+        assert_eq!(graph.node_degree(1), 2);
+        assert_eq!(graph.node_degree(2), 1);
+    }
 }
