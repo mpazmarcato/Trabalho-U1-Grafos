@@ -10,16 +10,16 @@ fn main() {
         println!("Vértice {}: {}", i, graph.node_degree(&i));
     }
 
-//     let matrix = AdjacencyMatrix(vec![
-//         vec![0, 1, 1], // 0 conectado a 1 e 2
-//         vec![1, 0, 0], // 1 conectado a 0
-//         vec![1, 0, 0], // 2 conectado a 0
-//     ]);
+    let matrix = AdjacencyMatrix(vec![
+        vec![0, 1, 1], // 0 conectado a 1 e 2
+        vec![1, 0, 0], // 1 conectado a 0
+        vec![1, 0, 0], // 2 conectado a 0
+    ]);
 
-//     println!("Grau de cada vértice (matriz de adjacência):");
-//     for i in 0..matrix.0.len() {
-//         println!("Vértice {}: {}", i, matrix.node_degree(i));
-//     }
+    println!("Grau de cada vértice (matriz de adjacência):");
+    for i in 0..matrix.0.len() {
+        println!("Vértice {}: {}", i, matrix.node_degree(i));
+    }
 
 //    let matrix = AdjacencyMatrix(vec![
 //         vec![0, 1, 1], // 0 conectado a 1 e 2

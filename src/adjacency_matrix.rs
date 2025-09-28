@@ -69,6 +69,14 @@ impl AdjacencyMatrix {
         visited_count
     }
 
+    pub fn node_degree(&self, n: usize) -> usize {
+        if n >= self.0.len() {
+            0
+        } else {
+            self.0[n].iter().filter(|&&val| val != 0).count()
+        }
+    }
+
     #[allow(dead_code)]
     fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
         let mut file: File = File::create(path)?;
@@ -125,5 +133,19 @@ mod tests {
         let converted_list = AdjacencyList::from_adjacency_matrix(&matrix);
 
         assert_eq!(original_list.0, converted_list.0);
+    }
+
+    #[test]
+    fn node_degree_matrix() {
+        // Graph: 2 ── 0 ── 1
+        let matrix = AdjacencyMatrix(vec![
+            vec![0, 1, 1], // 0 conectado a 1 e 2
+            vec![1, 0, 0], // 1 conectado a 0
+            vec![1, 0, 0], // 2 conectado a 0
+        ]);
+
+        assert_eq!(matrix.node_degree(0), 2);
+        assert_eq!(matrix.node_degree(1), 1);
+        assert_eq!(matrix.node_degree(2), 1);
     }
 }

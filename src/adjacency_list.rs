@@ -92,6 +92,10 @@ impl Graph<usize> for AdjacencyList {
         todo!()
     }
 
+    fn node_degree(&self, &n: &usize) -> usize {
+        self.neighbors(&n).count()
+    }
+
     #[allow(unreachable_code)]
     fn biconnected_components(&self) -> &[Vec<&usize>] {
         todo!();
@@ -114,5 +118,14 @@ mod tests {
         // Graph: 2    0 ── 1
         // should be not connected.
         assert!(!AdjacencyList(vec![vec![1], vec![0], vec![]]).connected())
+    }
+
+    #[test]
+    fn node_degree_test() {
+        // Graph: 2 ── 0 ── 1
+        let graph = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
+        assert_eq!(graph.node_degree(&0), 2);
+        assert_eq!(graph.node_degree(&1), 1);
+        assert_eq!(graph.node_degree(&2), 1);
     }
 }
