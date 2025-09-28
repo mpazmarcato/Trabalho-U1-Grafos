@@ -140,7 +140,7 @@ impl Graph<usize> for AdjacencyMatrix {
 
     fn biparted(&self) -> bool {
         todo!()
-    }    
+    }
 }
 
 impl UndirectedGraph<usize> for AdjacencyMatrix {
@@ -453,6 +453,6 @@ mod tests {
         //        │
         //        2
         let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
-        assert_eq!(matrix.undirected_order(), 3);       
+        assert_eq!(matrix.undirected_order(), 3);
     }
 }
