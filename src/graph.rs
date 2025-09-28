@@ -18,9 +18,6 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         Node: 'a;
     fn neighbors<'a>(&'a self, n: Node) -> Self::Neighbors<'a>;
 
-    fn connected(&self) -> bool;
-    fn biconnected_components(&self) -> &[Vec<Node>];
-
     fn biparted(&self) -> bool;
 
     fn has_edge(&self, n: Node, m: Node) -> bool {
@@ -54,6 +51,10 @@ pub trait Graph<Node: Eq + Hash + Copy> {
 }
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
+    fn connected(&self) -> bool;
+
+    fn biconnected_components(&self) -> &[Vec<Node>];
+
     fn add_undirected_edge(&mut self, n: Node, m: Node) {
         self.add_edge(n, m);
         self.add_edge(m, n);

@@ -204,6 +204,12 @@ impl Graph<usize> for AdjacencyMatrix {
         }
     }
 
+    fn biparted(&self) -> bool {
+        todo!()
+    }
+}
+
+impl UndirectedGraph<usize> for AdjacencyMatrix {
     fn connected(&self) -> bool {
         todo!()
     }
@@ -211,13 +217,7 @@ impl Graph<usize> for AdjacencyMatrix {
     fn biconnected_components(&self) -> &[Vec<usize>] {
         todo!()
     }
-
-    fn biparted(&self) -> bool {
-        todo!()
-    }
 }
-
-impl UndirectedGraph<usize> for AdjacencyMatrix {}
 
 #[cfg(test)]
 mod tests {

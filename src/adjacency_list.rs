@@ -106,7 +106,12 @@ impl Graph<usize> for AdjacencyList {
         }
     }
 
-    // TODO: Only working for undirected graphs...
+    fn biparted(&self) -> bool {
+        todo!()
+    }
+}
+
+impl UndirectedGraph<usize> for AdjacencyList {
     fn connected(&self) -> bool {
         for i in 0..self.order() {
             if self
@@ -121,17 +126,10 @@ impl Graph<usize> for AdjacencyList {
         true
     }
 
-    fn biparted(&self) -> bool {
-        todo!()
-    }
-
-    #[allow(unreachable_code)]
     fn biconnected_components(&self) -> &[Vec<usize>] {
         todo!();
     }
 }
-
-impl UndirectedGraph<usize> for AdjacencyList {}
 
 #[cfg(test)]
 mod tests {
