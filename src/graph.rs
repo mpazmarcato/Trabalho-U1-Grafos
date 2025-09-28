@@ -12,6 +12,7 @@ pub enum Edge<Node> {
 pub trait Graph<Node: Eq + Hash + Copy> {
     fn order(&self) -> usize;
     fn size(&self) -> usize;
+    fn underlying_graph(&self) -> Self;
 
     fn add_node(&mut self, n: Node);
     fn remove_node(&mut self, n: Node);
