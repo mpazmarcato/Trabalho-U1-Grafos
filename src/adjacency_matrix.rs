@@ -126,15 +126,18 @@ impl Graph<usize> for AdjacencyMatrix {
         }
     }
 
-    type Neighbors<'a> = Box<dyn Iterator<Item = usize> + 'a>;
+    type Neighbors<'a> = std::iter::FilterMap<
+        std::iter::Enumerate<std::slice::Iter<'a, usize>>,
+        fn((usize, &'a usize)) -> Option<usize>,
+    >;
+
     fn neighbors<'a>(&'a self, n: usize) -> Self::Neighbors<'a> {
+        fn filter_fn((i, &weight): (usize, &usize)) -> Option<usize> {
+            if weight != 0 { Some(i) } else { None }
+        }
         match self.0.get(n) {
-            Some(row) => Box::new(
-                row.iter()
-                    .enumerate()
-                    .filter_map(|(i, &weight)| if weight != 0 { Some(i) } else { None }),
-            ),
-            None => Box::new(std::iter::empty()),
+            Some(row) => row.iter().enumerate().filter_map(filter_fn),
+            None => [].iter().enumerate().filter_map(filter_fn),
         }
     }
 
