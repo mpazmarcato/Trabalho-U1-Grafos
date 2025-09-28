@@ -76,5 +76,5 @@ fn main() {
         vec![0],    // 2 → 0
     ]);
 
-    println!("Visitados no BFS: {}", list.bfs());
+    println!("Visitados no BFS: {}", list.bfs(0).count());
 }
