@@ -97,12 +97,12 @@ impl Graph<usize> for AdjacencyList {
         }
     }
 
-    type Neighbors<'a> = Box<dyn Iterator<Item = usize> + 'a>;
+    type Neighbors<'a> = std::iter::Copied<std::slice::Iter<'a, usize>>;
 
     fn neighbors<'a>(&'a self, n: usize) -> Self::Neighbors<'a> {
         match self.0.get(n) {
-            Some(edges) => Box::new(edges.iter().copied()),
-            None => Box::new(std::iter::empty()),
+            Some(edges) => edges.iter().copied(),
+            None => [].iter().copied(),
         }
     }
 
