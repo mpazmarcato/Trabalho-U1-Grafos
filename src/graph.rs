@@ -4,13 +4,15 @@ use std::hash::Hash;
 
 pub trait Graph<Node: Eq + Hash + Copy> {
     fn order(&self) -> usize;
+
     fn size(&self) -> usize;
-    fn underlying_graph(&self) -> Self;
 
     fn add_node(&mut self, n: Node);
+
     fn remove_node(&mut self, n: Node);
 
     fn add_edge(&mut self, n: Node, m: Node);
+
     fn remove_edge(&mut self, n: Node, m: Node);
 
     type Neighbors<'a>: Iterator<Item = Node>
@@ -20,6 +22,8 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     fn neighbors<'a>(&'a self, n: Node) -> Self::Neighbors<'a>;
 
     fn biparted(&self) -> bool;
+
+    fn underlying_graph(&self) -> Self;
 
     fn has_edge(&self, n: Node, m: Node) -> bool {
         self.neighbors(n).any(|neighbor| neighbor == m)
@@ -52,6 +56,8 @@ pub trait Graph<Node: Eq + Hash + Copy> {
 }
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
+    fn undirected_size(&self) -> usize;
+
     fn connected(&self) -> bool;
 
     fn biconnected_components(&self) -> &[Vec<Node>];

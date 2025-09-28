@@ -29,7 +29,6 @@ impl Graph<usize> for AdjacencyList {
         self.0.len()
     }
 
-    // FIXME: fix the duplication!! Only working for digraphs.
     fn size(&self) -> usize {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
     }
@@ -95,6 +94,25 @@ impl Graph<usize> for AdjacencyList {
 }
 
 impl UndirectedGraph<usize> for AdjacencyList {
+    fn undirected_size(&self) -> usize {
+        let mut self_loops = 0;
+        let regular_edges: usize = self
+            .0
+            .iter()
+            .enumerate()
+            .map(|(i, _)| {
+                self.neighbors(i)
+                    .filter(|&n| {
+                        let is_self_loop = n == i;
+                        self_loops += is_self_loop as usize;
+                        !is_self_loop
+                    })
+                    .count()
+            })
+            .sum();
+        regular_edges / 2 + self_loops
+    }
+
     fn connected(&self) -> bool {
         for i in 0..self.order() {
             if self

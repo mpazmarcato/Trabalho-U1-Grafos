@@ -1,7 +1,5 @@
-use std::{
-    fs::File,
-    io::{self, Write},
-};
+use std::fs::File;
+use std::io::{self, Write};
 
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
 use crate::{Graph, UndirectedGraph};
@@ -32,6 +30,7 @@ impl AdjacencyMatrix {
         todo!()
     }
 
+    // TODO: Investigate why this is dead and when we should use it.
     #[allow(dead_code)]
     fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
         let mut file: File = File::create(path)?;
@@ -60,20 +59,12 @@ impl Graph<usize> for AdjacencyMatrix {
         self.0.len()
     }
 
-    // FIXME: There is edge duplication in undirected graphs.
     fn size(&self) -> usize {
-        let mut stack: Vec<(usize, usize)> = Vec::new();
-
-        for (idx_r, row) in self.0.iter().enumerate() {
-            for (idx_c, col) in row.iter().enumerate() {
-                if *col == 1 && !stack.contains(&(idx_r, idx_c)) && !stack.contains(&(idx_c, idx_r))
-                {
-                    stack.push((idx_r, idx_c));
-                }
-            }
-        }
-
-        stack.len()
+        self.0
+            .iter()
+            .enumerate()
+            .map(|(i, _)| self.neighbors(i).count())
+            .sum()
     }
 
     fn underlying_graph(&self) -> Self {
@@ -161,6 +152,18 @@ impl Graph<usize> for AdjacencyMatrix {
 }
 
 impl UndirectedGraph<usize> for AdjacencyMatrix {
+    fn undirected_size(&self) -> usize {
+        let mut size = 0;
+        for i in 0..self.order() {
+            for j in 0..=i {
+                if self.0[i][j] > 0 {
+                    size += 1;
+                }
+            }
+        }
+        size
+    }
+
     fn connected(&self) -> bool {
         todo!()
     }
@@ -186,7 +189,7 @@ mod tests {
             vec![0, 0, 0, 1, 0, 1],
             vec![0, 0, 0, 1, 1, 0],
         ]);
-        assert!(undirected_m.size() == 9);
+        assert_eq!(undirected_m.undirected_size(), 9);
     }
 
     #[test]
@@ -199,7 +202,7 @@ mod tests {
             vec![0, 0, 0, 1, 0, 1],
             vec![0, 0, 0, 1, 0, 0],
         ]);
-        assert!(directed_m.size() == 9);
+        assert_eq!(directed_m.size(), 9);
     }
 
     #[test]
@@ -255,7 +258,6 @@ mod tests {
         //        -  4
         let underlying_graph = original_graph.underlying_graph();
         assert_eq!(original_graph.order(), underlying_graph.order());
-        assert_eq!(original_graph.size(), underlying_graph.size());
     }
 
     #[test]
@@ -287,7 +289,7 @@ mod tests {
         // Graph: 0 - 2 - 1 - 3
         assert!(m.has_edge(1, 3));
         assert!(m.has_edge(3, 1));
-        assert!(m.size() == 3);
+        assert_eq!(m.undirected_size(), 3);
     }
 
     #[test]
@@ -409,7 +411,7 @@ mod tests {
         m.remove_undirected_edge(2, 4);
         assert!(!m.has_edge(2, 4));
         assert!(!m.has_edge(4, 2));
-        assert!(m.size() == 4);
+        assert!(m.undirected_size() == 4);
     }
 
     #[test]
@@ -428,7 +430,7 @@ mod tests {
         ]);
 
         m.remove_node(4);
-        assert!(m.size() == 3);
+        assert_eq!(m.undirected_size(), 3);
         assert!(!m.has_edge(2, 4));
         assert!(!m.has_edge(1, 4));
     }
