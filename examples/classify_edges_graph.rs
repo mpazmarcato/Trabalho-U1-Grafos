@@ -15,37 +15,33 @@ fn main() {
         vec![4, 9],
         vec![],
     ]);
-    fn m(i: usize) -> char {
-        match i {
-            0 => 's',
-            1 => 'a',
-            2 => 'b',
-            3 => 'c',
-            4 => 'd',
-            5 => 'e',
-            6 => 'f',
-            7 => 'g',
-            8 => 'h',
-            9 => 'i',
-            _ => panic!(),
+    let to_ch = |i| match i {
+        0 => 's',
+        1 => 'a',
+        2 => 'b',
+        3 => 'c',
+        4 => 'd',
+        5 => 'e',
+        6 => 'f',
+        7 => 'g',
+        8 => 'h',
+        9 => 'i',
+        _ => panic!(),
+    };
+    let print_edge = |e| match e {
+        Edge::Tree(v, u) => println!("Tree: {} -> {}", to_ch(v), to_ch(u)),
+        Edge::Back(v, u) | Edge::ParentBack(v, u) => {
+            println!("Back: {} -> {}", to_ch(v), to_ch(u))
         }
-    }
+        Edge::Foward(v, u) => println!("Foward: {} -> {}", to_ch(v), to_ch(u)),
+        Edge::Cross(v, u) => println!("Cross: {} -> {}", to_ch(v), to_ch(u)),
+    };
     let mut iter = digraph.classify_edges(0);
     for e in &mut iter {
-        match e {
-            Edge::Tree(v, u) => println!("Tree: {} -> {}", m(v), m(u)),
-            Edge::Back(v, u) | Edge::ParentBack(v, u) => println!("Back: {} -> {}", m(v), m(u)),
-            Edge::Foward(v, u) => println!("Foward: {} -> {}", m(v), m(u)),
-            Edge::Cross(v, u) => println!("Cross: {} -> {}", m(v), m(u)),
-        }
+        print_edge(e);
     }
     iter.new_start(8);
     for e in &mut iter {
-        match e {
-            Edge::Tree(v, u) => println!("Tree: {} -> {}", m(v), m(u)),
-            Edge::Back(v, u) | Edge::ParentBack(v, u) => println!("Back: {} -> {}", m(v), m(u)),
-            Edge::Foward(v, u) => println!("Foward: {} -> {}", m(v), m(u)),
-            Edge::Cross(v, u) => println!("Cross: {} -> {}", m(v), m(u)),
-        }
+        print_edge(e)
     }
 }
