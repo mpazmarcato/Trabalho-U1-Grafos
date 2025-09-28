@@ -223,7 +223,7 @@ impl Graph<usize> for AdjacencyMatrix {
     fn biparted(&self) -> bool {
         todo!()
     }
-    
+
     fn node_degree(&self, node: usize) -> usize {
         if let Some(row) = self.0.get(node) {
             row.iter().filter(|&&val| val != 0).count()
