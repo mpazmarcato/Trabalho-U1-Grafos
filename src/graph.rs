@@ -1,4 +1,4 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::Debug;
 use std::hash::Hash;
 
@@ -44,6 +44,13 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     {
         BfsIter::new(self, start)
     }
+
+    fn classify_edges(&self, start: Node) -> DfsEdgesIter<'_, Node, Self>
+    where
+        Self: Sized,
+    {
+        DfsEdgesIter::new(self, start)
+    }
 }
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
@@ -55,6 +62,15 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
     fn remove_undirected_edge(&mut self, n: Node, m: Node) {
         self.remove_edge(n, m);
         self.remove_edge(m, n);
+    }
+
+    fn classify_undirected_edges<'a>(&'a self, start: Node) -> impl Iterator<Item = Edge<Node>>
+    where
+        Self: Sized,
+        Node: 'a,
+    {
+        DfsEdgesIter::new(self, start)
+            .filter(|edge| matches!(edge, Edge::Tree(_, _) | Edge::Back(_, _)))
     }
 }
 
@@ -96,7 +112,7 @@ pub enum DfsEvent<Node> {
     NonTreeEdge(Node, Node),
 }
 
-impl<'a, Node: Eq + Hash + Copy + Debug, G: Graph<Node>> Iterator for DfsIter<'a, Node, G> {
+impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsIter<'a, Node, G> {
     type Item = DfsEvent<Node>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -106,6 +122,7 @@ impl<'a, Node: Eq + Hash + Copy + Debug, G: Graph<Node>> Iterator for DfsIter<'a
                 .push((start_node, self.graph.neighbors(start_node)));
             return Some(DfsEvent::Discover(start_node, None));
         }
+
         if let Some((node, mut neighbors)) = self.stack.pop() {
             if let Some(neighbor) = neighbors.next() {
                 self.stack.push((node, neighbors));
@@ -154,6 +171,90 @@ impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for BfsIter<'a, Node, 
             }
         }
         Some(node)
+    }
+}
+
+#[derive(Debug)]
+pub enum Edge<Node> {
+    Tree(Node, Node),
+    Back(Node, Node),
+    ParentBack(Node, Node),
+    Foward(Node, Node),
+    Cross(Node, Node),
+}
+
+pub struct DfsEdgesIter<'a, Node, G>
+where
+    G: Graph<Node>,
+    Node: Eq + Hash + Copy,
+    Self: 'a,
+{
+    iter: DfsIter<'a, Node, G>,
+    time: usize,
+    discovery: HashMap<Node, usize>,
+    finish: HashMap<Node, usize>,
+    parent: HashMap<Node, Node>,
+    stack_hash: HashSet<Node>,
+}
+
+impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> DfsEdgesIter<'a, Node, G> {
+    fn new(graph: &'a G, start: Node) -> Self {
+        Self {
+            iter: DfsIter::new(graph, start),
+            time: 0,
+            discovery: HashMap::with_capacity(graph.order()),
+            finish: HashMap::with_capacity(graph.order()),
+            parent: HashMap::with_capacity(graph.order()),
+            stack_hash: HashSet::with_capacity(graph.order()),
+        }
+    }
+}
+
+impl<'a, Node: Eq + Hash + Copy, G: Graph<Node>> Iterator for DfsEdgesIter<'a, Node, G> {
+    type Item = Edge<Node>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if let Some(event) = self.iter.next() {
+                match event {
+                    DfsEvent::Discover(node, maybe_parent) => {
+                        self.stack_hash.insert(node);
+                        self.discovery.insert(node, self.time);
+                        self.time += 1;
+                        if let Some(parent) = maybe_parent {
+                            self.parent.insert(node, parent);
+                            return Some(Edge::Tree(parent, node));
+                        }
+                    }
+                    DfsEvent::Finish(node) => {
+                        self.stack_hash.remove(&node);
+                        self.finish.insert(node, self.time);
+                        self.time += 1;
+                    }
+                    DfsEvent::NonTreeEdge(node, neighbor) => {
+                        if self.stack_hash.contains(&neighbor) {
+                            if self
+                                .parent
+                                .get(&node)
+                                .is_some_and(|&parent| parent == neighbor)
+                            {
+                                return Some(Edge::ParentBack(node, neighbor));
+                            } else {
+                                return Some(Edge::Back(node, neighbor));
+                            }
+                        } else if self.discovery.get(&node).is_some_and(|t1| {
+                            self.discovery.get(&neighbor).is_some_and(|t2| t1 < t2)
+                        }) {
+                            return Some(Edge::Foward(node, neighbor));
+                        } else {
+                            return Some(Edge::Cross(node, neighbor));
+                        }
+                    }
+                }
+            } else {
+                return None;
+            }
+        }
     }
 }
 
