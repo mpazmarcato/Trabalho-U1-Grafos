@@ -554,4 +554,14 @@ mod tests {
         let empty_list = AdjacencyList(vec![]);
         assert_eq!(empty_list.order(), 0); // empty list -> 0 nodes
     }
+
+    #[test]
+    fn test_size_adjacency_list() {
+        // Graph: 0 ── 1
+        //        │
+        //        2
+        let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
+
+        assert_eq!(list.undirected_size(), 2);
+    }
 }
