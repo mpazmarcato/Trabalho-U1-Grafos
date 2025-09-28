@@ -448,12 +448,8 @@ mod tests {
         // Graph: 0 ── 1
         //        │
         //        2
-        let matrix = AdjacencyMatrix(vec![
-            vec![0, 1, 1], 
-            vec![1, 0, 0], 
-            vec![1, 0, 0], 
-        ]);
-        assert_eq!(matrix.order(), 3); 
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
+        assert_eq!(matrix.order(), 3);
 
         let empty_matrix = AdjacencyMatrix(vec![]);
         assert_eq!(empty_matrix.order(), 0); // empty list -> 0 nodes

@@ -548,11 +548,7 @@ mod tests {
         // Graph: 0 ── 1
         //        │
         //        2
-        let list = AdjacencyList(vec![
-            vec![1, 2], 
-            vec![0],    
-            vec![0],   
-        ]);
+        let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
         assert_eq!(list.order(), 3);
 
         let empty_list = AdjacencyList(vec![]);

@@ -39,12 +39,16 @@ impl IncidenceMatrix {
         self.0.iter().filter(|row| row[vertex] != 0).count() / 2
     }
 
-     pub fn order(&self) -> usize {
+    pub fn order(&self) -> usize {
         if self.0.is_empty() {
             0
         } else {
             self.0[0].len()
         }
+    }
+
+    pub fn size(&self) -> usize {
+        self.0.len() / 2
     }
 }
 
@@ -65,18 +69,24 @@ mod tests {
         assert_eq!(incidence.node_degree(1), 1);
         assert_eq!(incidence.node_degree(2), 1);
     }
-    
-     #[test]
+
+    #[test]
     fn test_order_incidence_matrix() {
-        // Graph: 0 ── 1 ── 2 
-        let adj = AdjacencyMatrix(vec![
-            vec![0, 1, 0],
-            vec![1, 0, 1],
-            vec![0, 1, 0],
-        ]);
+        // Graph: 0 ── 1 ── 2
+        let adj = AdjacencyMatrix(vec![vec![0, 1, 0], vec![1, 0, 1], vec![0, 1, 0]]);
 
         let inc = IncidenceMatrix::from_adjacency_matrix(&adj);
 
-        assert_eq!(inc.order(), 3); // número de vértices = 3
+        assert_eq!(inc.order(), 3);
+    }
+
+    #[test]
+    fn test_size_incidence_matrix() {
+        // Graph: 0 ── 1 ── 2
+        let adj = AdjacencyMatrix(vec![vec![0, 1, 0], vec![1, 0, 1], vec![0, 1, 0]]);
+
+        let inc = IncidenceMatrix::from_adjacency_matrix(&adj);
+
+        assert_eq!(inc.size(), 2);
     }
 }
