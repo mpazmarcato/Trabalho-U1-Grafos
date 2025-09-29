@@ -126,6 +126,17 @@ impl UndirectedGraph<usize> for AdjacencyList {
         }
         true
     }
+
+    fn undirected_node_degree(&self, node: usize) -> usize {
+        self.0
+            .get(node)
+            .map(|neighbors| neighbors.len())
+            .unwrap_or(0)
+    }
+
+    fn undirected_order(&self) -> usize {
+        self.0.len()
+    }
 }
 
 #[cfg(test)]
@@ -535,11 +546,30 @@ mod tests {
 
     #[test]
     fn node_degree_adjacency_list() {
-        // Grafo: 0 ── 1 ── 2
-        let graph = AdjacencyList(vec![vec![1], vec![0, 2], vec![1]]);
+        // Graph: 0 ── 1 ── 2
+        let list = AdjacencyList(vec![vec![1], vec![0, 2], vec![1]]);
 
-        assert_eq!(graph.node_degree(0), 1);
-        assert_eq!(graph.node_degree(1), 2);
-        assert_eq!(graph.node_degree(2), 1);
+        assert_eq!(list.undirected_node_degree(0), 1);
+        assert_eq!(list.undirected_node_degree(1), 2);
+        assert_eq!(list.undirected_node_degree(2), 1);
+    }
+
+    #[test]
+    fn adjacency_list_order() {
+        // Graph: 0 ── 1
+        //        │
+        //        2
+        let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
+        assert_eq!(list.undirected_order(), 3);
+    }
+
+    #[test]
+    fn test_size_adjacency_list() {
+        // Graph: 0 ── 1
+        //        │
+        //        2
+        let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
+
+        assert_eq!(list.undirected_size(), 2);
     }
 }

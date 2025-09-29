@@ -1,4 +1,5 @@
 use graphs_algorithms::Graph;
+use graphs_algorithms::UndirectedGraph;
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
 
 fn main() {
@@ -6,14 +7,14 @@ fn main() {
 
     println!("Grau de cada vértice:");
     for i in 0..graph.order() {
-        println!("Vértice {}: {}", i, graph.node_degree(i));
+        println!("Vértice {}: {}", i, graph.undirected_node_degree(i));
     }
 
     let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]);
 
     println!("Grau de cada vértice:");
     for i in 0..matrix.order() {
-        println!("Vértice {}: {}", i, matrix.node_degree(i));
+        println!("Vértice {}: {}", i, matrix.undirected_node_degree(i));
     }
 
     let adjacency_matrix = AdjacencyMatrix(vec![

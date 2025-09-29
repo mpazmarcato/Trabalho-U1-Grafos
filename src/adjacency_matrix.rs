@@ -144,14 +144,6 @@ impl Graph<usize> for AdjacencyMatrix {
     fn biparted(&self) -> bool {
         todo!()
     }
-
-    fn node_degree(&self, node: usize) -> usize {
-        if let Some(row) = self.0.get(node) {
-            row.iter().filter(|&&val| val != 0).count()
-        } else {
-            0
-        }
-    }
 }
 
 impl UndirectedGraph<usize> for AdjacencyMatrix {
@@ -169,6 +161,18 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
 
     fn connected(&self) -> bool {
         todo!()
+    }
+
+    fn undirected_node_degree(&self, node: usize) -> usize {
+        if let Some(row) = self.0.get(node) {
+            row.iter().filter(|&&val| val != 0).count()
+        } else {
+            0
+        }
+    }
+
+    fn undirected_order(&self) -> usize {
+        self.0.len()
     }
 }
 
@@ -441,8 +445,17 @@ mod tests {
         //        2
         let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]);
 
-        assert_eq!(matrix.node_degree(0), 2);
-        assert_eq!(matrix.node_degree(1), 2);
-        assert_eq!(matrix.node_degree(2), 2);
+        assert_eq!(matrix.undirected_node_degree(0), 2);
+        assert_eq!(matrix.undirected_node_degree(1), 2);
+        assert_eq!(matrix.undirected_node_degree(2), 2);
+    }
+
+    #[test]
+    fn adjacency_matrix_order() {
+        // Graph: 0 ── 1
+        //        │
+        //        2
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
+        assert_eq!(matrix.undirected_order(), 3);
     }
 }
