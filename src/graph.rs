@@ -61,6 +61,7 @@ pub trait Graph<Node: Eq + Hash + Copy + Display> {
         writeln!(file, " }}").unwrap();
     }
 
+    // TODO!!
     fn write_dfs_on_file(&self, start: Node)
     where
         Self: Sized,
