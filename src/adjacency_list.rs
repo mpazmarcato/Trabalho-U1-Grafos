@@ -1,6 +1,6 @@
-use crate::Graph;
 use crate::graph::{DfsEvent, UndirectedGraph};
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
+use crate::{Graph, GraphIO};
 
 #[derive(Debug, Clone, Default)]
 pub struct AdjacencyList(pub Vec<Vec<usize>>);
@@ -25,6 +25,10 @@ impl AdjacencyList {
 }
 
 impl Graph<usize> for AdjacencyList {
+    fn new_empty() -> Self {
+        AdjacencyList(vec![])
+    }
+
     fn order(&self) -> usize {
         self.0.len()
     }
@@ -143,10 +147,33 @@ impl UndirectedGraph<usize> for AdjacencyList {
     }
 }
 
+impl GraphIO<usize> for AdjacencyList {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    #[test]
+    fn new_digraph_1() {
+        let list: AdjacencyList = GraphIO::from_file("DIGRAFO1.txt".to_owned());
+        assert!(list.order() == 13);
+        assert!(list.size() == 16);
+    }
+
+    #[test]
+    fn new_digraph_2() {
+        let list: AdjacencyList = GraphIO::from_file("DIGRAFO2.txt".to_owned());
+        assert!(list.order() == 13);
+        assert!(list.size() == 17);
+    }
+
+    #[test]
+    fn new_undirected_graph_1() {
+        let list: AdjacencyList = GraphIO::undirected_from_file("GRAFO_2.txt".to_owned());
+        assert!(list.order() == 11);
+        assert!(list.undirected_size() == 13);
+    }
+    
     #[test]
     fn connected_undirected_graph() {
         // Graph: 2 ── 0 ── 1

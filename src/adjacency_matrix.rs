@@ -1,5 +1,5 @@
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
-use crate::{Graph, UndirectedGraph};
+use crate::{Graph, GraphIO, UndirectedGraph};
 
 #[derive(Debug, Clone)]
 pub struct AdjacencyMatrix(pub Vec<Vec<usize>>);
@@ -23,6 +23,10 @@ impl AdjacencyMatrix {
 }
 
 impl Graph<usize> for AdjacencyMatrix {
+    fn new_empty() -> Self {
+        AdjacencyMatrix(vec![])
+    }
+
     fn order(&self) -> usize {
         self.0.len()
     }
@@ -148,11 +152,34 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
     }
 }
 
+impl GraphIO<usize> for AdjacencyMatrix {}
+
 #[cfg(test)]
 mod tests {
     use std::vec;
 
     use super::*;
+
+    #[test]
+    fn new_digraph_1() {
+        let matrix: AdjacencyMatrix = GraphIO::from_file("DIGRAFO1.txt".to_owned());
+        assert!(matrix.order() == 13);
+        assert!(matrix.size() == 16);
+    }
+
+    #[test]
+    fn new_digraph_2() {
+        let matrix: AdjacencyMatrix = GraphIO::from_file("DIGRAFO2.txt".to_owned());
+        assert!(matrix.order() == 13);
+        assert!(matrix.size() == 17);
+    }
+
+    #[test]
+    fn new_undirected_graph_1() {
+        let matrix: AdjacencyMatrix = GraphIO::undirected_from_file("GRAFO_2.txt".to_owned());
+        assert!(matrix.order() == 11);
+        assert!(matrix.undirected_size() == 13);
+    }
 
     #[test]
     fn undirected_graph_matrix_size() {
