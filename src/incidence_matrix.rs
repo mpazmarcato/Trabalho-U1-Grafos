@@ -28,7 +28,22 @@ impl IncidenceMatrix {
     }
 
     pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
-        todo!()
+        let mut inc: Vec<Vec<i32>> = Vec::new();
+
+        for (c_out, v) in _list.0.iter().enumerate() {
+            if !v.is_empty() {
+                for c_in in v.iter() {
+                    let mut edge: Vec<i32> = vec![0; _list.order()];
+
+                    edge[c_out] = -1;
+                    edge[*c_in] = 1;
+
+                    inc.push(edge);
+                }
+            }
+        }
+
+        IncidenceMatrix(inc)
     }
 
     pub fn node_degree(&self, vertex: usize) -> usize {
