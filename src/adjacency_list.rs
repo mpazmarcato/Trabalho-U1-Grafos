@@ -153,27 +153,28 @@ impl GraphIO<usize> for AdjacencyList {}
 mod tests {
     use super::*;
 
+    static PATH: &str = "examples/data/";
     #[test]
     fn new_digraph_1() {
-        let list: AdjacencyList = GraphIO::from_file("DIGRAFO1.txt".to_owned());
+        let list: AdjacencyList = GraphIO::from_file(PATH.to_owned() + "DIGRAFO1.txt");
         assert!(list.order() == 13);
         assert!(list.size() == 16);
     }
 
     #[test]
     fn new_digraph_2() {
-        let list: AdjacencyList = GraphIO::from_file("DIGRAFO2.txt".to_owned());
+        let list: AdjacencyList = GraphIO::from_file(PATH.to_owned() + "DIGRAFO2.txt");
         assert!(list.order() == 13);
         assert!(list.size() == 17);
     }
 
     #[test]
     fn new_undirected_graph_1() {
-        let list: AdjacencyList = GraphIO::undirected_from_file("GRAFO_2.txt".to_owned());
+        let list: AdjacencyList = GraphIO::undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
         assert!(list.order() == 11);
         assert!(list.undirected_size() == 13);
     }
-    
+
     #[test]
     fn connected_undirected_graph() {
         // Graph: 2 ── 0 ── 1

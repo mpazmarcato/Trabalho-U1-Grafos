@@ -160,23 +160,26 @@ mod tests {
 
     use super::*;
 
+    static PATH: &str = "examples/data/";
+
     #[test]
     fn new_digraph_1() {
-        let matrix: AdjacencyMatrix = GraphIO::from_file("DIGRAFO1.txt".to_owned());
+        let matrix: AdjacencyMatrix = GraphIO::from_file(PATH.to_owned() + "DIGRAFO1.txt");
         assert!(matrix.order() == 13);
         assert!(matrix.size() == 16);
     }
 
     #[test]
     fn new_digraph_2() {
-        let matrix: AdjacencyMatrix = GraphIO::from_file("DIGRAFO2.txt".to_owned());
+        let matrix: AdjacencyMatrix = GraphIO::from_file(PATH.to_owned() + "DIGRAFO2.txt");
         assert!(matrix.order() == 13);
         assert!(matrix.size() == 17);
     }
 
     #[test]
     fn new_undirected_graph_1() {
-        let matrix: AdjacencyMatrix = GraphIO::undirected_from_file("GRAFO_2.txt".to_owned());
+        let matrix: AdjacencyMatrix =
+            GraphIO::undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
         assert!(matrix.order() == 11);
         assert!(matrix.undirected_size() == 13);
     }
