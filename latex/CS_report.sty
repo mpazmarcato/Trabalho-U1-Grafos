@@ -57,8 +57,9 @@
 \usepackage[cmex10]{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
-\newtheorem{mydef}{Definition}
-\newtheorem{mytherm}{Theorem}
+\theoremstyle{definition}
+\newtheorem{mydef}{Definição}
+\newtheorem{mytherm}{Teorema}
 
 %%-------------------------------------
 %% Algorithms/Code Listing environment settings  -
@@ -105,6 +106,7 @@
 \usepackage{subfigure}
 \usepackage{caption}
 \usepackage{lipsum}
+\usepackage{tkz-graph}
 
 %%-------------------------------------
 %% Table environment settings
@@ -140,6 +142,7 @@
 %% Bibliography/References settings   - Harvard Style was used in this report
 %%-------------------------------------
 % Harvard, Name Style
+%% TODO: atualizar as citações para abnt2
 \usepackage[semicolon,authoryear]{natbib}
 \bibliographystyle{agsm}
 
