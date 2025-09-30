@@ -1,10 +1,4 @@
-use graphs_algorithms::{Graph, UndirectedGraph, graphs::AdjacencyList};
-
-fn print_list(list: &AdjacencyList) {
-    for (i, neighbors) in list.0.iter().enumerate() {
-        println!("{}: {:?}", i, neighbors);
-    }
-}
+use graphs_algorithms::{Graph, UndirectedGraph, graphs::AdjacencyList, print_list};
 
 fn digraph_add() {
     println!("Digraph!");

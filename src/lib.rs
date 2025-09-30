@@ -3,11 +3,14 @@ mod graph;
 mod adjacency_list;
 mod adjacency_matrix;
 mod incidence_matrix;
+mod utils;
 
 pub use graph::DfsEvent;
 pub use graph::Edge;
 pub use graph::Graph;
 pub use graph::UndirectedGraph;
+pub use utils::print_list;
+pub use utils::print_matrix;
 
 pub mod graphs {
     pub use crate::{
