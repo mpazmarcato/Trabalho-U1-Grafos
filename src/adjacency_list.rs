@@ -33,6 +33,10 @@ impl Graph<usize> for AdjacencyList {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
     }
 
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        (0..self.order()).map(|i| i)
+    }
+
     fn underlying_graph(&self) -> Self {
         let mut list = AdjacencyList(vec![Vec::new(); self.0.len()]);
 

@@ -1,14 +1,5 @@
-use std::fs::File;
-use std::io::{self, Write};
-
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
 use crate::{Graph, UndirectedGraph};
-
-#[derive(Debug)]
-pub struct Node {
-    value: usize,
-    ancestor: Option<usize>,
-}
 
 #[derive(Debug, Clone)]
 pub struct AdjacencyMatrix(pub Vec<Vec<usize>>);
@@ -29,29 +20,6 @@ impl AdjacencyMatrix {
     pub fn from_incidency_matrix(_matrix: &IncidenceMatrix) -> Self {
         todo!()
     }
-
-    // TODO: Investigate why this is dead and when we should use it.
-    #[allow(dead_code)]
-    fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
-        let mut file: File = File::create(path)?;
-
-        writeln!(file, "digraph G {{")?;
-        writeln!(file, "  rankdir=LR;")?;
-        writeln!(file, "  node [shape=circle];")?;
-
-        for node in graph {
-            writeln!(file, "  {}", node.value)?;
-        }
-
-        for node in graph {
-            if let Some(ancestor_idx) = node.ancestor {
-                writeln!(file, "  {} -> {};", graph[ancestor_idx].value, node.value)?;
-            }
-        }
-
-        writeln!(file, " }}")?;
-        Ok(())
-    }
 }
 
 impl Graph<usize> for AdjacencyMatrix {
@@ -65,6 +33,10 @@ impl Graph<usize> for AdjacencyMatrix {
             .enumerate()
             .map(|(i, _)| self.neighbors(i).count())
             .sum()
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        (0..self.order()).map(|i| i)
     }
 
     fn underlying_graph(&self) -> Self {

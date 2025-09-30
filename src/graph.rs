@@ -1,11 +1,15 @@
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
+use std::fs::File;
 use std::hash::Hash;
+use std::io::Write;
 
-pub trait Graph<Node: Eq + Hash + Copy> {
+pub trait Graph<Node: Eq + Hash + Copy + Display> {
     fn order(&self) -> usize;
 
     fn size(&self) -> usize;
+
+    fn nodes(&self) -> impl Iterator<Item = Node>;
 
     fn add_node(&mut self, n: Node);
 
@@ -40,6 +44,36 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         DfsIter::new(self, start)
     }
 
+    fn write_graph(&self, path: String) -> () {
+        let mut file: File = File::create(&path).unwrap();
+
+        writeln!(file, "digraph G {{").unwrap();
+        writeln!(file, "  rankdir=LR;").unwrap();
+        writeln!(file, "  node [shape=circle];").unwrap();
+
+        for node in self.nodes() {
+            writeln!(file, " {} ", node).unwrap();
+            for neighbor in self.neighbors(node) {
+                writeln!(file, " {} -> {} ", node, neighbor).unwrap();
+            }
+        }
+
+        writeln!(file, " }}").unwrap();
+    }
+
+    fn write_dfs_on_file(&self, start: Node)
+    where
+        Self: Sized,
+    {
+        for i in self.dfs(start) {
+            match i {
+                DfsEvent::Discover(_, _) => todo!(),
+                DfsEvent::Finish(_) => todo!(),
+                DfsEvent::NonTreeEdge(_, _) => todo!(),
+            }
+        }
+    }
+
     fn bfs(&self, start: Node) -> BfsIter<'_, Node, Self>
     where
         Self: Sized,
@@ -55,10 +89,32 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     }
 }
 
-pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
+pub trait UndirectedGraph<Node: Copy + Eq + Hash + Display>: Graph<Node> {
     fn undirected_size(&self) -> usize;
 
     fn connected(&self) -> bool;
+
+    fn write_undirected_graph(&self, path: String) -> () {
+        let mut file: File = File::create(&path).unwrap();
+
+        let mut visited: Vec<Node> = vec![];
+
+        writeln!(file, "graph G {{").unwrap();
+        writeln!(file, "  rankdir=LR;").unwrap();
+        writeln!(file, "  node [shape=circle];").unwrap();
+
+        for node in self.nodes() {
+            writeln!(file, " {} ", node).unwrap();
+            for neighbor in self.neighbors(node) {
+                if !visited.contains(&neighbor) {
+                    writeln!(file, " {} -- {} ", node, neighbor).unwrap();
+                }
+            }
+            visited.push(node);
+        }
+
+        writeln!(file, " }}").unwrap();
+    }
 
     fn biconnected_components(&self, start: Node) -> BiconnectedComponentsIter<'_, Node, Self>
     where
@@ -135,7 +191,7 @@ pub enum DfsEvent<Node> {
 pub struct DfsIter<'a, Node, G>
 where
     G: Graph<Node>,
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     Self: 'a,
 {
     graph: &'a G,
@@ -146,7 +202,7 @@ where
 
 impl<'a, Node, G> DfsIter<'a, Node, G>
 where
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     G: Graph<Node>,
 {
     fn new(graph: &'a G, start: Node) -> Self {
@@ -185,7 +241,7 @@ where
 
 impl<'a, Node, G> Iterator for DfsIter<'a, Node, G>
 where
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     G: Graph<Node>,
 {
     type Item = DfsEvent<Node>;
@@ -226,7 +282,7 @@ pub struct BfsIter<'a, Node, G> {
 
 impl<'a, Node, G> BfsIter<'a, Node, G>
 where
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     G: Graph<Node>,
 {
     fn new(graph: &'a G, start: Node) -> Self {
@@ -242,7 +298,7 @@ where
 
 impl<'a, Node, G> Iterator for BfsIter<'a, Node, G>
 where
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     G: Graph<Node>,
 {
     type Item = Node;
@@ -310,7 +366,7 @@ pub enum Edge<Node> {
 pub struct DfsEdgesIter<'a, Node, G>
 where
     G: Graph<Node>,
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     Self: 'a,
 {
     iter: DfsIter<'a, Node, G>,
@@ -323,7 +379,7 @@ where
 
 impl<'a, Node, G> DfsEdgesIter<'a, Node, G>
 where
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     G: Graph<Node>,
 {
     fn new(graph: &'a G, start: Node) -> Self {
@@ -369,7 +425,7 @@ where
 
 impl<'a, Node, G> Iterator for DfsEdgesIter<'a, Node, G>
 where
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     G: Graph<Node>,
 {
     type Item = Edge<Node>;
@@ -461,7 +517,7 @@ where
 pub struct BiconnectedComponentsIter<'a, Node, G>
 where
     G: Graph<Node>,
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     Self: 'a,
 {
     iter: DfsIter<'a, Node, G>,
@@ -475,7 +531,7 @@ where
 impl<'a, Node, G> BiconnectedComponentsIter<'a, Node, G>
 where
     G: Graph<Node> + 'a,
-    Node: Eq + Hash + Copy + 'a,
+    Node: Eq + Hash + Copy + Display + 'a,
 {
     fn new(graph: &'a G, start: Node) -> Self {
         Self {
@@ -503,7 +559,7 @@ where
 impl<'a, Node, G> Iterator for BiconnectedComponentsIter<'a, Node, G>
 where
     G: Graph<Node>,
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
 {
     type Item = Vec<(Node, Node)>;
 
