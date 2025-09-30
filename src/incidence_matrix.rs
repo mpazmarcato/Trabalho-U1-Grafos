@@ -104,4 +104,25 @@ mod tests {
 
         assert_eq!(inc.size(), 2);
     }
+
+    #[test]
+    fn test_from_adjacency_list() {
+        // Graph:
+        //     0      -> 1
+        //       \    /   \
+        //        -> 3     -> 2
+        //       /
+        //      4
+        let adj_list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1], vec![3]]);
+        let answer: Vec<Vec<i32>> = vec![
+            vec![-1, 0, 0, 1, 0],
+            vec![0, -1, 1, 0, 0],
+            vec![0, 1, 0, -1, 0],
+            vec![0, 0, 0, 1, -1],
+        ];
+
+        let inc = IncidenceMatrix::from_adjacency_list(&adj_list);
+
+        assert_eq!(inc.0, answer);
+    }
 }
