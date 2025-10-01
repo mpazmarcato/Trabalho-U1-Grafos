@@ -27,7 +27,7 @@ impl IncidenceMatrix {
         IncidenceMatrix(inc)
     }
 
-    pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
+    pub fn from_adjacency_list_digraph(_list: &AdjacencyList) -> Self {
         let mut inc: Vec<Vec<i32>> = Vec::new();
 
         for (c_out, v) in _list.0.iter().enumerate() {
@@ -106,7 +106,7 @@ mod tests {
     }
 
     #[test]
-    fn test_from_adjacency_list() {
+    fn from_adjacency_list_digraph() {
         // Graph:
         //     0      -> 1
         //       \    /   \
@@ -121,7 +121,10 @@ mod tests {
             vec![0, 0, 0, 1, -1],
         ];
 
-        let inc = IncidenceMatrix::from_adjacency_list(&adj_list);
+        let inc = IncidenceMatrix::from_adjacency_list_digraph(&adj_list);
+
+        assert_eq!(inc.0, answer);
+    }
 
         assert_eq!(inc.0, answer);
     }
