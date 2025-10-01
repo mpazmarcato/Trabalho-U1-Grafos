@@ -46,6 +46,25 @@ impl IncidenceMatrix {
         IncidenceMatrix(inc)
     }
 
+    pub fn from_adjacency_list_graph(_list: &AdjacencyList) -> Self {
+        let mut inc: Vec<Vec<i32>> = Vec::new();
+
+        for (c_out, v) in _list.0.iter().enumerate() {
+            if !v.is_empty() {
+                for c_in in v.iter() {
+                    let mut edge: Vec<i32> = vec![0; _list.order()];
+
+                    edge[c_out] = 1;
+                    edge[*c_in] = 1;
+
+                    inc.push(edge);
+                }
+            }
+        }
+
+        IncidenceMatrix(inc)
+    }
+
     pub fn node_degree(&self, vertex: usize) -> usize {
         if self.0.is_empty() || vertex >= self.0[0].len() {
             return 0;
@@ -125,6 +144,24 @@ mod tests {
 
         assert_eq!(inc.0, answer);
     }
+
+    #[test]
+    fn from_adjacency_list_graph() {
+        // Graph:
+        //     0        1
+        //       \    /   \
+        //        -- 3     -- 2
+        //       /
+        //      4
+        let adj_list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1], vec![3]]);
+        let answer: Vec<Vec<i32>> = vec![
+            vec![1, 0, 0, 1, 0],
+            vec![0, 1, 1, 0, 0],
+            vec![0, 1, 0, 1, 0],
+            vec![0, 0, 0, 1, 1],
+        ];
+
+        let inc = IncidenceMatrix::from_adjacency_list_graph(&adj_list);
 
         assert_eq!(inc.0, answer);
     }
