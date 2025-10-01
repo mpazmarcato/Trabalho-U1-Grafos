@@ -30,6 +30,12 @@ Unidade1-Grafos/
 
 ## Desenvolvimento
 
+### Pré-requisitos
+
+- [Cargo 1.90.0 (com rustc 1.90.0 stable)](https://rust-lang.org/learn/get-started/)
+- [Texlive (full)](https://tug.org/texlive/) e Texlive-lang-portuguese. (pode ser encontrado nos gerenciadores de pacote)
+- [Docker](https://www.docker.com/) (Para compilar o latex se não quiser instalar diretamente o texlive)
+
 ### Compilação e testes
 
 #### Rust
@@ -76,6 +82,23 @@ make distclean
 
 # Limpa e compila novamente
 make rebuild
+```
+
+#### $\LaTeX$ com Docker
+
+```bash
+# Cria a imagem docker
+docker build -t latex-compiler latex/
+
+# Compila a imagem e executa o container criando o pdf.
+# --rm automaticamente deleta o container e o volume
+docker run --rm latex-compiler > main.pdf
+```
+
+Existe uma imagem compilada em `vleema/latex-compiler` (não garanto que esteja atualizada). Podes substituir `docker build...` por
+
+```bash
+docker pull vleema/latex-compiler:latest
 ```
 
 ## TODOs
