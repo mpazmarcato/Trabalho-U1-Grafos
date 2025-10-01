@@ -1,0 +1,156 @@
+\chapter{Introdução}
+\label{ch:intro}
+
+%TODO: Melhorar e extender a introdução
+% Isso ficou com uma cara de abstract mal feito...
+Este projeto tem como objetivo implementar uma API de
+algoritmos relacionados a Grafos na linguagem de programação Rust. A
+especificação da API segue as funcionalidades descritas na
+definição da Avaliação 01 da disciplina de Grafos, sob o Departamento
+de Informática Aplicada (DIMAp) da Universidade Federal do Rio Grande
+do Norte (UFRN).
+
+Nesta implementação, a especificação da API se materializa em grande
+parte como \emph{traços} (\textit{traits}) de Rust, esse conceito é
+semelhante a noção de \textit{interface} em linguagens como Java
+e Go e praticamente idêntico ao conceito de \textit{typeclasses} em
+linguagens como Haskell, o uso de traços permite que a API seja
+flexível e mantenha fidelidade as definições algébricas, além do
+mais, permite, por meio da implementação a nível de traço, que o código
+seja genérico e eficiente para as diversas representações de grafos.
+
+Além dos traços, fizemos grande uso do conceito de \textit{iteradores}, que
+também surgem a partir de traços, essa abstração permite que o código
+fique ainda mais reutilizável, sem que a eficiência seja comprometida.
+
+Neste relatório vamos discutir a implementação e apresentar essas
+vantagens em detalhes, além disso, vamos demonstrar empiricamente a
+partir de testes de benchmark que apesar do alto nível de abstração,
+a eficiência dos algoritmos ainda fica a par de implementações ótimas
+feitas em C++.
+
+Para assegurar o comportamento esperado dos algoritmos, também
+implementamos mais de 50 testes unitários que testam as
+validam as implementações. Entretanto, por causa da extensão dos testes, vamos
+disponibilizá-los apenas através do código fonte da API.
+
+\section{Especificação da API}
+\label{sec:api_spec}
+
+De acordo com a definição da Avaliação 01 a API deve possuir as
+seguintes funcionalidades:
+
+\subsection{Para Grafos Não Direcionados}
+
+\begin{enumerate}
+  \item Criação do Grafo a partir da Lista de Adjacências.
+  \item Criação do Grafo a partir da Matriz de Adjacências.
+  \item Criação do Grafo a partir da Matriz de Incidência.
+  \item Conversão de matriz de adjacência para lista de Adjacências e
+    vice-versa.
+  \item Função que calcula o grau de cada vértice.
+  \item Função que determina se dois vértices são adjacentes.
+  \item Função que determina o número total de vértices.
+  \item Função que determina o número total de arestas.
+  \item Inclusão de um novo vértice usando Lista de Adjacências e
+    Matriz de Adjacências.
+  \item Exclusão de um vértice existente usando Lista de Adjacências
+    e Matriz de Adjacências.
+  \item Função que determina se um grafo é conexo ou não.
+  \item Determinar se um grafo é bipartido.
+  \item \label{item:bfs1} Busca em Largura, a partir de um vértice específico.
+  \item \label{item:dfs1} Busca em Profundidade, com determinação de arestas de
+    retorno, a partir de um vértice em específico.
+  \item \label{item:biconnect} Determinação de articulações e
+    componentes biconexos, utilizando obrigatoriamente a função \texttt{lowpt}.
+\end{enumerate}
+
+\subsection{Para Grafos Direcionados (ou Dígrafos)}
+
+\begin{enumerate}[resume]
+  \item Representação do Dígrafo a partir da Matriz de Adjacências.
+  \item Representação do Dígrafo a partir da Matriz de Incidência.
+  \item Determinação do Grafo subjacente.
+  \item \label{item:bfs2} Busca em largura.
+  \item \label{item:dfs2} Busca em profundidade, com determinação de
+    profundidade de entrada de saída de cada vértice, e arestas de
+    árvore, retorno, avanço e cruzamento.
+\end{enumerate}
+
+\section{Solução proposta}
+
+\subsection{Traços}
+
+Como discutido brevemente no início do capítulo (\ref{ch:intro}),
+nossa solução se baseia na criação de traços e iteradores que vão
+implementar os algoritmos descritos na especificação da API
+(\ref{sec:api_spec}). Em específico, haverá um traço para grafos não
+direcionados e um traço para grafo direcionados, onde o traço para
+grafos não direcionados herdará as propriedades do traço para grafos
+direcionados. Essa abordagem permite que boa parte dos algoritmos
+que seriam exclusivos para um tipo de grafo funcione em ambos, a
+validade desse design se materializa por meio dos testes unitários
+que desenvolvemos para API, que testa diversos casos de uso de cada
+implementação para os dois tipos de grafos.
+
+\subsection{Iteradores}
+
+Quanto ao uso de iteradores especificamente, eles serão implementados
+para algoritmos que envolvem algum tipo de travessia no grafo, como a
+Busca em Profundidade (DFS) nos items~\ref{item:dfs1} e \ref{item:dfs2} e
+Busca em Largura (BFS) nos items~\ref{item:bfs1} e \ref{item:bfs2}. A
+vantagem de implementar iteradores para esses algoritmos é que a
+outros algoritmos como a Determinação de Componentes Biconexos no
+item~\ref{item:biconnect} fica derivável da implementação dessas
+buscas. Além disso, a implementação em forma de iteradores permite
+que possíveis usuários da API tenha acesso ao extenso framework de iteradores
+que a biblioteca padrão de Rust oferece. Um exemplo de uso de
+iteradores para além da implementação da API, seria a determinação de
+ciclos no grafo, determinação de menor caminho entre dois vértices,
+busca de um vértice específico, filtragem de vértices durante a
+busca, modificação do grafo durante a busca, algoritmos de
+backtracking e outros, tudo isso apenas compondo a implementação
+inicial com os recursos que o iterador de Rust oferece e sem perder
+desempenho em relação a uma implementação tradicional.
+
+% TODO: Refletir sobre se devemos adicionar mais informações sobre a
+% solução aqui. Falar mais, por exemplo, de abstrações de custo zero,
+% leitura de arquivos, etc.
+
+\section{Organização do relatório}
+
+% TODO: Atualizar referência do capítulo 2.
+No capítulo 2, vamos apresentar as definições que vamos usar durante
+o relatório e construir a base necessária para que o leitor consiga
+acompanhar a parte teórica em sua totalidade. Nessa seção revisaremos conceitos
+como definição de grafo, vértices, arestas, adjacência,
+conectividade e outros.
+
+% TODO: Atualizar referência do capítulo 3.
+No capítulo 3, vamos revisar as representações de grafos nas
+estruturas de dados que temos disponíveis na linguagem de
+programação, estas são, Lista de Adjacência, Matriz de Adjacência e
+Matriz de Incidência. Também vamos discorrer um pouco sobre as
+vantagens e desvantagens de cada uma.
+
+% TODO: Atualizar referência do capítulo 4.
+No capítulo 4, vamos descrever em uma linguagem de alto nível a
+implementação dos algoritmos da especificação da API. Novamente, para
+preparar o leitor teoricamente para a implementação em Rust.
+
+% TODO: Atualizar referência do capítulo 5.
+No capítulo 5, vamos apresentar e discorre sobre as partes relevantes
+do código em Rust que implementa a API e consequentemente as representações e
+algoritmos descritos nos capítulos 3 e 4.
+
+% TODO: Atualizar referência do capítulo 6.
+No capítulo 6, vamos demonstrar porque as abstrações utilizadas na
+implementação é zero custo comparando sua performance com uma
+implementação tradicional em C++.
+
+% TODO: Atualizar referência do capítulo 7.
+No capítulo 7, vamos discutir as possíveis melhorias a nossa API e quais
+podem ser os futuros próximos passos.
+
+No apêndice A, você poderá consultar as atividades desenvolvidas por
+cada integrante.
