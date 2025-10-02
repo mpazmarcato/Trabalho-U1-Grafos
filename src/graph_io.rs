@@ -71,7 +71,10 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
             } else {
                 let values: Vec<usize> = content
                     .split(',')
-                    .map(|x| x.parse::<usize>().unwrap() - 1)
+                    .map(|x| match x.parse::<usize>() {
+                        Ok(value) => value - 1,
+                        Err(_) => panic!("Graph can't have non-integer nodes!"),
+                    })
                     .collect();
                 graph.add_edge(Node::from(values[0]), Node::from(values[1]));
             }
@@ -102,7 +105,10 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
             } else {
                 let values: Vec<usize> = content
                     .split(',')
-                    .map(|x| x.parse::<usize>().unwrap() - 1)
+                    .map(|x| match x.parse::<usize>() {
+                        Ok(value) => value - 1,
+                        Err(_) => panic!("Graph can't have non-integer nodes!"),
+                    })
                     .collect();
                 graph.add_undirected_edge(Node::from(values[0]), Node::from(values[1]));
             }
