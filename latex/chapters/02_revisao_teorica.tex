@@ -1,5 +1,5 @@
-\chapter{Teoria de Grafos}
-\label{ch:teoria}
+\chapter{Revisão teórica}
+\label{ch:revisão}
 
 As definições utilizadas neste projeto foram, em grande parte,
 retiradas de \cite{diestel2025graph}, com algumas modificações. Como
@@ -85,11 +85,11 @@ o correspondente de cada definição em inglês, entre parênteses.
 \end{mydef}
 
 \begin{mydef}[Grafo não direcionado]
-  Dizemos que um grafo $G$ é \emph{não direcionado} se somente se $A$ é
-  simétrico, ou seja, se $uv \in A$ então $vu \in A$. O nome não
-  direcionado vem da ideia de que os grafos que viemos discutindo até
-  agora são denomidados de \emph{direcionados}, ou simplesmente
-  \emph{dígrafos}. Na
+  Dizemos que um grafo $G$ é \emph{não direcionado}
+  (\textit{undirected}) se somente se $A$ é simétrico, ou seja, se
+  $uv \in A$ então $vu \in A$. O nome não direcionado vem da ideia de
+  que os grafos que viemos discutindo até agora são denomidados de
+  \emph{direcionados}, ou simplesmente \emph{dígrafos}. Na
   literatura é comum apresentar grafo não direcionado como grafo e
   depois o direcionado como dígrafo, resolvemos inverter a ordem pois
   assim se traduz melhor nas representações de grafos que vamos
@@ -115,11 +115,51 @@ o correspondente de cada definição em inglês, entre parênteses.
 \end{mydef}
 
 \begin{mydef}[Grafo subjacente]
-  O grafo subjacente de um grafo direcionado $G := (V, A)$ é o grafo
-  $S := (V, A')$ onde $A' := \{vu\, |\, uv \in A\} \cup A$.
+  O grafo subjacente (\textit{underlying}) de um grafo direcionado $G
+  := (V, A)$ é o grafo $S := (V, A')$ onde $A' := \{vu\, |\, uv \in A\} \cup A$.
 \end{mydef}
 
-% TODO: Adicionar as definições
-% - Grafo bipartido
-% - Articulação
-% - Biconectividade
+\begin{mydef}[Grafo Bipartido]
+  Dizemos que um grafo $G := (V, A)$ é bipartido (\textit{bipartite})
+  se somente se existem dois conjuntos disjuntos $V_1$, $V_2$ tal que
+  $V_1 \cup V_2 = V$, e que para todo $(u, v) \in A$, ($u \in
+  V_1$ e $v \in V_2$) ou ($u \in V_2$ e $v \in V_1$), isto é, toda
+  aresta em $A$ conecta um vértice de $V_1$ a um vértice de $V_2$.
+  \begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+      \GraphInit[vstyle=normal]
+      \SetGraphUnit{2}
+
+      % V_1
+      \Vertex[x=0,y=3]{a}
+      \Vertex[x=0,y=2]{b}
+      \Vertex[x=0,y=1]{c}
+
+      % V_2
+      \Vertex[x=3,y=2]{u}
+      \Vertex[x=3,y=1]{v}
+
+      % Bipartite edges
+      \Edge(a)(u)
+      \Edge(b)(v)
+      \Edge(b)(u)
+      \Edge(c)(v)
+
+      % Partitions
+      \draw[rounded corners] (-0.5, 0.5) rectangle (0.5, 3.5);
+      \node at (0, 3.8) {$V_1$};
+      \draw[rounded corners] (2.5, 0.5) rectangle (3.5, 2.5);
+      \node at (3, 2.8) {$V_2$};
+    \end{tikzpicture}
+    \caption{Um grafo bipartido com $V_1 := \{a,b,c\}$ e $V_2 := \{u,v\}$}
+  \end{figure}
+  \FloatBarrier
+\end{mydef}
+
+\begin{mydef}[Grafo Biconexo]
+  Dizemos que um grafo $G := (V, A)$ é biconexo
+  (\textit{biconnected}) se somente se $|G| > 2$ e para todo $v \in
+  V$,  o subgrafo de $G$ resultante da remoção de $v$ é conexo, isto
+  é, $G - \{v\}$ é conexo.
+\end{mydef}
