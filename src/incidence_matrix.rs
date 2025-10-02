@@ -1,3 +1,4 @@
+use crate::Graph;
 use crate::graphs::{AdjacencyList, AdjacencyMatrix};
 
 #[derive(Debug, Clone)]
