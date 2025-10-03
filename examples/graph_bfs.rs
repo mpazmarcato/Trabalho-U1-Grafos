@@ -1,4 +1,6 @@
-use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
+use std::io::Error;
+
+use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList};
 
 static PATH: &str = "examples/output/dot/";
 fn main() {
@@ -17,10 +19,15 @@ fn main() {
     ]);
 
     // print_list(&g1);
-    let _ = g1.undirected_write_bfs_tree(1, PATH.to_owned() + "bfs/bfs_1.dot");
+    let _ = g1.export_undirected_bfs_to_dot(1, PATH.to_owned() + "bfs/bfs_1.dot");
 
-    let dg1: AdjacencyList = GraphIO::from_file("examples/data/DIGRAFO1.txt".to_owned());
-    // print_list(&dg1);
+    let res: Result<AdjacencyList, Error> =
+        GraphIO::import_from_file("examples/data/DIGRAFO1.txt".to_owned());
 
-    let _ = dg1.write_bfs_tree(1, PATH.to_owned() + "bfs/bfs_2.dot");
+    match res {
+        Ok(dg) => {
+            let _ = dg.export_directed_bfs_to_dot(1, PATH.to_owned() + "bfs/bfs_2.dot");
+        }
+        Err(_) => todo!(),
+    }
 }

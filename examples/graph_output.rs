@@ -1,94 +1,74 @@
-use graphs_algorithms::{
-    GraphIO, UndirectedGraphIO,
-    graphs::{AdjacencyList, AdjacencyMatrix},
-};
+use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
 
-static PATH: &str = "examples/output/";
+static PATH: &str = "examples/dot/";
 
 fn main() {
     // UNDIRECTED GRAPHS
-    let g1: AdjacencyMatrix = AdjacencyMatrix(vec![
-        vec![0, 1, 0, 0],
-        vec![1, 0, 1, 0],
-        vec![0, 1, 0, 1],
-        vec![0, 0, 1, 0],
-    ]);
-    let _ = g1.write_undirected_graph(PATH.to_owned() + "dot/graph_undirected1.dot");
-
-    let g2 = AdjacencyMatrix(vec![
-        vec![0, 1, 0, 0, 1],
-        vec![1, 0, 1, 0, 0],
-        vec![0, 1, 0, 1, 1],
-        vec![0, 0, 1, 0, 0],
-        vec![1, 0, 1, 0, 0],
-    ]);
-    let _ = g2.write_undirected_graph(PATH.to_owned() + "dot/graph_undirected2.dot");
-
-    let g3 = AdjacencyList(vec![
+    let graph1 = AdjacencyList(vec![
         vec![1, 2],
-        vec![0, 2],
-        vec![0, 1, 3, 4],
-        vec![2, 4],
-        vec![2],
+        vec![2, 3, 7, 10],
+        vec![0, 1, 4, 3],
+        vec![2, 6, 8, 7],
+        vec![2, 5],
+        vec![4],
+        vec![3, 9, 10],
+        vec![1, 3],
+        vec![3, 10],
+        vec![6, 10],
+        vec![1, 6, 9, 8],
     ]);
-    let _ = g3.write_undirected_graph(PATH.to_owned() + "dot/graph_undirected3.dot");
 
-    let g4 = AdjacencyMatrix(vec![
-        vec![0, 1, 1, 0, 1, 0],
-        vec![1, 0, 1, 1, 0, 1],
-        vec![1, 1, 0, 1, 1, 0],
-        vec![0, 1, 1, 0, 1, 1],
-        vec![1, 0, 1, 1, 0, 1],
-        vec![0, 1, 0, 1, 1, 0],
-    ]);
-    let _ = g4.write_undirected_graph(PATH.to_owned() + "dot/graph_undirected4.dot");
+    println!("[UNDIRECTED] Graph 1: ");
+    print_list(&graph1);
 
-    let g5 = AdjacencyMatrix(vec![
-        vec![0, 1, 1, 1, 1, 0],
-        vec![1, 0, 1, 1, 1, 1],
-        vec![1, 1, 0, 1, 1, 1],
-        vec![1, 1, 1, 0, 1, 1],
-        vec![1, 1, 1, 1, 0, 1],
-        vec![0, 1, 1, 1, 1, 0],
-    ]);
-    let _ = g5.write_undirected_graph(PATH.to_owned() + "dot/graph_undirected5.dot");
+    let result1 = graph1.export_undirected_to_dot(PATH.to_owned() + "graph1.dot");
+    match result1 {
+        Ok(_) => println!("Created .dot file for the graph above!"),
+        Err(e) => println!("{e}"),
+    }
+
+    let result2 = graph1.export_undirected_bfs_to_dot(6, PATH.to_owned() + "bfs/bfs_graph1.dot");
+    match result2 {
+        Ok(_) => println!("Created BFS tree with 6 as root for the graph above!"),
+        Err(e) => println!("{e}"),
+    }
+
+    let result3 = graph1.export_undirected_dfs_to_dot(6, PATH.to_owned() + "dfs/dfs_graph1.dot");
+    match result3 {
+        Ok(_) => println!("Created DFS tree with 6 as root for the graph above!"),
+        Err(e) => println!("{e}"),
+    }
 
     // DIGRAPHS
-
-    let dg1 = AdjacencyList(vec![vec![1], vec![2], vec![3], vec![]]);
-    let _ = dg1.write_graph(PATH.to_owned() + "dot/graph_directed1.dot");
-
-    let dg2 = AdjacencyList(vec![vec![1, 2], vec![], vec![3], vec![]]);
-    let _ = dg2.write_graph(PATH.to_owned() + "dot/graph_directed2.dot");
-
-    let dg3 = AdjacencyMatrix(vec![
-        vec![0, 1, 0, 0, 0],
-        vec![0, 0, 1, 0, 0],
-        vec![0, 0, 0, 1, 1],
-        vec![0, 0, 0, 0, 0],
-        vec![1, 0, 0, 0, 0],
-    ]);
-    let _ = dg3.write_graph(PATH.to_owned() + "dot/graph_directed3.dot");
-
-    let dg4 = AdjacencyMatrix(vec![
-        vec![0, 1, 1, 0, 1],
-        vec![0, 0, 1, 1, 0],
-        vec![0, 0, 0, 1, 1],
-        vec![1, 0, 0, 0, 1],
-        vec![1, 1, 0, 0, 0],
-    ]);
-    let _ = dg4.write_graph(PATH.to_owned() + "dot/graph_directed4.dot");
-
-    let dg5 = AdjacencyList(vec![
+    let graph2 = AdjacencyList(vec![
         vec![1, 3],
         vec![4],
-        vec![0, 4],
+        vec![4, 0],
         vec![4],
         vec![0],
         vec![2, 6],
         vec![7],
-        vec![6],
+        vec![8],
     ]);
 
-    let _ = dg5.write_graph(PATH.to_owned() + "dot/graph_directed5.dot");
+    println!("[DIRECTED] Graph 2: ");
+    print_list(&graph2);
+
+    let result4 = graph2.export_to_dot(PATH.to_owned() + "graph2.dot");
+    match result4 {
+        Ok(_) => println!("Created .dot file for the graph above!"),
+        Err(e) => println!("{e}"),
+    }
+
+    let result5 = graph2.export_directed_bfs_to_dot(5, PATH.to_owned() + "bfs/bfs_graph2.dot");
+    match result5 {
+        Ok(_) => println!("Created BFS tree with 5 as root for the graph above!"),
+        Err(e) => println!("{e}"),
+    }
+
+    let result6 = graph2.export_directed_dfs_to_dot(5, PATH.to_owned() + "dfs/dfs_graph2.dot");
+    match result6 {
+        Ok(_) => println!("Created DFS tree with 5 as root for the graph above!"),
+        Err(e) => println!("{e}"),
+    }
 }

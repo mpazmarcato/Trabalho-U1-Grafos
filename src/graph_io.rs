@@ -2,32 +2,13 @@ use std::collections::HashSet;
 use std::fmt::Display;
 use std::fs::File;
 use std::hash::Hash;
-use std::io::{self, BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 
 use crate::graph::BfsEvent;
-use crate::{DfsEvent, Edge, Graph, UndirectedGraph, graph};
+use crate::{DfsEvent, Edge, Graph, UndirectedGraph};
 
 pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
-    fn write_graph(&self, path: String) -> io::Result<()> {
-        let mut file: File = File::create(&path)?;
-
-        writeln!(file, "digraph G {{")?;
-        writeln!(file, "  rankdir=LR;")?;
-        writeln!(file, "  node [shape=circle];")?;
-
-        for node in self.nodes() {
-            writeln!(file, " {} ", node)?;
-            for neighbor in self.neighbors(node) {
-                writeln!(file, " {} -> {} ", node, neighbor)?;
-            }
-        }
-
-        writeln!(file, " }}")?;
-
-        Ok(())
-    }
-
-    fn from_file(path: String) -> Self
+    fn import_from_file(path: String) -> Result<Self, Error>
     where
         Self: Sized,
     {
@@ -49,22 +30,53 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
             } else {
                 let values: Vec<usize> = content
                     .split(',')
-                    .map(|x| match x.parse::<usize>() {
-                        Ok(value) => value - 1,
-                        Err(_) => panic!("Graph can't have non-integer nodes!"),
+                    .map(|x| {
+                        x.trim().parse::<usize>().map(|v| v - 1).map_err(|_| {
+                            Error::new(
+                                ErrorKind::InvalidData,
+                                format!("Invalid data was found during file creation: {} ", x),
+                            )
+                        })
                     })
-                    .collect();
+                    .collect::<Result<Vec<_>, Error>>()?;
                 graph.add_edge(Node::from(values[0]), Node::from(values[1]));
             }
         }
 
-        graph
+        Ok(graph)
     }
 
-    fn write_bfs_tree(&self, start: Node, path: String) -> io::Result<()>
+    fn export_to_dot(&self, mut path: String) -> Result<(), Error> {
+        if !path.contains(".dot") {
+            path = path + ".dot";
+        }
+
+        let mut file: File = File::create(path)?;
+
+        writeln!(file, "digraph G {{")?;
+        writeln!(file, "  rankdir=LR;")?;
+        writeln!(file, "  node [shape=circle];")?;
+
+        for node in self.nodes() {
+            writeln!(file, " {} ", node)?;
+            for neighbor in self.neighbors(node) {
+                writeln!(file, " {} -> {} ", node, neighbor)?;
+            }
+        }
+
+        writeln!(file, " }}")?;
+
+        Ok(())
+    }
+
+    fn export_directed_bfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
     where
         Self: Sized,
     {
+        if !path.contains(".dot") {
+            path = path + ".dot";
+        }
+
         let mut iter = self.bfs(start);
         let mut file: File = File::create(&path)?;
 
@@ -91,12 +103,14 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         Ok(())
     }
 
-    // Permitir somente pra grafos direcionados?
-    fn write_dfs_tree_with_edges(&self, start: Node, path: String) -> io::Result<()>
+    fn export_directed_dfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
     where
         Self: Sized,
         Node: Copy + Eq + Hash + Display + From<usize>,
     {
+        if !path.contains(".dot") {
+            path = path + ".dot";
+        }
         let mut iter = self.classify_edges(start);
         let mut file: File = File::create(&path)?;
 
@@ -115,7 +129,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
                     node, parent
                 )?,
                 Edge::ParentBack(_, _) => continue,
-                Edge::Foward(parent, node) => {
+                Edge::Forward(parent, node) => {
                     writeln!(file, " {} -> {} [color=pink, style=dashed]; ", parent, node)?
                 }
                 Edge::Cross(node_1, node_2) => writeln!(
@@ -133,10 +147,14 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
 }
 
 pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: GraphIO<Node> {
-    fn write_undirected_graph(&self, path: String) -> io::Result<()>
+    fn export_undirected_to_dot(&self, mut path: String) -> Result<(), Error>
     where
         Self: Sized + UndirectedGraph<Node>,
     {
+        if !path.contains(".dot") {
+            path = path + ".dot";
+        }
+
         let mut file: File = File::create(&path)?;
 
         let mut visited: Vec<Node> = vec![];
@@ -160,8 +178,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         Ok(())
     }
 
-    // TODO: return Result, not Self
-    fn undirected_from_file(path: String) -> Self
+    fn import_undirected_from_file(path: String) -> Result<Self, Error>
     where
         Self: Sized + UndirectedGraph<Node>,
     {
@@ -176,31 +193,51 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
             }
 
             if idx == 0 {
-                let n: usize = content.parse().unwrap();
+                let n: usize = content.parse().map_err(|_| {
+                    Error::new(
+                        ErrorKind::InvalidData,
+                        format!("Line 1 from file is invalid"),
+                    )
+                })?;
+
                 for i in 0..n {
                     graph.add_node(Node::from(i));
                 }
             } else {
                 let values: Vec<usize> = content
                     .split(',')
-                    .map(|x| match x.parse::<usize>() {
-                        Ok(value) => value - 1,
-                        Err(_) => panic!("Graph can't have non-integer nodes!"),
+                    .map(|x| {
+                        x.trim().parse::<usize>().map(|v| v - 1).map_err(|_| {
+                            Error::new(
+                                ErrorKind::InvalidData,
+                                format!("Invalid node was found during file creation: {} ", x),
+                            )
+                        })
                     })
-                    .collect();
+                    .collect::<Result<Vec<_>, Error>>()?;
+
                 graph.add_undirected_edge(Node::from(values[0]), Node::from(values[1]));
             }
         }
 
-        graph
+        Ok(graph)
     }
 
-    fn write_dfs_tree(&self, start: Node, path: String) -> io::Result<()>
+    fn export_undirected_dfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
     where
         Self: Sized + UndirectedGraph<Node>,
         Node: Copy + Eq + Hash + Display + From<usize> + PartialOrd,
     {
-        // TODO: adicionar validação pra não executar se o node for out of bounds?
+        if Node::from(self.nodes().count()) < start {
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                format!("Node {} isn't present in graph!", start),
+            ));
+        }
+
+        if !path.contains(".dot") {
+            path = path + ".dot";
+        }
 
         let mut iter = self.dfs(start);
         let mut file: File = File::create(&path)?;
@@ -214,24 +251,20 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
                 DfsEvent::Discover(node, option) => {
                     writeln!(file, " {} ", node)?;
                     if let Some(parent) = option {
-                        let edge = if parent < node {
-                            (parent, node)
-                        } else {
-                            (node, parent)
-                        };
-                        if visited_edges.insert(edge) {
+                        if !visited_edges.contains(&(node, parent))
+                            && !visited_edges.contains(&(parent, node))
+                        {
                             writeln!(file, " {} -- {} ", parent, node)?;
+                            visited_edges.insert((node, parent));
                         }
                     }
                 }
                 DfsEvent::NonTreeEdge(node, parent) => {
-                    let edge = if parent < node {
-                        (parent, node)
-                    } else {
-                        (node, parent)
-                    };
-                    if visited_edges.insert(edge) {
+                    if !visited_edges.contains(&(node, parent))
+                        && !visited_edges.contains(&(parent, node))
+                    {
                         writeln!(file, " {} -- {} [style=dashed];", node, parent)?;
+                        visited_edges.insert((node, parent));
                     }
                 }
                 DfsEvent::Finish(_) => continue,
@@ -243,11 +276,22 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         Ok(())
     }
 
-    //FIXME: nome provisório só pra diferenciar
-    fn undirected_write_bfs_tree(&self, start: Node, path: String) -> io::Result<()>
+    fn export_undirected_bfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
     where
         Self: Sized + UndirectedGraph<Node>,
+        Node: Copy + Eq + Hash + Display + From<usize> + PartialOrd,
     {
+        if Node::from(self.nodes().count()) < start {
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                format!("Node {} isn't present in graph!", start),
+            ));
+        }
+
+        if !path.contains(".dot") {
+            path = path + ".dot";
+        }
+
         let mut iter = self.bfs(start);
         let mut file: File = File::create(&path)?;
         let mut visited_edges: HashSet<(Node, Node)> = HashSet::new();

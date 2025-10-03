@@ -297,14 +297,14 @@ where
 /// - `Back(u, v)`: An edge from a node `u` to its ancestor `v` in the DFS tree. This indicates a cycle.
 /// - `ParentBack(u, v)`: A special case of a back edge where `v` is the direct parent of `u`.
 ///   This is common in undirected graphs.
-/// - `Foward(u, v)`: An edge from a node `u` to its descendant `v` that is not a tree edge.
+/// - `Forward(u, v)`: An edge from a node `u` to its descendant `v` that is not a tree edge.
 /// - `Cross(u, v)`: An edge between two nodes `u` and `v` such that neither is an ancestor of the other.
 #[derive(Debug)]
 pub enum Edge<Node> {
     Tree(Node, Node),
     Back(Node, Node),
     ParentBack(Node, Node),
-    Foward(Node, Node),
+    Forward(Node, Node),
     Cross(Node, Node),
 }
 
@@ -435,7 +435,7 @@ where
                         .get(&node)
                         .is_some_and(|t1| self.discovery.get(&neighbor).is_some_and(|t2| t1 < t2))
                     {
-                        return Some(Edge::Foward(node, neighbor));
+                        return Some(Edge::Forward(node, neighbor));
                     } else {
                         return Some(Edge::Cross(node, neighbor));
                     }
