@@ -1,16 +1,4 @@
-use graphs_algorithms::{Graph, UndirectedGraph, graphs::AdjacencyMatrix};
-
-fn print_matrix(m: &AdjacencyMatrix) {
-    println!("Current matrix: ");
-    for row in &m.0 {
-        print!("[ ");
-        for col in row {
-            print!("{col} ");
-        }
-        print!("]");
-        println!();
-    }
-}
+use graphs_algorithms::{Graph, UndirectedGraph, graphs::AdjacencyMatrix, print_matrix};
 
 fn digraph_create_and_add() {
     println!("Digraph!");
