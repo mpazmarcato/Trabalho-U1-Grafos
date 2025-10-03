@@ -275,7 +275,6 @@ where
                 children.push(neighbor);
             } else {
                 if Some(node) != self.parent.get(&neighbor).copied().flatten() {
-                    // Antes, retornar Some(BfsEvent::CrossEdge) fazia com que a busca não continuasse para os outros vizinhos..
                     events.push(BfsEvent::CrossEdge(node, neighbor));
                 }
             }
