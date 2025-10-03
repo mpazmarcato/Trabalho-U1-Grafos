@@ -3,10 +3,15 @@ name = "graphs-algorithms"
 version = "0.1.0"
 edition = "2024"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dev-dependencies]
 criterion = "0.7.0"
+iai = { git = "https://github.com/vleema/iai", branch = "main" }
+cpp-api = { version = "*", path = "crates/cpp-api" }
 
 [[bench]]
-name = "dfs_bench"
+name = "dfs_adjacency_list"
+harness = false
+
+[[bench]]
+name = "iai_dfs_adjacency_list"
 harness = false
