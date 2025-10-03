@@ -79,7 +79,7 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
 
     fn undirected_node_degree(&self, n: Node) -> usize {
         self.neighbors(n).count()
-    }   
+    }
 
     fn classify_undirected_edges<'a>(&'a self, start: Node) -> impl Iterator<Item = Edge<Node>>
     where

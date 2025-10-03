@@ -132,7 +132,7 @@ impl UndirectedGraph<usize> for AdjacencyList {
             .get(node)
             .map(|neighbors| neighbors.len())
             .unwrap_or(0)
-    }   
+    }
 }
 
 #[cfg(test)]

@@ -160,7 +160,25 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
     }
 
     fn connected(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut visited = vec![false; n];
+        let mut stack = vec![0];
+        visited[0] = true;
+
+        while let Some(u) = stack.pop() {
+            for v in 0..n {
+                if self.0[u][v] > 0 && !visited[v] {
+                    visited[v] = true;
+                    stack.push(v);
+                }
+            }
+        }
+
+        visited.into_iter().all(|v| v)
     }
 
     fn undirected_node_degree(&self, node: usize) -> usize {
@@ -169,7 +187,7 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
         } else {
             0
         }
-    }    
+    }
 }
 
 #[cfg(test)]
@@ -453,5 +471,21 @@ mod tests {
         //        2
         let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
         assert_eq!(matrix.order(), 3);
+    }
+
+    #[test]
+    fn test_connected_graph() {
+        // Graph: 0 ─ 1
+        //        │ /
+        //        2
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]);
+        assert!(matrix.connected());
+    }
+
+    #[test]
+    fn test_disconnected_graph() {
+        // Graph: 0 ─ 1     2                
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 0], vec![1, 0, 0], vec![0, 0, 0]]);
+        assert!(!matrix.connected());
     }
 }
