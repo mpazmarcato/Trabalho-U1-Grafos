@@ -4,7 +4,8 @@ use std::fs::File;
 use std::hash::Hash;
 use std::io::{self, BufRead, BufReader, Write};
 
-use crate::{DfsEvent, Edge, Graph, UndirectedGraph};
+use crate::graph::BfsEvent;
+use crate::{DfsEvent, Edge, Graph, UndirectedGraph, graph};
 
 pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     fn write_graph(&self, path: String) -> io::Result<()> {
@@ -60,14 +61,42 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         graph
     }
 
+    fn write_bfs_tree(&self, start: Node, path: String) -> io::Result<()>
+    where
+        Self: Sized,
+    {
+        let mut iter = self.bfs(start);
+        let mut file: File = File::create(&path)?;
+
+        writeln!(file, "digraph G {{")?;
+        writeln!(file, "  node [shape=circle];")?;
+
+        while let Some(events) = iter.next() {
+            for event in events {
+                match event {
+                    BfsEvent::Discover(node, items) => {
+                        writeln!(file, " {} ", node)?;
+                        for i in items {
+                            writeln!(file, " {} -> {} ", node, i)?;
+                        }
+                    }
+                    BfsEvent::CrossEdge(node_1, node_2) => {
+                        writeln!(file, " {} -> {} [style=dashed]; ", node_1, node_2)?
+                    }
+                }
+            }
+        }
+
+        writeln!(file, "}}")?;
+        Ok(())
+    }
+
     // Permitir somente pra grafos direcionados?
     fn write_dfs_tree_with_edges(&self, start: Node, path: String) -> io::Result<()>
     where
         Self: Sized,
         Node: Copy + Eq + Hash + Display + From<usize>,
     {
-        // TODO: adicionar validação pra não executar se o node for out of bounds?
-
         let mut iter = self.classify_edges(start);
         let mut file: File = File::create(&path)?;
 
@@ -131,6 +160,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         Ok(())
     }
 
+    // TODO: return Result, not Self
     fn undirected_from_file(path: String) -> Self
     where
         Self: Sized + UndirectedGraph<Node>,
@@ -165,7 +195,6 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         graph
     }
 
-    // Permitir somente pra grafos nao direcionados?
     fn write_dfs_tree(&self, start: Node, path: String) -> io::Result<()>
     where
         Self: Sized + UndirectedGraph<Node>,
@@ -211,6 +240,45 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
 
         writeln!(file, " }}")?;
 
+        Ok(())
+    }
+
+    //FIXME: nome provisório só pra diferenciar
+    fn undirected_write_bfs_tree(&self, start: Node, path: String) -> io::Result<()>
+    where
+        Self: Sized + UndirectedGraph<Node>,
+    {
+        let mut iter = self.bfs(start);
+        let mut file: File = File::create(&path)?;
+        let mut visited_edges: HashSet<(Node, Node)> = HashSet::new();
+
+        writeln!(file, "graph G {{")?;
+        writeln!(file, "  node [shape=circle];")?;
+
+        while let Some(events) = iter.next() {
+            for event in events {
+                match event {
+                    BfsEvent::Discover(node, items) => {
+                        writeln!(file, " {} ", node)?;
+                        for i in items {
+                            if visited_edges.insert((node, i)) {
+                                writeln!(file, " {} -- {} ", node, i)?;
+                            }
+                        }
+                    }
+                    BfsEvent::CrossEdge(node_1, node_2) => {
+                        if !visited_edges.contains(&(node_1, node_2))
+                            && !visited_edges.contains(&(node_2, node_1))
+                        {
+                            writeln!(file, " {} -- {} [style=dashed]; ", node_1, node_2)?;
+                            visited_edges.insert((node_1, node_2));
+                        }
+                    }
+                }
+            }
+        }
+
+        writeln!(file, "}}")?;
         Ok(())
     }
 }

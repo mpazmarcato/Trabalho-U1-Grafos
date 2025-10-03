@@ -1,0 +1,20 @@
+graph G {
+  node [shape=circle];
+ 0 
+ 1 
+ 0 -- 1 
+ 2 
+ 1 -- 2 
+ 2 -- 0 [style=dashed];
+ 3 
+ 2 -- 3 
+ 3 -- 1 [style=dashed];
+ 4 
+ 3 -- 4 
+ 4 -- 0 [style=dashed];
+ 4 -- 2 [style=dashed];
+ 5 
+ 4 -- 5 
+ 5 -- 1 [style=dashed];
+ 5 -- 3 [style=dashed];
+ }

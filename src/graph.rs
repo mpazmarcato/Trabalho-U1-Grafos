@@ -222,10 +222,17 @@ where
     }
 }
 
+#[derive(Debug)]
+pub enum BfsEvent<Node> {
+    Discover(Node, Vec<Node>),
+    CrossEdge(Node, Node),
+}
+
 pub struct BfsIter<'a, Node, G> {
     graph: &'a G,
     queue: VecDeque<Node>,
     visited: HashSet<Node>,
+    parent: HashMap<Node, Option<Node>>,
 }
 
 impl<'a, Node, G> BfsIter<'a, Node, G>
@@ -236,10 +243,15 @@ where
     fn new(graph: &'a G, start: Node) -> Self {
         let mut visited = HashSet::with_capacity(graph.order());
         visited.insert(start);
+
+        let mut parent: HashMap<Node, Option<Node>> = HashMap::with_capacity(graph.order());
+        parent.insert(start, None);
+
         Self {
             graph,
             queue: VecDeque::from(vec![start]),
             visited,
+            parent,
         }
     }
 }
@@ -249,16 +261,28 @@ where
     Node: Eq + Hash + Copy + Display,
     G: Graph<Node>,
 {
-    type Item = Node;
+    type Item = Vec<BfsEvent<Node>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.queue.pop_front()?;
+        let mut children: Vec<Node> = Vec::new();
+        let mut events: Vec<BfsEvent<Node>> = Vec::new();
+
         for neighbor in self.graph.neighbors(node) {
             if self.visited.insert(neighbor) {
                 self.queue.push_back(neighbor);
+                self.parent.insert(neighbor, Some(node));
+                children.push(neighbor);
+            } else {
+                if Some(node) != self.parent.get(&neighbor).copied().flatten() {
+                    // Antes, retornar Some(BfsEvent::CrossEdge) fazia com que a busca não continuasse para os outros vizinhos..
+                    events.push(BfsEvent::CrossEdge(node, neighbor));
+                }
             }
         }
-        Some(node)
+
+        events.push(BfsEvent::Discover(node, children));
+        Some(events)
     }
 }
 
