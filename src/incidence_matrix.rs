@@ -1,3 +1,4 @@
+use crate::Graph;
 use crate::graphs::{AdjacencyList, AdjacencyMatrix};
 
 #[derive(Debug, Clone)]
@@ -27,8 +28,38 @@ impl IncidenceMatrix {
         IncidenceMatrix(inc)
     }
 
-    pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
-        todo!()
+    pub fn from_adjacency_list_digraph(adj_list: &AdjacencyList) -> Self {
+        let mut incidence_matrix: Vec<Vec<i32>> = Vec::new();
+
+        for (c_out, v) in adj_list.0.iter().enumerate() {
+            for c_in in v.iter() {
+                let mut edge: Vec<i32> = vec![0; adj_list.order()];
+
+                edge[c_out] = -1;
+                edge[*c_in] = 1;
+
+                incidence_matrix.push(edge);
+            }
+        }
+
+        IncidenceMatrix(incidence_matrix)
+    }
+
+    pub fn from_adjacency_list_graph(adj_list: &AdjacencyList) -> Self {
+        let mut incidence_matrix: Vec<Vec<i32>> = Vec::new();
+
+        for (c_out, v) in adj_list.0.iter().enumerate() {
+            for c_in in v.iter() {
+                let mut edge: Vec<i32> = vec![0; adj_list.order()];
+
+                edge[c_out] = 1;
+                edge[*c_in] = 1;
+
+                incidence_matrix.push(edge);
+            }
+        }
+
+        IncidenceMatrix(incidence_matrix)
     }
 
     pub fn node_degree(&self, vertex: usize) -> usize {
@@ -88,5 +119,45 @@ mod tests {
         let inc = IncidenceMatrix::from_adjacency_matrix(&adj);
 
         assert_eq!(inc.size(), 2);
+    }
+
+    #[test]
+    fn from_adjacencylist_digraph() {
+        //    (0)      ->(1)
+        //       \a₁  /a₃  \a₂
+        //        ->(3)     ->(2)
+        //       /a₄
+        //     (4)
+        let adj_list = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1], vec![3]]);
+        let answer: Vec<Vec<i32>> = vec![
+            vec![-1, 0, 0, 1, 0],
+            vec![0, -1, 1, 0, 0],
+            vec![0, 1, 0, -1, 0],
+            vec![0, 0, 0, 1, -1],
+        ];
+
+        let incidence_matrix = IncidenceMatrix::from_adjacency_list_digraph(&adj_list);
+
+        assert_eq!(incidence_matrix.0, answer);
+    }
+
+    #[test]
+    fn from_adjacencylist_graph() {
+        //    (0)      --(1)
+        //       \a₁  /a₃  \a₂
+        //        --(3)     --(2)
+        //       /a₄
+        //     (4)
+        let adjlist = AdjacencyList(vec![vec![3], vec![2], vec![], vec![1], vec![3]]);
+        let answer: Vec<Vec<i32>> = vec![
+            vec![1, 0, 0, 1, 0],
+            vec![0, 1, 1, 0, 0],
+            vec![0, 1, 0, 1, 0],
+            vec![0, 0, 0, 1, 1],
+        ];
+
+        let inc = IncidenceMatrix::from_adjacency_list_graph(&adjlist);
+
+        assert_eq!(inc.0, answer);
     }
 }
