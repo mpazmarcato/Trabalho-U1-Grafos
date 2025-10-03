@@ -11,6 +11,7 @@ pub use graph::Edge;
 pub use graph::Graph;
 pub use graph::UndirectedGraph;
 pub use graph_io::GraphIO;
+pub use graph_io::UndirectedGraphIO;
 pub use utils::print_list;
 pub use utils::print_matrix;
 

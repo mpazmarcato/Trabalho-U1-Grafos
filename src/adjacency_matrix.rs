@@ -1,3 +1,4 @@
+use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
 use crate::{Graph, GraphIO, UndirectedGraph};
 
@@ -154,6 +155,8 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
 
 impl GraphIO<usize> for AdjacencyMatrix {}
 
+impl UndirectedGraphIO<usize> for AdjacencyMatrix {}
+
 #[cfg(test)]
 mod tests {
     use std::vec;
@@ -179,7 +182,7 @@ mod tests {
     #[test]
     fn new_undirected_graph_1() {
         let matrix: AdjacencyMatrix =
-            GraphIO::undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+            UndirectedGraphIO::undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
         assert!(matrix.order() == 11);
         assert!(matrix.undirected_size() == 13);
     }
@@ -272,6 +275,7 @@ mod tests {
         m.add_node(3);
         // Graph: 0 -> 2 <- 1  3
         assert!(m.order() == 4);
+        // assert!(!m.underlying_graph().connected());
     }
 
     #[test]
@@ -283,6 +287,7 @@ mod tests {
         // Graph: 0 -> 2 <- 1 -> 3
         assert!(m.has_edge(1, 3));
         assert!(!m.has_edge(3, 1));
+        // assert!(m.underlying_graph().connected());
     }
 
     #[test]
@@ -295,6 +300,7 @@ mod tests {
         assert!(m.has_edge(1, 3));
         assert!(m.has_edge(3, 1));
         assert_eq!(m.undirected_size(), 3);
+        // assert!(!m.underlying_graph().connected());
     }
 
     #[test]
@@ -316,6 +322,7 @@ mod tests {
         assert!(!m.has_edge(1, 4));
         assert!(!m.has_edge(4, 1));
         assert!(m.size() == 4);
+        // assert!(m.underlying_graph().connected());
     }
 
     #[test]
@@ -338,6 +345,7 @@ mod tests {
         assert!(!m.has_edge(1, 4));
         assert!(!m.has_edge(4, 1));
         assert!(m.size() == 4);
+        // assert!(m.underlying_graph().connected());
     }
 
     #[test]

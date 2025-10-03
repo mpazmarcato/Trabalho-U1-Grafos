@@ -1,4 +1,5 @@
 use crate::graph::{DfsEvent, UndirectedGraph};
+use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 use crate::{Graph, GraphIO};
 
@@ -148,6 +149,7 @@ impl UndirectedGraph<usize> for AdjacencyList {
 }
 
 impl GraphIO<usize> for AdjacencyList {}
+impl UndirectedGraphIO<usize> for AdjacencyList {}
 
 #[cfg(test)]
 mod tests {
@@ -170,7 +172,8 @@ mod tests {
 
     #[test]
     fn new_undirected_graph_1() {
-        let list: AdjacencyList = GraphIO::undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+        let list: AdjacencyList =
+            UndirectedGraphIO::undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
         assert!(list.order() == 11);
         assert!(list.undirected_size() == 13);
     }

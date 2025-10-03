@@ -1,9 +1,10 @@
+use std::collections::HashSet;
 use std::fmt::Display;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::{self, BufRead, BufReader, Write};
 
-use crate::{Graph, UndirectedGraph};
+use crate::{DfsEvent, Edge, Graph, UndirectedGraph};
 
 pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     fn write_graph(&self, path: String) -> io::Result<()> {
@@ -18,30 +19,6 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
             for neighbor in self.neighbors(node) {
                 writeln!(file, " {} -> {} ", node, neighbor)?;
             }
-        }
-
-        writeln!(file, " }}")?;
-
-        Ok(())
-    }
-
-    fn write_undirected_graph(&self, path: String) -> io::Result<()> {
-        let mut file: File = File::create(&path)?;
-
-        let mut visited: Vec<Node> = vec![];
-
-        writeln!(file, "graph G {{")?;
-        writeln!(file, "  rankdir=LR;")?;
-        writeln!(file, "  node [shape=circle];")?;
-
-        for node in self.nodes() {
-            writeln!(file, " {} ", node)?;
-            for neighbor in self.neighbors(node) {
-                if !visited.contains(&neighbor) {
-                    writeln!(file, " {} -- {} ", node, neighbor)?;
-                }
-            }
-            visited.push(node);
         }
 
         writeln!(file, " }}")?;
@@ -83,6 +60,77 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         graph
     }
 
+    // Permitir somente pra grafos direcionados?
+    fn write_dfs_tree_with_edges(&self, start: Node, path: String) -> io::Result<()>
+    where
+        Self: Sized,
+        Node: Copy + Eq + Hash + Display + From<usize>,
+    {
+        // TODO: adicionar validação pra não executar se o node for out of bounds?
+
+        let mut iter = self.classify_edges(start);
+        let mut file: File = File::create(&path)?;
+
+        writeln!(file, "digraph G {{")?;
+        writeln!(file, "  node [shape=circle];")?;
+
+        while let Some(event) = iter.next() {
+            match event {
+                Edge::Tree(parent, node) => {
+                    writeln!(file, " {} ", node)?;
+                    writeln!(file, " {} -> {} ", parent, node)?;
+                }
+                Edge::Back(node, parent) => writeln!(
+                    file,
+                    " {} -> {} [color=green, style=dashed]; ",
+                    node, parent
+                )?,
+                Edge::ParentBack(_, _) => continue,
+                Edge::Foward(parent, node) => {
+                    writeln!(file, " {} -> {} [color=pink, style=dashed]; ", parent, node)?
+                }
+                Edge::Cross(node_1, node_2) => writeln!(
+                    file,
+                    " {} -> {} [color=purple, style=dashed]; ",
+                    node_1, node_2
+                )?,
+            }
+        }
+
+        writeln!(file, " }}")?;
+
+        Ok(())
+    }
+}
+
+pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: GraphIO<Node> {
+    fn write_undirected_graph(&self, path: String) -> io::Result<()>
+    where
+        Self: Sized + UndirectedGraph<Node>,
+    {
+        let mut file: File = File::create(&path)?;
+
+        let mut visited: Vec<Node> = vec![];
+
+        writeln!(file, "graph G {{")?;
+        writeln!(file, "  rankdir=LR;")?;
+        writeln!(file, "  node [shape=circle];")?;
+
+        for node in self.nodes() {
+            writeln!(file, " {} ", node)?;
+            for neighbor in self.neighbors(node) {
+                if !visited.contains(&neighbor) {
+                    writeln!(file, " {} -- {} ", node, neighbor)?;
+                }
+            }
+            visited.push(node);
+        }
+
+        writeln!(file, " }}")?;
+
+        Ok(())
+    }
+
     fn undirected_from_file(path: String) -> Self
     where
         Self: Sized + UndirectedGraph<Node>,
@@ -115,5 +163,54 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         }
 
         graph
+    }
+
+    // Permitir somente pra grafos nao direcionados?
+    fn write_dfs_tree(&self, start: Node, path: String) -> io::Result<()>
+    where
+        Self: Sized + UndirectedGraph<Node>,
+        Node: Copy + Eq + Hash + Display + From<usize> + PartialOrd,
+    {
+        // TODO: adicionar validação pra não executar se o node for out of bounds?
+
+        let mut iter = self.dfs(start);
+        let mut file: File = File::create(&path)?;
+        let mut visited_edges: HashSet<(Node, Node)> = HashSet::new();
+
+        writeln!(file, "graph G {{")?;
+        writeln!(file, "  node [shape=circle];")?;
+
+        while let Some(event) = iter.next() {
+            match event {
+                DfsEvent::Discover(node, option) => {
+                    writeln!(file, " {} ", node)?;
+                    if let Some(parent) = option {
+                        let edge = if parent < node {
+                            (parent, node)
+                        } else {
+                            (node, parent)
+                        };
+                        if visited_edges.insert(edge) {
+                            writeln!(file, " {} -- {} ", parent, node)?;
+                        }
+                    }
+                }
+                DfsEvent::NonTreeEdge(node, parent) => {
+                    let edge = if parent < node {
+                        (parent, node)
+                    } else {
+                        (node, parent)
+                    };
+                    if visited_edges.insert(edge) {
+                        writeln!(file, " {} -- {} [style=dashed];", node, parent)?;
+                    }
+                }
+                DfsEvent::Finish(_) => continue,
+            }
+        }
+
+        writeln!(file, " }}")?;
+
+        Ok(())
     }
 }
