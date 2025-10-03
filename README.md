@@ -92,24 +92,24 @@ A. Para GRAFOS (as opcionais possuem a sigla OPC ao final da função)
 - [x] (2) Criação do Grafo a partir da Matriz de Adjacências.
 - [x] (3) Criação do Grafo a partir da Matriz de Incidência.
 - [x] (4) Conversão de matriz de adjacência para lista de Adjacências e vice-versa.
-- [ ] (5) Função que calcula o grau de cada vértice.
+- [x] (5) Função que calcula o grau de cada vértice.
 - [x] (6) Função que determina se dois vértices são adjacentes.
-- [ ] (7) Função que determina o número total de vértices.
-- [ ] (8) Função que determina o número total de arestas.
-- [ ] (9) Inclusão de um novo vértice usando Lista de Adjacências e Matriz de Adjacências.
-- [ ] (10) Exclusão de um vértice existente usando Lista de Adjacências e Matriz de Adjacências.
+- [x] (7) Função que determina o número total de vértices.
+- [x] (8) Função que determina o número total de arestas.
+- [x] (9) Inclusão de um novo vértice usando Lista de Adjacências e Matriz de Adjacências.
+- [x] (10) Exclusão de um vértice existente usando Lista de Adjacências e Matriz de Adjacências.
 - [x] (11) Função que determina se um grafo é conexo ou não.
 - [ ] (12) Determinar se um grafo é bipartido (OPC = 1,0 ponto).
-- [ ] (13) Busca em Largura, a partir de um vértice específico.
+- [x] (13) Busca em Largura, a partir de um vértice específico.
 - [x] (14) Busca em Profundidade, com determinação de arestas de retorno, a partir de um vértice em específico.
-- [ ] (15) Determinação de articulações e blocos (biconectividade), utilizando obrigatoriamente a função lowpt.
+- [x] (15) Determinação de articulações e blocos (biconectividade), utilizando obrigatoriamente a função lowpt.
 
 B. Para DIGRAFOS (as opcionais possuem a sigla OPC ao final da função)
 
 - [x] (16) Representação do Digrafo a partir da Matriz de Adjacências.
-- [ ] (17) Representação do Digrafo a partir da Matriz de Incidência.
-- [ ] (18) Determinação do Grafo subjacente (OPC= 0,5 ponto)
-- [ ] (19) Busca em largura. (equivalente ao 13)
+- [x] (17) Representação do Digrafo a partir da Matriz de Incidência.
+- [x] (18) Determinação do Grafo subjacente (OPC= 0,5 ponto)
+- [x] (19) Busca em largura. (equivalente ao 13)
 - [x] (20) Busca em profundidade, com determinação de profundidade de entrada e de saída de cada vértice, e arestas de árvore, retorno, avanço e cruzamento.
 
 D. Relatório
@@ -124,14 +124,14 @@ D. Relatório
 
 ### Extra
 
-C. Implementação de testes de benchmark para comparar performance das implementações dos grafos.
+C. Implementação de testes de benchmark para comparar performance da implementação em Rust com versão clássica de C++.
 
-- [ ] (21) Comparação de performance de `has_edge()` entre as três implementações em grafos de diferentes densidades (esparso, médio, denso).
-- [ ] (22) Comparação de performance de `neighbors()` entre as três implementações para nós com diferentes graus de conectividade.
-- [ ] (23) Comparação de performance de `add_node()` e `remove_node()` entre as implementações com grafos de diferentes tamanhos.
-- [ ] (24) Comparação de performance de `add_edge()` e `remove_edge()` entre as implementações.
-- [ ] (25) Comparação da performance do BFS entre as implementações em grafos esparsos vs densos.
-- [ ] (26) Comparação da performance do DFS entre as implementações em grafos esparsos vs densos.
-- [ ] (27) Comparação da performance da detecção de biconectividade entre as implementações.
-- [ ] (28) Comparação da performance da detecção de grafo bipartido entre as implementações.
-- [ ] (29) Comparação da performance da verificação de conectividade entre as implementações.
+- [ ] (21) Comparação de performance de `neighbors()` para lista de adjacência e matriz de adjacência.
+- [ ] (22) Micro-benchmark da busca em profundidade (DFS).
+- [ ] (23) Macro-benchmark da busca em profundidade (DFS).
+- [ ] (24) Micro-benchmark da busca em largura (BFS).
+- [ ] (25) Macro-benchmark da busca em largura (BFS).
+- [ ] (26) Micro-benchmark da identificação de componentes biconexos.
+- [ ] (27) Macro-benchmark da identificação de componentes biconexos.
+- [ ] (28) Macro-benchmark da determinação de grafo bipartido.
+- [ ] (29) Macro-benchmark da classificação de arestas.
