@@ -7,14 +7,14 @@ Este projeto tem como objetivo implementar uma API de
 algoritmos relacionados a Grafos na linguagem de programação Rust. A
 especificação da API segue as funcionalidades descritas na
 definição da Avaliação 01 da disciplina de Grafos, sob o Departamento
-de Informática Aplicada (DIMAp) da Universidade Federal do Rio Grande
-do Norte (UFRN).
+de Informática e Matemática Aplicada (DIMAp) da Universidade Federal
+do Rio Grande do Norte (UFRN).
 
 Nesta implementação, a especificação da API se materializa em grande
-parte como \emph{traços} (\textit{traits}) de Rust, esse conceito é
+parte como \emph{traços} (\textit{traits}) de Rust. Tal conceito é
 semelhante a noção de \textit{interface} em linguagens como Java
 e Go e praticamente idêntico ao conceito de \textit{typeclasses} em
-linguagens como Haskell, o uso de traços permite que a API seja
+linguagens como Haskell. O uso de traços permite que a API seja
 flexível e mantenha fidelidade as definições algébricas, além do
 mais, permite, por meio da implementação a nível de traço, que o código
 seja genérico e eficiente para as diversas representações de grafos.
@@ -24,7 +24,7 @@ também surgem a partir de traços, essa abstração permite que o código
 fique ainda mais reutilizável, sem que a eficiência seja comprometida.
 
 Neste relatório vamos discutir a implementação e apresentar essas
-vantagens em detalhes, além disso, vamos demonstrar empiricamente a
+vantagens em detalhes. Além disso, vamos demonstrar empiricamente a
 partir de testes de benchmark que apesar do alto nível de abstração,
 a eficiência dos algoritmos ainda fica a par de implementações ótimas
 feitas em C++.
@@ -84,34 +84,40 @@ seguintes funcionalidades:
 Como discutido brevemente no início do capítulo (\ref{ch:intro}),
 nossa solução se baseia na criação de traços e iteradores que vão
 implementar os algoritmos descritos na especificação da API
-(\ref{sec:api_spec}). Em específico, haverá um traço para grafos não
-direcionados e um traço para grafo direcionados, onde o traço para
-grafos não direcionados herdará as propriedades do traço para grafos
-direcionados. Essa abordagem permite que boa parte dos algoritmos
-que seriam exclusivos para um tipo de grafo funcione em ambos, a
-validade desse design se materializa por meio dos testes unitários
-que desenvolvemos para API, que testa diversos casos de uso de cada
-implementação para os dois tipos de grafos.
+(\ref{sec:api_spec}). Um traço define a funcionalidade que um tipo
+tem e que pode compartilhar com outros tipos~\citep{rustbooktraits}.
+No nosso caso específico, haverá um traço para grafos não
+direcionados, chamado de \texttt{Graph}, e um traço para grafos
+direcionados, chamado de \texttt{UndirectedGraph}. O traço
+\texttt{UndirectedGraph} herdará as propriedades do traço
+\texttt{Graph}, permitindo que os algoritmos definidos em \texttt{Graph}
+funcionem em \texttt{UndirectedGraph}. Essa escolha faz sentido
+porque na nossa implementação o grafo não direcionado funciona melhor
+como uma extensão do grafo direcionado.
 
 \subsection{Iteradores}
 
-Quanto ao uso de iteradores especificamente, eles serão implementados
-para algoritmos que envolvem algum tipo de travessia no grafo, como a
-Busca em Profundidade (DFS) nos items~\ref{item:dfs1} e \ref{item:dfs2} e
-Busca em Largura (BFS) nos items~\ref{item:bfs1} e \ref{item:bfs2}. A
-vantagem de implementar iteradores para esses algoritmos é que a
-outros algoritmos como a Determinação de Componentes Biconexos no
-item~\ref{item:biconnect} fica derivável da implementação dessas
-buscas. Além disso, a implementação em forma de iteradores permite
-que possíveis usuários da API tenha acesso ao extenso framework de iteradores
-que a biblioteca padrão de Rust oferece. Um exemplo de uso de
-iteradores para além da implementação da API, seria a determinação de
-ciclos no grafo, determinação de menor caminho entre dois vértices,
-busca de um vértice específico, filtragem de vértices durante a
-busca, modificação do grafo durante a busca, algoritmos de
+Quanto ao uso de iteradores, eles serão implementados
+em algoritmos que envolvem algum tipo de travessia no grafo, como a
+Busca em Profundidade (DFS) dos items~\ref{item:dfs1} e \ref{item:dfs2}, e a
+Busca em Largura (BFS) dos items~\ref{item:bfs1} e \ref{item:bfs2}. A
+vantagem de implementar iteradores para esses algoritmos é que
+outros algoritmos, como a Determinação de Componentes Biconexos, do
+item~\ref{item:biconnect}, fica derivável dessa implementação. Além
+disso, a implementação em forma de iteradores permite
+que possíveis usuários da API tenham acesso ao extenso framework de iteradores
+que a biblioteca padrão de Rust oferece. Alguns exemplos de uso de
+iteradores para além da implementação da API, seriam, a determinação de
+ciclos no grafo, a determinação de menor caminho entre dois vértices,
+a busca por um vértice específico, uma filtragem de vértices durante a
+busca, uma modificação do grafo durante a busca, algoritmos de
 backtracking e outros, tudo isso apenas compondo a implementação
-inicial com os recursos que o iterador de Rust oferece e sem perder
-desempenho em relação a uma implementação tradicional.
+inicial. É importante ressaltar, também, que o iterador de Rust não
+perde desempenho em relação a uma implementação tradicional com
+loops~\citep{rustbookIteratorPerformance,
+stackoverflowZerocostAbstractions}, inclusive podendo ser mais
+ótimo devido a otimizações do compilador. Essa capacidade lhe dá o apelido de
+abstração de custo zero.
 
 % TODO: Refletir sobre se devemos adicionar mais informações sobre a
 % solução aqui. Falar mais, por exemplo, de abstrações de custo zero,
