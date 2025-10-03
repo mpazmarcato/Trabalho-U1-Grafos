@@ -132,11 +132,7 @@ impl UndirectedGraph<usize> for AdjacencyList {
             .get(node)
             .map(|neighbors| neighbors.len())
             .unwrap_or(0)
-    }
-
-    fn undirected_order(&self) -> usize {
-        self.0.len()
-    }
+    }   
 }
 
 #[cfg(test)]
@@ -560,7 +556,7 @@ mod tests {
         //        │
         //        2
         let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
-        assert_eq!(list.undirected_order(), 3);
+        assert_eq!(list.order(), 3);
     }
 
     #[test]

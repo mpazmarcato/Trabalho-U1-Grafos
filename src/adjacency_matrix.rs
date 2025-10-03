@@ -169,11 +169,7 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
         } else {
             0
         }
-    }
-
-    fn undirected_order(&self) -> usize {
-        self.0.len()
-    }
+    }    
 }
 
 #[cfg(test)]
@@ -456,6 +452,6 @@ mod tests {
         //        │
         //        2
         let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
-        assert_eq!(matrix.undirected_order(), 3);
+        assert_eq!(matrix.order(), 3);
     }
 }
