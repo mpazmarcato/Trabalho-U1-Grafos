@@ -53,6 +53,8 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     {
         DfsEdgesIter::new(self, start)
     }
+
+    fn node_degrees(&self, n: Node) -> (usize, usize);
 }
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
