@@ -1,5 +1,5 @@
 use graphs_algorithms::Graph;
-use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix};
+use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
 
 fn main() {
     let lista = AdjacencyList(vec![vec![1], vec![0, 2], vec![1]]);
@@ -7,4 +7,11 @@ fn main() {
 
     println!("Número de vértices (lista): {}", lista.order());
     println!("Número de vértices (matriz): {}", matriz.order());
+
+    let incidence = IncidenceMatrix(vec![vec![1, 1, 0], vec![0, 1, 1]]);
+
+    println!(
+        "Número de vértices (Matriz de Incidência): {}",
+        incidence.order()
+    );
 }
