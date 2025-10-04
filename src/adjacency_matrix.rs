@@ -144,6 +144,12 @@ impl Graph<usize> for AdjacencyMatrix {
     fn biparted(&self) -> bool {
         todo!()
     }
+
+    fn node_degrees(&self, n: usize) -> (usize, usize) {
+        let out_deg = self.0[n].iter().filter(|&&v| v != 0).count();
+        let in_deg = self.0.iter().filter(|row| row[n] != 0).count();
+        (in_deg, out_deg)
+    }
 }
 
 impl UndirectedGraph<usize> for AdjacencyMatrix {
@@ -160,7 +166,25 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
     }
 
     fn connected(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut visited = vec![false; n];
+        let mut stack = vec![0];
+        visited[0] = true;
+
+        while let Some(u) = stack.pop() {
+            for (v, &is_edge) in self.0[u].iter().enumerate() {
+                if is_edge > 0 && !visited[v] {
+                    visited[v] = true;
+                    stack.push(v);
+                }
+            }
+        }
+
+        visited.into_iter().all(|v| v)
     }
 
     fn undirected_node_degree(&self, node: usize) -> usize {
@@ -169,10 +193,6 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
         } else {
             0
         }
-    }
-
-    fn undirected_order(&self) -> usize {
-        self.0.len()
     }
 }
 
@@ -456,6 +476,38 @@ mod tests {
         //        │
         //        2
         let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
-        assert_eq!(matrix.undirected_order(), 3);
+        assert_eq!(matrix.order(), 3);
+    }
+
+    #[test]
+    fn test_connected_graph() {
+        // Graph: 0 ─ 1
+        //        │ /
+        //        2
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]);
+        assert!(matrix.connected());
+    }
+
+    #[test]
+    fn test_disconnected_graph() {
+        // Graph: 0 ─ 1     2
+        let matrix = AdjacencyMatrix(vec![vec![0, 1, 0], vec![1, 0, 0], vec![0, 0, 0]]);
+        assert!(!matrix.connected());
+    }
+
+    #[test]
+    fn test_node_degrees_matrix() {
+        let mut matrix = AdjacencyMatrix(vec![vec![0, 0, 0]; 3]);
+        matrix.0[0][1] = 1;
+        matrix.0[1][2] = 1;
+        matrix.0[2][0] = 1;
+
+        let degrees_0 = matrix.node_degrees(0);
+        let degrees_1 = matrix.node_degrees(1);
+        let degrees_2 = matrix.node_degrees(2);
+
+        assert_eq!(degrees_0, (1, 1)); // in: 2->0, out: 0->1
+        assert_eq!(degrees_1, (1, 1)); // in: 0->1, out: 1->2
+        assert_eq!(degrees_2, (1, 1)); // in: 1->2, out: 2->0
     }
 }

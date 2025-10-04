@@ -17,17 +17,10 @@ fn main() {
         println!("Vértice {}: {}", i, matrix.undirected_node_degree(i));
     }
 
-    let adjacency_matrix = AdjacencyMatrix(vec![
-        vec![0, 1, 1], // 0 conectado a 1 e 2
-        vec![1, 0, 0], // 1 conectado a 0
-        vec![1, 0, 0], // 2 conectado a 0
-    ]);
-
-    // Gerando a matriz de incidência a partir da matriz de adjacência
-    let incidence_matrix = IncidenceMatrix::from_adjacency_matrix(&adjacency_matrix);
+    let incidence = IncidenceMatrix(vec![vec![1, 1, 0], vec![0, 1, 1]]);
 
     println!("Grau de cada vértice (Matriz de Incidência):");
-    for i in 0..matrix.order() {
-        println!("Vértice {}: {}", i, incidence_matrix.node_degree(i));
+    for i in 0..incidence.order() {
+        println!("Vértice {}: {}", i, incidence.undirected_node_degree(i));
     }
 }

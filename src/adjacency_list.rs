@@ -91,6 +91,16 @@ impl Graph<usize> for AdjacencyList {
     fn biparted(&self) -> bool {
         todo!()
     }
+
+    fn node_degrees(&self, n: usize) -> (usize, usize) {
+        let out_deg = self.0.get(n).map_or(0, |neighbors| neighbors.len());
+        let in_deg = self
+            .0
+            .iter()
+            .filter(|neighbors| neighbors.contains(&n))
+            .count();
+        (in_deg, out_deg)
+    }
 }
 
 impl UndirectedGraph<usize> for AdjacencyList {
@@ -132,10 +142,6 @@ impl UndirectedGraph<usize> for AdjacencyList {
             .get(node)
             .map(|neighbors| neighbors.len())
             .unwrap_or(0)
-    }
-
-    fn undirected_order(&self) -> usize {
-        self.0.len()
     }
 }
 
@@ -560,7 +566,7 @@ mod tests {
         //        │
         //        2
         let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
-        assert_eq!(list.undirected_order(), 3);
+        assert_eq!(list.order(), 3);
     }
 
     #[test]
@@ -571,5 +577,24 @@ mod tests {
         let list = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
 
         assert_eq!(list.undirected_size(), 2);
+    }
+
+    #[test]
+    fn test_node_degrees_list() {
+        let mut list = AdjacencyList::default();
+        list.add_node(0);
+        list.add_node(1);
+        list.add_node(2);
+        list.add_edge(0, 1);
+        list.add_edge(1, 2);
+        list.add_edge(2, 0);
+
+        let degrees_0 = list.node_degrees(0);
+        let degrees_1 = list.node_degrees(1);
+        let degrees_2 = list.node_degrees(2);
+
+        assert_eq!(degrees_0, (1, 1)); // in: 2->0, out: 0->1
+        assert_eq!(degrees_1, (1, 1)); // in: 0->1, out: 1->2
+        assert_eq!(degrees_2, (1, 1)); // in: 1->2, out: 2->0
     }
 }
