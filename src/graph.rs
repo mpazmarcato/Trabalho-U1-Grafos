@@ -33,6 +33,7 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         self.neighbors(n).any(|neighbor| neighbor == m)
     }
 
+    // FIX: This should be the sum of the internal and external degree of `n`.
     fn node_degree(&self, n: Node) -> usize {
         self.neighbors(n).count()
     }
