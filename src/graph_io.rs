@@ -77,7 +77,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
             path += ".dot";
         }
 
-        let mut iter = self.bfs(start);
+        let iter = self.bfs(start);
         let mut file: File = File::create(&path)?;
 
         writeln!(file, "digraph G {{")?;
@@ -111,7 +111,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         if !path.contains(".dot") {
             path += ".dot";
         }
-        let mut iter = self.classify_edges(start);
+        let iter = self.classify_edges(start);
         let mut file: File = File::create(&path)?;
 
         writeln!(file, "digraph G {{")?;
@@ -236,7 +236,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
             path += ".dot";
         }
 
-        let mut iter = self.dfs(start);
+        let iter = self.dfs(start);
         let mut file: File = File::create(&path)?;
         let mut visited_edges: HashSet<(Node, Node)> = HashSet::new();
 
@@ -288,7 +288,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
             path += ".dot";
         }
 
-        let mut iter = self.bfs(start);
+        let iter = self.bfs(start);
         let mut file: File = File::create(&path)?;
         let mut visited_edges: HashSet<(Node, Node)> = HashSet::new();
 
