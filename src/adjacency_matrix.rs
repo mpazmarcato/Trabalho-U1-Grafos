@@ -176,8 +176,8 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
         visited[0] = true;
 
         while let Some(u) = stack.pop() {
-            for v in 0..n {
-                if self.0[u][v] > 0 && !visited[v] {
+            for (v, &is_edge) in self.0[u].iter().enumerate() {
+                if is_edge > 0 && !visited[v] {
                     visited[v] = true;
                     stack.push(v);
                 }
