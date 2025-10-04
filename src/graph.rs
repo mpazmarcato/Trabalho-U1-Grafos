@@ -273,10 +273,8 @@ where
                 self.queue.push_back(neighbor);
                 self.parent.insert(neighbor, Some(node));
                 children.push(neighbor);
-            } else {
-                if Some(node) != self.parent.get(&neighbor).copied().flatten() {
-                    events.push(BfsEvent::CrossEdge(node, neighbor));
-                }
+            } else if Some(node) != self.parent.get(&neighbor).copied().flatten() {
+                events.push(BfsEvent::CrossEdge(node, neighbor));
             }
         }
 

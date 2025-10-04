@@ -48,7 +48,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
 
     fn export_to_dot(&self, mut path: String) -> Result<(), Error> {
         if !path.contains(".dot") {
-            path = path + ".dot";
+            path += ".dot";
         }
 
         let mut file: File = File::create(path)?;
@@ -74,7 +74,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         Self: Sized,
     {
         if !path.contains(".dot") {
-            path = path + ".dot";
+            path += ".dot";
         }
 
         let mut iter = self.bfs(start);
@@ -83,7 +83,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         writeln!(file, "digraph G {{")?;
         writeln!(file, "  node [shape=circle];")?;
 
-        while let Some(events) = iter.next() {
+        for events in iter {
             for event in events {
                 match event {
                     BfsEvent::Discover(node, items) => {
@@ -109,7 +109,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         Node: Copy + Eq + Hash + Display + From<usize>,
     {
         if !path.contains(".dot") {
-            path = path + ".dot";
+            path += ".dot";
         }
         let mut iter = self.classify_edges(start);
         let mut file: File = File::create(&path)?;
@@ -117,7 +117,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         writeln!(file, "digraph G {{")?;
         writeln!(file, "  node [shape=circle];")?;
 
-        while let Some(event) = iter.next() {
+        for event in iter {
             match event {
                 Edge::Tree(parent, node) => {
                     writeln!(file, " {} ", node)?;
@@ -152,7 +152,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         Self: Sized + UndirectedGraph<Node>,
     {
         if !path.contains(".dot") {
-            path = path + ".dot";
+            path += ".dot";
         }
 
         let mut file: File = File::create(&path)?;
@@ -194,10 +194,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
 
             if idx == 0 {
                 let n: usize = content.parse().map_err(|_| {
-                    Error::new(
-                        ErrorKind::InvalidData,
-                        format!("Line 1 from file is invalid"),
-                    )
+                    Error::new(ErrorKind::InvalidData, "Line 1 from file is invalid")
                 })?;
 
                 for i in 0..n {
@@ -236,7 +233,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         }
 
         if !path.contains(".dot") {
-            path = path + ".dot";
+            path += ".dot";
         }
 
         let mut iter = self.dfs(start);
@@ -246,17 +243,16 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         writeln!(file, "graph G {{")?;
         writeln!(file, "  node [shape=circle];")?;
 
-        while let Some(event) = iter.next() {
+        for event in iter {
             match event {
                 DfsEvent::Discover(node, option) => {
                     writeln!(file, " {} ", node)?;
-                    if let Some(parent) = option {
-                        if !visited_edges.contains(&(node, parent))
-                            && !visited_edges.contains(&(parent, node))
-                        {
-                            writeln!(file, " {} -- {} ", parent, node)?;
-                            visited_edges.insert((node, parent));
-                        }
+                    if let Some(parent) = option
+                        && !visited_edges.contains(&(node, parent))
+                        && !visited_edges.contains(&(parent, node))
+                    {
+                        writeln!(file, " {} -- {} ", parent, node)?;
+                        visited_edges.insert((node, parent));
                     }
                 }
                 DfsEvent::NonTreeEdge(node, parent) => {
@@ -289,7 +285,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         }
 
         if !path.contains(".dot") {
-            path = path + ".dot";
+            path += ".dot";
         }
 
         let mut iter = self.bfs(start);
@@ -299,7 +295,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         writeln!(file, "graph G {{")?;
         writeln!(file, "  node [shape=circle];")?;
 
-        while let Some(events) = iter.next() {
+        for events in iter {
             for event in events {
                 match event {
                     BfsEvent::Discover(node, items) => {

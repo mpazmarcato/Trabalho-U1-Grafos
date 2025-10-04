@@ -39,7 +39,7 @@ impl Graph<usize> for AdjacencyList {
     }
 
     fn nodes(&self) -> impl Iterator<Item = usize> {
-        (0..self.order()).map(|i| i)
+        0..self.order()
     }
 
     fn underlying_graph(&self) -> Self {
