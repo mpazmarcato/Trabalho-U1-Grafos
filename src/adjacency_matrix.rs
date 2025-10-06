@@ -1,14 +1,6 @@
-use std::fs::File;
-use std::io::{self, Write};
-
+use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
-use crate::{Graph, UndirectedGraph};
-
-#[derive(Debug)]
-pub struct Node {
-    value: usize,
-    ancestor: Option<usize>,
-}
+use crate::{Graph, GraphIO, UndirectedGraph};
 
 #[derive(Debug, Clone)]
 pub struct AdjacencyMatrix(pub Vec<Vec<usize>>);
@@ -29,32 +21,13 @@ impl AdjacencyMatrix {
     pub fn from_incidency_matrix(_matrix: &IncidenceMatrix) -> Self {
         todo!()
     }
-
-    // TODO: Investigate why this is dead and when we should use it.
-    #[allow(dead_code)]
-    fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
-        let mut file: File = File::create(path)?;
-
-        writeln!(file, "digraph G {{")?;
-        writeln!(file, "  rankdir=LR;")?;
-        writeln!(file, "  node [shape=circle];")?;
-
-        for node in graph {
-            writeln!(file, "  {}", node.value)?;
-        }
-
-        for node in graph {
-            if let Some(ancestor_idx) = node.ancestor {
-                writeln!(file, "  {} -> {};", graph[ancestor_idx].value, node.value)?;
-            }
-        }
-
-        writeln!(file, " }}")?;
-        Ok(())
-    }
 }
 
 impl Graph<usize> for AdjacencyMatrix {
+    fn new_empty() -> Self {
+        AdjacencyMatrix(vec![])
+    }
+
     fn order(&self) -> usize {
         self.0.len()
     }
@@ -65,6 +38,10 @@ impl Graph<usize> for AdjacencyMatrix {
             .enumerate()
             .map(|(i, _)| self.neighbors(i).count())
             .sum()
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
     }
 
     fn underlying_graph(&self) -> Self {
@@ -196,11 +173,92 @@ impl UndirectedGraph<usize> for AdjacencyMatrix {
     }
 }
 
+impl GraphIO<usize> for AdjacencyMatrix {}
+
+impl UndirectedGraphIO<usize> for AdjacencyMatrix {}
+
 #[cfg(test)]
 mod tests {
-    use std::vec;
+    use std::{
+        io::{Error, ErrorKind},
+        vec,
+    };
 
     use super::*;
+
+    static PATH: &str = "examples/data/";
+
+    #[test]
+    fn new_digraph_1() {
+        let result: Result<AdjacencyMatrix, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
+
+        assert!(result.is_ok());
+
+        match result {
+            Ok(matrix) => {
+                assert!(matrix.order() == 13);
+                assert!(matrix.size() == 16);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_digraph_2() {
+        let result: Result<AdjacencyMatrix, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
+
+        assert!(result.is_ok());
+
+        match result {
+            Ok(matrix) => {
+                assert!(matrix.order() == 13);
+                assert!(matrix.size() == 17);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_digraph_error_1() {
+        let result: Result<AdjacencyMatrix, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(result.is_err());
+
+        match result {
+            Ok(_) => {}
+            Err(err) => {
+                assert!(err.kind() == ErrorKind::InvalidData);
+                assert!(err.to_string().contains("Invalid data was found"));
+            }
+        }
+    }
+
+    #[test]
+    fn new_undirected_graph_1() {
+        let res: Result<AdjacencyMatrix, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+
+        assert!(res.is_ok());
+
+        match res {
+            Ok(list) => {
+                assert!(list.order() == 11);
+                assert!(list.undirected_size() == 13);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_undirected_graph_2() {
+        let res: Result<AdjacencyMatrix, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(res.is_err());
+    }
 
     #[test]
     fn undirected_graph_matrix_size() {
@@ -290,6 +348,7 @@ mod tests {
         m.add_node(3);
         // Graph: 0 -> 2 <- 1  3
         assert!(m.order() == 4);
+        // assert!(!m.underlying_graph().connected());
     }
 
     #[test]
@@ -301,6 +360,7 @@ mod tests {
         // Graph: 0 -> 2 <- 1 -> 3
         assert!(m.has_edge(1, 3));
         assert!(!m.has_edge(3, 1));
+        // assert!(m.underlying_graph().connected());
     }
 
     #[test]
@@ -313,6 +373,7 @@ mod tests {
         assert!(m.has_edge(1, 3));
         assert!(m.has_edge(3, 1));
         assert_eq!(m.undirected_size(), 3);
+        // assert!(!m.underlying_graph().connected());
     }
 
     #[test]
@@ -334,6 +395,7 @@ mod tests {
         assert!(!m.has_edge(1, 4));
         assert!(!m.has_edge(4, 1));
         assert!(m.size() == 4);
+        // assert!(m.underlying_graph().connected());
     }
 
     #[test]
@@ -356,6 +418,7 @@ mod tests {
         assert!(!m.has_edge(1, 4));
         assert!(!m.has_edge(4, 1));
         assert!(m.size() == 4);
+        // assert!(m.underlying_graph().connected());
     }
 
     #[test]

@@ -1,6 +1,7 @@
-use crate::Graph;
 use crate::graph::{DfsEvent, UndirectedGraph};
+use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
+use crate::{Graph, GraphIO};
 
 #[derive(Debug, Clone, Default)]
 pub struct AdjacencyList(pub Vec<Vec<usize>>);
@@ -25,12 +26,20 @@ impl AdjacencyList {
 }
 
 impl Graph<usize> for AdjacencyList {
+    fn new_empty() -> Self {
+        AdjacencyList(vec![])
+    }
+
     fn order(&self) -> usize {
         self.0.len()
     }
 
     fn size(&self) -> usize {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
     }
 
     fn underlying_graph(&self) -> Self {
@@ -145,9 +154,89 @@ impl UndirectedGraph<usize> for AdjacencyList {
     }
 }
 
+impl GraphIO<usize> for AdjacencyList {}
+impl UndirectedGraphIO<usize> for AdjacencyList {}
+
 #[cfg(test)]
 mod tests {
+
+    use std::io::{Error, ErrorKind};
+
     use super::*;
+
+    static PATH: &str = "examples/data/";
+
+    #[test]
+    fn new_digraph_1() {
+        let result: Result<AdjacencyList, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
+
+        assert!(result.is_ok());
+
+        match result {
+            Ok(matrix) => {
+                assert!(matrix.order() == 13);
+                assert!(matrix.size() == 16);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_digraph_2() {
+        let result: Result<AdjacencyList, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
+
+        assert!(result.is_ok());
+
+        match result {
+            Ok(matrix) => {
+                assert!(matrix.order() == 13);
+                assert!(matrix.size() == 17);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_digraph_error_1() {
+        let result: Result<AdjacencyList, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(result.is_err());
+
+        match result {
+            Ok(_) => {}
+            Err(err) => {
+                assert!(err.kind() == ErrorKind::InvalidData);
+                assert!(err.to_string().contains("Invalid data was found"));
+            }
+        }
+    }
+
+    #[test]
+    fn new_undirected_graph_1() {
+        let res: Result<AdjacencyList, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+
+        assert!(res.is_ok());
+
+        match res {
+            Ok(list) => {
+                assert!(list.order() == 11);
+                assert!(list.undirected_size() == 13);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_undirected_graph_2() {
+        let res: Result<AdjacencyList, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(res.is_err());
+    }
 
     #[test]
     fn connected_undirected_graph() {
@@ -182,7 +271,7 @@ mod tests {
         //       /
         //      4
         assert_eq!(original_list.order(), underlying_list.order());
-        // assert_eq!(original_list.size(), underlying_list.size()); // FIXME: uncomment when size duplication is fixed!
+        assert_eq!(original_list.size(), underlying_list.undirected_size());
         assert!(underlying_list.connected());
     }
 
@@ -203,7 +292,7 @@ mod tests {
         //       \   |
         //        -  4
         assert_eq!(original_list.order(), underlying_list.order());
-        // assert_eq!(original_list.size(), underlying_list.size()); // FIXME: uncomment when size duplication is fixed!
+        assert_eq!(original_list.size(), underlying_list.undirected_size());
         assert!(underlying_list.connected());
 
         underlying_list.remove_node(2);
@@ -259,7 +348,7 @@ mod tests {
         assert!(list.order() == 6);
         assert!(list.size() == 5);
         assert!(list.has_edge(3, 5));
-        // assert!(list.connected()); // FIXME: implementar uma conversão de digrafo para seu subjacente para que funcione
+        assert!(list.underlying_graph().connected());
     }
 
     #[test]
@@ -285,6 +374,7 @@ mod tests {
         assert!(list.size() == 6);
         assert!(list.has_edge(3, 5));
         assert!(list.has_edge(2, 2));
+        assert!(list.underlying_graph().connected());
     }
 
     #[test]
@@ -307,7 +397,7 @@ mod tests {
         assert!(list.size() == 4);
         assert!(!list.has_edge(0, 3));
         assert!(list.has_edge(4, 3));
-        assert!(!list.connected());
+        assert!(!list.underlying_graph().connected());
     }
 
     #[test]
@@ -330,7 +420,7 @@ mod tests {
         assert!(list.size() == 5);
         assert!(!list.has_edge(2, 2));
         assert!(list.has_edge(1, 2));
-        // assert!(list.connected()); // FIXME: implementar uma conversão de digrafo para seu subjacente para que funcione
+        assert!(list.underlying_graph().connected());
     }
 
     #[test]
@@ -354,7 +444,7 @@ mod tests {
         assert!(list.size() == 1);
         assert!(!list.has_edge(0, 3));
         assert!(list.has_edge(1, 2));
-        assert!(!list.connected());
+        assert!(!list.underlying_graph().connected());
     }
 
     #[test]
@@ -375,7 +465,7 @@ mod tests {
         //       /
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 4);// TODO: uncomment when fixed
+        assert!(list.undirected_size() == 4);
         assert!(!list.connected());
     }
 
@@ -398,7 +488,7 @@ mod tests {
         //       /   \
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 5); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 5);
         assert!(list.has_edge(3, 5));
         assert!(list.connected());
     }
@@ -423,7 +513,7 @@ mod tests {
         //       /   \      \    /
         //      4     5       -
         assert!(list.order() == 6);
-        // assert!(list.size() == 6);// TODO: uncomment when fixed
+        assert!(list.undirected_size() == 6);
         assert!(list.connected());
         assert!(list.has_edge(3, 5));
         assert!(list.has_edge(2, 2));
@@ -454,7 +544,7 @@ mod tests {
         //       /   \
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 4); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 4);
         assert!(!list.has_edge(3, 1));
         assert!(!list.connected());
     }
@@ -484,7 +574,7 @@ mod tests {
         //       /   \
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 5); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 5);
         assert!(!list.has_edge(2, 2));
         assert!(list.has_edge(2, 1));
         assert!(list.connected());
@@ -515,11 +605,12 @@ mod tests {
         //
         //       3    4
         assert!(list.order() == 5);
-        // assert!(list.size() == 1); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 1);
         assert!(!list.has_edge(0, 3));
         assert!(list.has_edge(2, 1));
         assert!(!list.connected());
     }
+
     #[test]
     fn undirected_graph_remove_node_4() {
         // Graph:
@@ -545,7 +636,7 @@ mod tests {
         //          \
         //           4
         assert!(list.order() == 5);
-        // assert!(list.size() == 4); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 4);
         assert!(list.has_edge(0, 3));
         assert!(list.connected());
     }
