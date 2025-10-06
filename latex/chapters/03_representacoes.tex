@@ -6,17 +6,27 @@ As representações de Lista de Adjacência e Matriz de Adjacência foram retira
 
 \begin{mydef}[Matriz de Adjacência]
   Uma matriz quadrada $M$ é uma Matriz de Adjacência de um Grafo $G := \{V, A\}$ quando:
-  % TODO : trocar pra notação de função..
-  \begin{itemize}
-    \item $M[i, j] = 1$ se $(i, j)$ é uma aresta de $A$; ou
-    \item $M[i, j] = 0$ se não.
-  \end{itemize}
-  para $i, j \in \mathbb{N}$.
+  \begin{align*}
+    M_{ij} ={}& \left\{
+    \begin{array}{ll}
+      1 & \text{se a aresta } (i, j) \in A, \\
+      0 & \text{caso contrário}
+    \end{array}
+    \right.
+  \end{align*}
 \end{mydef}
 
-% TODO
 \begin{mydef}[Matriz de Incidência]
-  TODO
+  Uma matriz $M$ de dimensões $|V| \times |A|$ é uma Matriz de Incidência de um Grafo $G := \{V, A\}$ quando:
+  \begin{align*}
+    M_{ij} ={}& \left\{
+    \begin{array}{ll}
+      -1 & \text{se a aresta } j \text{ sai do vértice } i, \\
+      1 & \text{se a aresta } j \text{ entra no vértice } i, \\
+      0 & \text{caso contrário}.
+    \end{array}
+    \right.
+  \end{align*}
 \end{mydef}
 
 \begin{mydef}[Lista de Adjacência]
@@ -36,7 +46,7 @@ Em \cite{skiena2008algo} a definição de Lista de Adjacência obriga que os "su
 \caption{Representações de grafos}
 \begin{tabular}{|l|c|c|c|}
 \hline
-\textbf{Aspecto} & \textbf{Lista de Adjacência} & \textbf{Matriz de Adjacência} & \textbf{Matriz de Incidência} \\ \hline
+\textbf{Aspecto} & \textbf{L.A} & \textbf{M.A} & \textbf{M.I} \\ \hline
 \textbf{Busca de aresta} $(x, y)$ & $O(n)$ & $\Theta(1)$ & $TODO$ \\ \hline
 \textbf{Inserção / Remoção de aresta} & $O(n)$ & $\Theta(1)$ & $TODO$ \\ \hline
 \textbf{Busca em grafo} & $\Theta(V + E)$ & $\Theta(V^2)$ & $TODO$ \\ \hline
@@ -46,11 +56,11 @@ Em \cite{skiena2008algo} a definição de Lista de Adjacência obriga que os "su
 \vspace{0.3em}
 \end{table}
 
-Podemos concluir, portanto, que a Matriz de Adjacência tem como forte a eficiência para busca, inserção e deleção de arestas ($\Theta(1)$) pois acessa diretamente a posição em memória, 
-enquanto a Lista de Adjacência apresenta melhor desempenho para travessia ($\Theta(V+E)$) e é mais econômica em espaço para grafos pequenos ou grandes.
-Entretanto, a Matriz de Adjacência tem um custo exponencial de memória e é mais adequada em grafos densos, 
-enquanto a Lista apresenta desempenho inferior para operações que alteram a estrutura do grafo, sendo adequada em grafos esparsos ou médios. 
-A Matriz de Incidência, desse modo, acaba sendo a escolha menos eficiente para diversas situações.
+Podemos concluir, portanto, que a Matriz de Adjacência tem como vantagem a eficiência para busca, inserção e deleção de arestas ($\Theta(1)$) pois acessa diretamente a posição em memória, mas não é adequada para grafos grandes dado o custo exponencial de espaço. 
+
+Por outro lado, a Lista de Adjacência tem como vantagem o melhor desempenho para travessia e maior economia em espaço, sendo uma escolha adequada para grafos de diversos tamanhos, mas apresenta desempenho pior para operações que alteram a estrutura do grafo.
+
+A Matriz de Incidência, em geral, acaba sendo a escolha menos eficiente para diversas situações.
 
 % We mentioned in Chapter~\ref{ch:intro} %[example backward reference
 % % to a chapter or section.]
