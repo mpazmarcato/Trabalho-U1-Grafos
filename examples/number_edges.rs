@@ -11,10 +11,10 @@ fn main() {
         matriz.undirected_size()
     );
 
-    let adjacency_matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
+    let incidence = IncidenceMatrix(vec![vec![1, 1, 0], vec![0, 1, 1]]);
 
-    // Gerando a matriz de incidência a partir da matriz de adjacência
-    let incidencia = IncidenceMatrix::from_adjacency_matrix(&adjacency_matrix);
-
-    println!("Número de arestas (incidência): {}", incidencia.size());
+    println!(
+        "Número de arestas (incidência): {}",
+        incidence.undirected_size()
+    );
 }

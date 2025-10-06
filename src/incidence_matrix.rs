@@ -1,5 +1,5 @@
-use crate::Graph;
 use crate::graphs::{AdjacencyList, AdjacencyMatrix};
+use crate::{Graph, UndirectedGraph};
 
 #[derive(Debug, Clone)]
 pub struct IncidenceMatrix(pub Vec<Vec<i32>>);
@@ -61,16 +61,10 @@ impl IncidenceMatrix {
 
         IncidenceMatrix(incidence_matrix)
     }
+}
 
-    pub fn node_degree(&self, vertex: usize) -> usize {
-        if self.0.is_empty() || vertex >= self.0[0].len() {
-            return 0;
-        }
-
-        self.0.iter().filter(|row| row[vertex] != 0).count() / 2
-    }
-
-    pub fn order(&self) -> usize {
+impl Graph<usize> for IncidenceMatrix {
+    fn order(&self) -> usize {
         if self.0.is_empty() {
             0
         } else {
@@ -78,8 +72,63 @@ impl IncidenceMatrix {
         }
     }
 
-    pub fn size(&self) -> usize {
-        self.0.len() / 2
+    fn size(&self) -> usize {
+        self.0.len()
+    }
+
+    fn add_node(&mut self, _n: usize) {
+        todo!()
+    }
+
+    fn remove_node(&mut self, _n: usize) {
+        todo!()
+    }
+
+    fn add_edge(&mut self, _n: usize, _m: usize) {
+        todo!()
+    }
+
+    fn remove_edge(&mut self, _n: usize, _m: usize) {
+        todo!()
+    }
+
+    type Neighbors<'a> = std::iter::FilterMap<
+        std::iter::Enumerate<std::slice::Iter<'a, usize>>,
+        fn((usize, &'a usize)) -> Option<usize>,
+    >;
+
+    fn neighbors<'a>(&'a self, _n: usize) -> Self::Neighbors<'a> {
+        todo!()
+    }
+
+    fn node_degrees(&self, _n: usize) -> (usize, usize) {
+        todo!()
+    }
+
+    fn biparted(&self) -> bool {
+        todo!()
+    }
+
+    fn underlying_graph(&self) -> Self {
+        todo!()
+    }
+}
+
+impl UndirectedGraph<usize> for IncidenceMatrix {
+    fn connected(&self) -> bool {
+        todo!()
+    }
+
+    fn undirected_node_degree(&self, vertex: usize) -> usize {
+        if self.0.is_empty() || vertex >= self.0[0].len() {
+            return 0;
+        }
+
+        self.0.iter().filter(|row| row[vertex] != 0).count()
+    }
+
+    fn undirected_size(&self) -> usize {
+        self.0.len()
     }
 }
 
@@ -88,37 +137,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn node_degree_incidence_matrix() {
-        // Graph: 0 ── 1
-        //        │
-        //        2
-        let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
+    fn test_undirected_node_degree() {
+        // Graph: 0 ── 1 ── 2
+        //
+        // Edges:
+        // e1: 0–1 → [1, 1, 0]
+        // e2: 1–2 → [0, 1, 1]
+        //
+        // IncidenceMatrix:
+        // [
+        //   [1, 1, 0],
+        //   [0, 1, 1]
+        // ]
+        let incidence = IncidenceMatrix(vec![vec![1, 1, 0], vec![0, 1, 1]]);
 
-        let incidence = IncidenceMatrix::from_adjacency_matrix(&matrix);
-
-        assert_eq!(incidence.node_degree(0), 2);
-        assert_eq!(incidence.node_degree(1), 1);
-        assert_eq!(incidence.node_degree(2), 1);
+        assert_eq!(incidence.undirected_node_degree(0), 1); // connected (0–1)
+        assert_eq!(incidence.undirected_node_degree(1), 2); // connected (0–1) e (1–2)
+        assert_eq!(incidence.undirected_node_degree(2), 1); // connected to edge (1–2)
     }
 
     #[test]
-    fn test_order_incidence_matrix() {
+    fn test_size_incidence_matrix_direct() {
         // Graph: 0 ── 1 ── 2
-        let adj = AdjacencyMatrix(vec![vec![0, 1, 0], vec![1, 0, 1], vec![0, 1, 0]]);
+        let incidence = IncidenceMatrix(vec![
+            vec![1, 1, 0], // 1 to 0 and 1
+            vec![0, 1, 1], // 2 to 1 and 2
+        ]);
 
-        let inc = IncidenceMatrix::from_adjacency_matrix(&adj);
-
-        assert_eq!(inc.order(), 3);
-    }
-
-    #[test]
-    fn test_size_incidence_matrix() {
-        // Graph: 0 ── 1 ── 2
-        let adj = AdjacencyMatrix(vec![vec![0, 1, 0], vec![1, 0, 1], vec![0, 1, 0]]);
-
-        let inc = IncidenceMatrix::from_adjacency_matrix(&adj);
-
-        assert_eq!(inc.size(), 2);
+        assert_eq!(incidence.size(), 2);
+        assert_eq!(incidence.undirected_node_degree(0), 1);
+        assert_eq!(incidence.undirected_node_degree(1), 2);
+        assert_eq!(incidence.undirected_node_degree(2), 1);
     }
 
     #[test]
