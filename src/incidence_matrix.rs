@@ -112,6 +112,14 @@ impl Graph<usize> for IncidenceMatrix {
     fn underlying_graph(&self) -> Self {
         todo!()
     }
+
+    fn new_empty() -> Self {
+        IncidenceMatrix(Vec::new())
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
+    }
 }
 
 impl UndirectedGraph<usize> for IncidenceMatrix {
