@@ -21,42 +21,10 @@ impl AdjacencyList {
     }
 
     pub fn from_incidence_matrix(_matrix: &IncidenceMatrix) -> Self {
-        let n = _matrix.0.len();
-        let m = if n > 0 { _matrix.0[0].len() } else { 0 };
-
-        let mut adjacency_list = vec![Vec::new(); n];
-
-        for j in 0..m {
-            let mut endpoints = Vec::new();
-            for i in 0..n {
-                let value = _matrix.0[i][j];
-                if value != 0 {
-                    endpoints.push((i, value));
-                }
-            }
-
-            match endpoints.as_slice() {
-                // Aresta direcionada
-                [(u, a), (v, b)] if *a == -1 && *b == 1 => {
-                    adjacency_list[*u].push(*v);
-                }
-                [(v, b), (u, a)] if *a == -1 && *b == 1 => {
-                    adjacency_list[*u].push(*v);
-                }
-                // Aresta não direcionada
-                [(u, _), (v, _)] => {
-                    adjacency_list[*u].push(*v);
-                    adjacency_list[*v].push(*u);
-                }
-                [(u, _)] => {
-                    adjacency_list[*u].push(*u);
-                }
-                _ => {}
-            }
-        }
-        AdjacencyList(adjacency_list)
+        todo!()
     }
 }
+
 impl Graph<usize> for AdjacencyList {
     fn new_empty() -> Self {
         AdjacencyList(vec![])
