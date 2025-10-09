@@ -1,7 +1,7 @@
 use crate::graph::{DfsEvent, UndirectedGraph};
 use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
-use crate::{Graph, GraphIO, adjacency_list};
+use crate::{Graph, GraphIO};
 
 #[derive(Debug, Clone, Default)]
 pub struct AdjacencyList(pub Vec<Vec<usize>>);
