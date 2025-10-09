@@ -4,14 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dev-dependencies]
-criterion = "0.7.0"
-iai = { git = "https://github.com/vleema/iai", branch = "main" }
 cpp-api = { version = "*", path = "crates/cpp-api" }
+criterion = "0.7.0"
+gungraun = "0.17.0"
 
 [[bench]]
-name = "dfs_adjacency_list"
+name = "macro_dfs_adjacency_list"
 harness = false
 
 [[bench]]
-name = "iai_dfs_adjacency_list"
+name = "micro_dfs_adjacency_list"
 harness = false
