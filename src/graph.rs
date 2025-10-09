@@ -53,6 +53,12 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     {
         DfsEdgesIter::new(self, start)
     }
+
+    fn new(data: &Vec<Vec<i32>>) -> Result<Self, GraphError>
+    where
+        Self: Sized;
+
+    fn data(&self) -> Vec<Vec<i32>>;
 }
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
@@ -91,6 +97,37 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
         DfsEdgesIter::new(self, start)
             .filter(|edge| matches!(edge, Edge::Tree(_, _) | Edge::Back(_, _)))
     }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum GraphError {
+    Dimensions,
+    InvalidColumn(Vec<i32>),
+    InvalidLine(Vec<i32>),
+}
+
+pub trait Direction {
+    fn is_directed() -> bool;
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Directed;
+#[derive(Debug, PartialEq)]
+pub struct Undirected;
+
+impl Direction for Directed {
+    fn is_directed() -> bool {
+        true
+    }
+}
+
+impl Direction for Undirected {
+    fn is_directed() -> bool {
+        false
+    }
+}
+pub trait FromGraph<Node: Copy + Eq + Hash, G: Graph<Node>> {
+    fn from_graph(g: &G) -> Self;
 }
 
 /// Represents an event that occurs during a depth-first search (DFS) traversal.
@@ -289,10 +326,10 @@ pub enum Edge<Node> {
 /// # Examples
 ///
 /// ```rust
-/// use graphs_algorithms::{Edge, Graph};
+/// use graphs_algorithms::{Edge, Graph, Directed};
 /// use graphs_algorithms::graphs::AdjacencyList;
 ///
-/// let mut graph = AdjacencyList::default();
+/// let mut graph: AdjacencyList<Directed> = AdjacencyList::default();
 /// graph.add_node(0);
 /// graph.add_node(1);
 /// graph.add_node(2);
@@ -345,9 +382,9 @@ where
     ///
     /// ```rust
     /// use graphs_algorithms::graphs::AdjacencyList;
-    /// use graphs_algorithms::{Edge, Graph};
+    /// use graphs_algorithms::{Edge, Graph, Undirected};
     ///
-    /// let mut graph = AdjacencyList::default();
+    /// let mut graph: AdjacencyList<Undirected> = AdjacencyList::default();
     /// graph.add_node(0);
     /// graph.add_node(1);
     /// graph.add_node(2);
@@ -426,10 +463,10 @@ where
 /// # Examples
 ///
 /// ```rust
-/// use graphs_algorithms::{UndirectedGraph, Graph};
+/// use graphs_algorithms::{UndirectedGraph, Graph, Undirected};
 /// use graphs_algorithms::graphs::AdjacencyList;
 ///
-/// let mut graph = AdjacencyList::default();
+/// let mut graph: AdjacencyList<Undirected> = AdjacencyList::default();
 /// // This graph is equivalent to:
 /// // 0 -- 1 -- 4
 /// //    /  \
@@ -549,11 +586,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::{DfsEvent, Graph, UndirectedGraph, graphs::AdjacencyList};
+    use crate::{DfsEvent, Directed, Graph, Undirected, UndirectedGraph, graphs::AdjacencyList};
 
     #[test]
     fn dfs_with_cycle() {
-        let mut g = AdjacencyList::default();
+        let mut g: AdjacencyList<Directed> = AdjacencyList::default();
         g.add_node(0);
         g.add_node(1);
         g.add_node(2);
@@ -575,7 +612,7 @@ mod test {
 
     #[test]
     fn dfs_simple_path() {
-        let mut g = AdjacencyList::default();
+        let mut g: AdjacencyList<Directed> = AdjacencyList::default();
         g.add_node(0);
         g.add_node(1);
         g.add_node(2);
@@ -595,7 +632,7 @@ mod test {
 
     #[test]
     fn single_node_dfs() {
-        let mut g = AdjacencyList::default();
+        let mut g: AdjacencyList<Undirected> = AdjacencyList::default();
         g.add_node(0);
 
         let mut dfs = g.dfs(0);
@@ -610,7 +647,7 @@ mod test {
         // 0 -- 1 -- 4
         //    /  \
         //   3 -- 2
-        let mut graph = AdjacencyList::default();
+        let mut graph: AdjacencyList<Undirected> = AdjacencyList::default();
         graph.add_node(0);
         graph.add_node(1);
         graph.add_node(2);
