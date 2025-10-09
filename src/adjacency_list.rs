@@ -1,7 +1,7 @@
 use crate::graph::{DfsEvent, UndirectedGraph};
 use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
-use crate::{Graph, GraphIO};
+use crate::{adjacency_list, Graph, GraphIO};
 
 #[derive(Debug, Clone, Default)]
 pub struct AdjacencyList(pub Vec<Vec<usize>>);
@@ -21,7 +21,42 @@ impl AdjacencyList {
     }
 
     pub fn from_incidence_matrix(_matrix: &IncidenceMatrix) -> Self {
-        todo!()
+        let n = _matrix.0.len();
+        let m = if n > 0 { _matrix.0[0].len() } else {0};
+
+        let mut adjacency_list = vec![Vec::new(); n];
+
+        for j in 0..m {
+            let mut endpoints = Vec::new();
+            for i in 0..n {
+                let value = _matrix.0[i][j];
+                if value != 0 {
+                    endpoints.push((i, value));
+                }
+            }
+
+            match endpoints.as_slice() {
+                // Aresta não direcionada → dois "1" (ou um 1 e outro -1 se não normalizado)
+                [(u, _), (v, _)] => {
+                    adjacency_list[*u].push(*v);
+                    adjacency_list[*v].push(*u);
+                }
+                // Aresta direcionada → um -1 (origem), um +1 (destino)
+                [(u, a), (v, b)] if *a == -1 && *b == 1 => {
+                    adjacency_list[*u].push(*v);
+                }
+                [(v, b), (u, a)] if *a == -1 && *b == 1 => {
+                    adjacency_list[*u].push(*v);
+                }
+                // Caso de laço (self-loop)
+                [(u, _)] => {
+                    adjacency_list[*u].push(*u);
+                }
+                _ => {}
+            }
+        }
+
+        AdjacencyList(adjacency_list)
     }
 }
 
@@ -98,7 +133,35 @@ impl Graph<usize> for AdjacencyList {
     }
 
     fn biparted(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut side = vec![None; n];
+
+        for start in 0..n {
+            if side[start].is_some() {
+                continue;
+            }
+            side[start] = Some(0);
+            let mut queue = std::collections::VecDeque::new();
+            queue.push_back(start);
+
+            while let Some(u) = queue.pop_front() {
+                let u_side = side[u].unwrap();
+                for v in self.neighbors(u) {
+                    if side[v].is_none() {
+                        side[v] = Some(1 - u_side);
+                        queue.push_back(v);
+                    } else if side[v] == Some(u_side) {
+                        return false; 
+                    }
+                }
+            }
+        }
+        
+        true
     }
 
     fn node_degrees(&self, n: usize) -> (usize, usize) {
