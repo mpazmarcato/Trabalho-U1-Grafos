@@ -1,7 +1,7 @@
 use crate::graph::{DfsEvent, UndirectedGraph};
 use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
-use crate::{adjacency_list, Graph, GraphIO};
+use crate::{Graph, GraphIO, adjacency_list};
 
 #[derive(Debug, Clone, Default)]
 pub struct AdjacencyList(pub Vec<Vec<usize>>);
@@ -22,7 +22,7 @@ impl AdjacencyList {
 
     pub fn from_incidence_matrix(_matrix: &IncidenceMatrix) -> Self {
         let n = _matrix.0.len();
-        let m = if n > 0 { _matrix.0[0].len() } else {0};
+        let m = if n > 0 { _matrix.0[0].len() } else { 0 };
 
         let mut adjacency_list = vec![Vec::new(); n];
 
@@ -36,30 +36,27 @@ impl AdjacencyList {
             }
 
             match endpoints.as_slice() {
-                // Aresta não direcionada → dois "1" (ou um 1 e outro -1 se não normalizado)
-                [(u, _), (v, _)] => {
-                    adjacency_list[*u].push(*v);
-                    adjacency_list[*v].push(*u);
-                }
-                // Aresta direcionada → um -1 (origem), um +1 (destino)
+                // Aresta direcionada
                 [(u, a), (v, b)] if *a == -1 && *b == 1 => {
                     adjacency_list[*u].push(*v);
                 }
                 [(v, b), (u, a)] if *a == -1 && *b == 1 => {
                     adjacency_list[*u].push(*v);
                 }
-                // Caso de laço (self-loop)
+                // Aresta não direcionada
+                [(u, _), (v, _)] => {
+                    adjacency_list[*u].push(*v);
+                    adjacency_list[*v].push(*u);
+                }
                 [(u, _)] => {
                     adjacency_list[*u].push(*u);
                 }
                 _ => {}
             }
         }
-
         AdjacencyList(adjacency_list)
     }
 }
-
 impl Graph<usize> for AdjacencyList {
     fn new_empty() -> Self {
         AdjacencyList(vec![])
@@ -155,12 +152,12 @@ impl Graph<usize> for AdjacencyList {
                         side[v] = Some(1 - u_side);
                         queue.push_back(v);
                     } else if side[v] == Some(u_side) {
-                        return false; 
+                        return false;
                     }
                 }
             }
         }
-        
+
         true
     }
 
