@@ -1,0 +1,177 @@
+\chapter{Descrição em Pseudocódigo dos Algoritmos da API}
+\label{ch:pseudocode}
+
+Neste capítulo, apresentamos a descrição, em linguagem de pseudocódigo, dos principais algoritmos definidos na especificação da API. O objetivo é proporcionar uma visão clara do funcionamento lógico das rotinas antes de sua implementação em Rust, estabelecendo um elo entre o modelo conceitual e o código-fonte.
+
+Cada algoritmo é expresso de forma estruturada e independente de linguagem, destacando apenas o fluxo essencial das operações. Essa abordagem facilita a compreensão dos procedimentos, sem se prender a detalhes sintáticos da linguagem de implementação.
+
+\section{Grafos Não Dirigidos e Conectividade}
+
+A interface \texttt{UndirectedGraph} estende o conceito de \texttt{Graph}, representando grafos em que as arestas não possuem direção. Toda conexão entre dois vértices implica uma relação de mão dupla. A API define métodos específicos para:  
+
+\begin{itemize}
+    \item Adicionar e remover vértices e arestas;
+    \item Obter vizinhos de um vértice;
+    \item Verificar conectividade e grau de nós;
+    \item Percorrer o grafo utilizando DFS e BFS;
+    \item Identificar componentes biconexas.
+\end{itemize}
+
+Grafos não dirigidos são fundamentais para modelar problemas onde a direção não é relevante.
+
+\section{Descrição em Pseudocódigo dos Algoritmos}
+
+A seguir, apresentamos os algoritmos da API em pseudocódigo. O objetivo é destacar sua lógica fundamental, sem referência direta à sintaxe de Rust, mas mantendo correspondência com o comportamento esperado dos iteradores.
+
+\subsection{Busca em Profundidade (DFS)}
+
+A busca em profundidade percorre o grafo a partir de um vértice inicial, explorando recursivamente os caminhos até o limite de cada ramo. 
+
+\begin{verbatim}
+DFS(G, v):
+    marcar v como visitado
+    gerar evento "descoberta" de v
+    para cada vizinho u de v em G:
+        se u não foi visitado:
+            DFS(G, u)
+    gerar evento "término" de v
+\end{verbatim}
+
+Essa lógica permite identificar ciclos, classificar arestas e analisar conectividade de forma eficiente.
+
+\subsection{Busca em Largura (BFS)}
+
+A busca em largura percorre o grafo por camadas, processando primeiro todos os vértices a uma mesma distância do ponto inicial antes de avançar para os níveis seguintes. O pseudocódigo é apresentado abaixo:
+
+\begin{verbatim}
+BFS(G, s):
+    criar fila Q
+    marcar s como visitado
+    enfileirar s em Q
+
+    enquanto Q não estiver vazia:
+        v <- desenfileirar(Q)
+        gerar evento "visita" de v
+        para cada vizinho u de v em G:
+            se u não foi visitado:
+                marcar u como visitado
+                enfileirar u em Q
+\end{verbatim}
+
+O BFS é útil em problemas que requerem a descoberta de caminhos mínimos ou a análise de níveis de distância em grafos.
+
+\subsection{Classificação de Arestas}
+
+Durante a DFS, é possível classificar as arestas em diferentes categorias, que auxiliam na análise estrutural do grafo:
+
+\begin{itemize}
+    \item \textbf{Tree Edge (Árvore):} Conecta um vértice a um filho na DFS.
+    \item \textbf{Back Edge (Retorno):} Conecta um vértice a um ancestral, indicando ciclo.
+    \item \textbf{Forward Edge (Avanço):} Conecta um vértice a um descendente não filho.
+    \item \textbf{Cross Edge (Cruzamento):} Conecta vértices em diferentes ramos da DFS.
+\end{itemize}
+
+\subsection{Componentes Biconexas}
+
+O algoritmo permite identificar componentes biconexas em grafos não dirigidos. Mantém pilhas de arestas e tempos de descoberta para determinar subconjuntos de vértices que formam componentes biconexas.
+
+\begin{verbatim}
+BICONNECTED(G):
+    tempo <- 0
+    para cada vértice v em G:
+        se v não foi visitado:
+            DFS_BICONNECTED(G, v, pai = NULL)
+
+DFS_BICONNECTED(G, v, pai):
+    marcar v como visitado
+    tempo <- tempo + 1
+    descoberta[v] <- tempo
+    baixo[v] <- tempo
+    para cada vizinho u de v em G:
+        se u não foi visitado:
+            empilhar aresta (v, u)
+            DFS_BICONNECTED(G, u, v)
+            baixo[v] <- min(baixo[v], baixo[u])
+            se baixo[u] >= descoberta[v]:
+                formar nova componente bicônexa a partir da pilha
+        senão se u ≠ pai e descoberta[u] < descoberta[v]:
+            empilhar aresta (v, u)
+            baixo[v] <- min(baixo[v], descoberta[u])
+\end{verbatim}
+
+O algoritmo também permite analisar a conectividade crítica do grafo, identificando vértices e arestas cuja remoção aumentaria o número de componentes conectadas.
+
+\section{Exemplos de Uso da API em Pseudocódigo}
+
+Para ilustrar a aplicação prática dos algoritmos descritos, apresentamos exemplos em pseudocódigo que utilizam operações básicas da interface \texttt{UndirectedGraph}. Esses exemplos ajudam a conectar a lógica teórica dos algoritmos à manipulação de grafos na prática.
+
+\subsection{Criação de um Grafo e Inserção de Vértices e Arestas}
+
+\begin{verbatim}
+G <- criar grafo não dirigido
+
+// Adicionar vértices
+adicionar_vertice(G, 0)
+adicionar_vertice(G, 1)
+adicionar_vertice(G, 2)
+adicionar_vertice(G, 3)
+adicionar_vertice(G, 4)
+
+// Adicionar arestas não dirigidas
+adicionar_aresta(G, 0, 1)
+adicionar_aresta(G, 1, 2)
+adicionar_aresta(G, 1, 3)
+adicionar_aresta(G, 1, 4)
+adicionar_aresta(G, 2, 3)
+\end{verbatim}
+
+\subsection{Executando uma Busca em Profundidade (DFS)}
+
+\begin{verbatim}
+DFS(G, 0) // Percorre o grafo a partir do vértice 0
+// Eventos gerados:
+// descobrir 0
+// descobrir 1
+// descobrir 2
+// descobrir 3
+// descobrir 4
+// terminar visita de cada vértice
+\end{verbatim}
+
+\subsection{Executando uma Busca em Largura (BFS)}
+
+\begin{verbatim}
+BFS(G, 0) // Percorre o grafo por camadas a partir do vértice 0
+// Eventos gerados:
+// visitar 0
+// visitar 1
+// visitar 2, 3, 4
+\end{verbatim}
+
+\subsection{Classificação de Arestas durante DFS}
+
+\begin{verbatim}
+classificar_arestas(G, 0) // Classifica as arestas a partir do vértice 0
+// Possíveis classificações:
+// (0,1) -> Tree
+// (1,2) -> Tree
+// (1,3) -> Tree
+// (1,4) -> Tree
+// (2,3) -> Back
+\end{verbatim}
+
+\subsection{Identificação de Componentes Biconexas}
+
+\begin{verbatim}
+componentes <- componentes_biconexas(G, 0)
+// Cada componente é um conjunto de arestas
+// Exemplo de resultado:
+// componente 1: (0,1)
+// componente 2: (1,4)
+// componente 3: (1,2), (2,3), (1,3)
+\end{verbatim}
+
+\subsection{Síntese}
+
+Esses exemplos demonstram como as operações básicas da API (\texttt{adicionar\_vertice}, \texttt{adicionar\_aresta}) se combinam com os algoritmos de DFS, BFS e análise de componentes biconexas.  
+O pseudocódigo permite ao leitor compreender a sequência lógica das operações, preparando-o para a implementação concreta em Rust, que será apresentada no próximo capítulo.
