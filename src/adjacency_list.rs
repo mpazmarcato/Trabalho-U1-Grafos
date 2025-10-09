@@ -98,7 +98,35 @@ impl Graph<usize> for AdjacencyList {
     }
 
     fn biparted(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut side = vec![None; n];
+
+        for start in 0..n {
+            if side[start].is_some() {
+                continue;
+            }
+            side[start] = Some(0);
+            let mut queue = std::collections::VecDeque::new();
+            queue.push_back(start);
+
+            while let Some(u) = queue.pop_front() {
+                let u_side = side[u].unwrap();
+                for v in self.neighbors(u) {
+                    if side[v].is_none() {
+                        side[v] = Some(1 - u_side);
+                        queue.push_back(v);
+                    } else if side[v] == Some(u_side) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        true
     }
 
     fn node_degrees(&self, n: usize) -> (usize, usize) {

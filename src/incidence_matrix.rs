@@ -106,7 +106,58 @@ impl Graph<usize> for IncidenceMatrix {
     }
 
     fn biparted(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut adj = vec![Vec::new(); n];
+
+        for edge in &self.0 {
+            let endpoints: Vec<usize> = edge
+                .iter()
+                .enumerate()
+                .filter_map(|(v, &x)| if x != 0 { Some(v) } else { None })
+                .collect();
+
+            match endpoints.as_slice() {
+                [u, v] => {
+                    adj[*u].push(*v);
+                    adj[*v].push(*u);
+                }
+                [u] => {
+                    adj[*u].push(*u);
+                }
+                _ => {}
+            }
+        }
+
+        let mut partition = vec![None; n];
+        let mut queue = std::collections::VecDeque::new();
+
+        for start in 0..n {
+            if partition[start].is_some() {
+                continue;
+            }
+
+            partition[start] = Some(0);
+            queue.push_back(start);
+
+            while let Some(u) = queue.pop_front() {
+                let u_side = partition[u].unwrap();
+
+                for &v in &adj[u] {
+                    if partition[v].is_none() {
+                        partition[v] = Some(1 - u_side);
+                        queue.push_back(v);
+                    } else if partition[v] == Some(u_side) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        true
     }
 
     fn underlying_graph(&self) -> Self {
