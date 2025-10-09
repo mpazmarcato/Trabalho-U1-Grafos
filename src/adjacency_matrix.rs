@@ -119,7 +119,42 @@ impl Graph<usize> for AdjacencyMatrix {
     }
 
     fn biparted(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut side = vec![None; n]; // None = uncolored, Some(0/1) = partition
+        let mut queue = std::collections::VecDeque::new();
+
+        for start in 0..n {
+            // skip already colored components
+            if side[start].is_some() {
+                continue;
+            }
+
+            side[start] = Some(0);
+            queue.push_back(start);
+
+            while let Some(u) = queue.pop_front() {
+                let u_side = side[u].unwrap();
+
+                for (v, &is_edge) in self.0[u].iter().enumerate() {
+                    if is_edge == 0 {
+                        continue;
+                    }
+
+                    if side[v].is_none() {
+                        side[v] = Some(1 - u_side);
+                        queue.push_back(v);
+                    } else if side[v] == Some(u_side) {
+                        return false; // adjacent nodes with same color
+                    }
+                }
+            }
+        }
+
+        true
     }
 
     fn node_degrees(&self, n: usize) -> (usize, usize) {
