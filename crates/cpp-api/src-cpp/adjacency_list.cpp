@@ -14,4 +14,9 @@ void dfs(void* graph, size_t start) {
     AdjacencyList* adj_list = static_cast<AdjacencyList*>(graph);
     return adj_list->dfs(start);
 }
+
+void bfs(void* graph, size_t start) {
+    AdjacencyList* adj_list = static_cast<AdjacencyList*>(graph);
+    return adj_list->bfs(start);
+}
 }
