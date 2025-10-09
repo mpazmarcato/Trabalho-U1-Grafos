@@ -1,14 +1,17 @@
-use graphs_algorithms::{Graph, UndirectedGraph, graphs::AdjacencyList};
+use graphs_algorithms::{
+    Directed, Direction, Graph, Undirected, UndirectedGraph, graphs::AdjacencyList,
+};
 
-fn print_list(list: &AdjacencyList) {
-    for (i, neighbors) in list.0.iter().enumerate() {
+fn print_list<D: Direction>(list: &AdjacencyList<D>) {
+    for (i, neighbors) in list.data().iter().enumerate() {
         println!("{}: {:?}", i, neighbors);
     }
 }
 
 fn digraph_add() {
     println!("Digraph!");
-    let mut directed_g = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
+    let mut directed_g: AdjacencyList<Directed> =
+        AdjacencyList::new(&vec![vec![1, 2], vec![0], vec![0]]).unwrap();
 
     println!("New node");
     directed_g.add_node(3);
@@ -34,8 +37,15 @@ fn digraph_add() {
 fn digraph_delete() {
     println!("Digraph!");
 
-    let mut directed_g =
-        AdjacencyList(vec![vec![3], vec![], vec![1], vec![1, 4], vec![5], vec![2]]);
+    let mut directed_g: AdjacencyList<Directed> = AdjacencyList::new(&vec![
+        vec![3],
+        vec![],
+        vec![1],
+        vec![1, 4],
+        vec![5],
+        vec![2],
+    ])
+    .unwrap();
 
     print_list(&directed_g);
 
@@ -50,7 +60,8 @@ fn digraph_delete() {
 
 fn undirected_graph_add() {
     println!("Undirected graph!");
-    let mut undirected_g = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
+    let mut undirected_g: AdjacencyList<Undirected> =
+        AdjacencyList::new(&vec![vec![1, 2], vec![0], vec![0]]).unwrap();
 
     println!("New node");
     undirected_g.add_node(3);
@@ -76,13 +87,14 @@ fn undirected_graph_add() {
 fn undirected_graph_delete() {
     println!("Undirected graph!");
 
-    let mut undirected_g = AdjacencyList(vec![
+    let mut undirected_g: AdjacencyList<Undirected> = AdjacencyList::new(&vec![
         vec![1, 2],
         vec![0, 2],
         vec![0, 1, 3, 4],
         vec![2],
         vec![2],
-    ]);
+    ])
+    .unwrap();
 
     print_list(&undirected_g);
 

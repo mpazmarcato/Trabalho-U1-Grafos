@@ -1,11 +1,13 @@
 use core::panic;
 
 use graphs_algorithms::Edge;
+use graphs_algorithms::Graph;
+use graphs_algorithms::Undirected;
 use graphs_algorithms::UndirectedGraph;
 use graphs_algorithms::graphs::AdjacencyList;
 
 fn main() {
-    let undirected_graph = AdjacencyList(vec![
+    let undirected_graph: AdjacencyList<Undirected> = AdjacencyList::new(&vec![
         vec![1, 7, 2],
         vec![3, 4, 0],
         vec![0],
@@ -16,7 +18,8 @@ fn main() {
         vec![0, 8],
         vec![7, 9],
         vec![8],
-    ]);
+    ])
+    .unwrap();
     let to_char = |i| match i {
         0 => 's',
         1 => 'a',

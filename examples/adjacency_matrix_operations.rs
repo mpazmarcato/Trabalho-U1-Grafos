@@ -1,8 +1,10 @@
-use graphs_algorithms::{Graph, UndirectedGraph, graphs::AdjacencyMatrix};
+use graphs_algorithms::{
+    Directed, Direction, Graph, Undirected, UndirectedGraph, graphs::AdjacencyMatrix,
+};
 
-fn print_matrix(m: &AdjacencyMatrix) {
+fn print_matrix<D: Direction>(m: &AdjacencyMatrix<D>) {
     println!("Current matrix: ");
-    for row in &m.0 {
+    for row in &m.data() {
         print!("[ ");
         for col in row {
             print!("{col} ");
@@ -14,7 +16,8 @@ fn print_matrix(m: &AdjacencyMatrix) {
 
 fn digraph_create_and_add() {
     println!("Digraph!");
-    let mut directed_m = AdjacencyMatrix(vec![vec![0, 1, 1], vec![0, 0, 0], vec![0, 1, 0]]);
+    let mut directed_m: AdjacencyMatrix<Directed> =
+        AdjacencyMatrix::new(&vec![vec![0, 1, 1], vec![0, 0, 0], vec![0, 1, 0]]).unwrap();
 
     print_matrix(&directed_m);
     directed_m.add_node(3);
@@ -35,14 +38,15 @@ fn digraph_create_and_add() {
 
 fn undirected_graph_create_and_add() {
     println!("Undirected graph!");
-    let mut undirected_m = AdjacencyMatrix(vec![
+    let mut undirected_m = AdjacencyMatrix::new(&vec![
         vec![0, 0, 0, 1, 0, 0],
         vec![0, 0, 1, 1, 0, 0],
         vec![0, 1, 0, 1, 0, 0],
         vec![1, 1, 1, 0, 1, 1],
         vec![0, 0, 0, 1, 0, 1],
         vec![0, 0, 0, 1, 1, 0],
-    ]);
+    ])
+    .unwrap();
     print_matrix(&undirected_m);
     println!("Edge 0 - 5");
     undirected_m.add_undirected_edge(0, 5);
@@ -50,13 +54,14 @@ fn undirected_graph_create_and_add() {
 }
 
 fn digraph_delete() {
-    let mut m = AdjacencyMatrix(vec![
+    let mut m: AdjacencyMatrix<Directed> = AdjacencyMatrix::new(&vec![
         vec![0, 1, 0, 0, 0],
         vec![0, 0, 1, 0, 1],
         vec![0, 0, 0, 0, 0],
         vec![0, 0, 1, 0, 0],
         vec![0, 0, 1, 0, 0],
-    ]);
+    ])
+    .unwrap();
     print_matrix(&m);
     println!("Delete edge 3 -> 2");
     m.remove_edge(3, 2);
@@ -69,14 +74,15 @@ fn digraph_delete() {
 
 fn undirected_graph_delete() {
     println!("Undirected graph!");
-    let mut undirected_m = AdjacencyMatrix(vec![
+    let mut undirected_m: AdjacencyMatrix<Undirected> = AdjacencyMatrix::new(&vec![
         vec![0, 0, 0, 1, 0, 0],
         vec![0, 0, 1, 1, 0, 0],
         vec![0, 1, 0, 1, 0, 0],
         vec![1, 1, 1, 0, 1, 1],
         vec![0, 0, 0, 1, 0, 1],
         vec![0, 0, 0, 1, 1, 0],
-    ]);
+    ])
+    .unwrap();
     print_matrix(&undirected_m);
 
     println!("Delete edge 3 - 4 ");

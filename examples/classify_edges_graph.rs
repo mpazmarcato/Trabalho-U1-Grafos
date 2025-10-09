@@ -1,9 +1,10 @@
+use graphs_algorithms::Directed;
 use graphs_algorithms::Edge;
 use graphs_algorithms::Graph;
 use graphs_algorithms::graphs::AdjacencyList;
 
 fn main() {
-    let digraph = AdjacencyList(vec![
+    let digraph: AdjacencyList<Directed> = AdjacencyList::new(&vec![
         vec![1, 2, 7],
         vec![3],
         vec![],
@@ -14,7 +15,8 @@ fn main() {
         vec![6],
         vec![4, 9],
         vec![],
-    ]);
+    ])
+    .unwrap();
     let to_ch = |i| match i {
         0 => 's',
         1 => 'a',
