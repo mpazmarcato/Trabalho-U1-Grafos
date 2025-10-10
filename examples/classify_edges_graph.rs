@@ -35,7 +35,7 @@ fn main() {
         Edge::Back(v, u) | Edge::ParentBack(v, u) => {
             println!("Back: {} -> {}", to_ch(v), to_ch(u))
         }
-        Edge::Foward(v, u) => println!("Foward: {} -> {}", to_ch(v), to_ch(u)),
+        Edge::Forward(v, u) => println!("Forward: {} -> {}", to_ch(v), to_ch(u)),
         Edge::Cross(v, u) => println!("Cross: {} -> {}", to_ch(v), to_ch(u)),
     };
     let mut iter = digraph.classify_edges(0);

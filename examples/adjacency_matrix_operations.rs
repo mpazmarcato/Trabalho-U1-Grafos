@@ -1,18 +1,6 @@
 use graphs_algorithms::{
-    Directed, Direction, Graph, Undirected, UndirectedGraph, graphs::AdjacencyMatrix,
+    Directed, Direction, Graph, Undirected, UndirectedGraph, graphs::AdjacencyMatrix, print_matrix,
 };
-
-fn print_matrix<D: Direction>(m: &AdjacencyMatrix<D>) {
-    println!("Current matrix: ");
-    for row in &m.data() {
-        print!("[ ");
-        for col in row {
-            print!("{col} ");
-        }
-        print!("]");
-        println!();
-    }
-}
 
 fn digraph_create_and_add() {
     println!("Digraph!");

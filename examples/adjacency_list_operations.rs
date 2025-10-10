@@ -1,12 +1,6 @@
 use graphs_algorithms::{
-    Directed, Direction, Graph, Undirected, UndirectedGraph, graphs::AdjacencyList,
+    Directed, Direction, Graph, Undirected, UndirectedGraph, graphs::AdjacencyList, print_list,
 };
-
-fn print_list<D: Direction>(list: &AdjacencyList<D>) {
-    for (i, neighbors) in list.data().iter().enumerate() {
-        println!("{}: {:?}", i, neighbors);
-    }
-}
 
 fn digraph_add() {
     println!("Digraph!");

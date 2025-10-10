@@ -1,6 +1,6 @@
-use crate::Graph;
 use crate::graph::{Directed, Direction, FromGraph, GraphError, Undirected};
 use crate::graphs::{AdjacencyList, AdjacencyMatrix};
+use crate::{Graph, UndirectedGraph};
 use std::marker::PhantomData;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -15,7 +15,7 @@ impl<D: Direction> Graph<usize> for IncidenceMatrix<D> {
             return 0;
         }
 
-        self.data.iter().filter(|row| row[vertex] != 0).count() / 2
+        self.data.iter().filter(|row| row[vertex] != 0).count()
     }
 
     fn order(&self) -> usize {
@@ -27,7 +27,7 @@ impl<D: Direction> Graph<usize> for IncidenceMatrix<D> {
     }
 
     fn size(&self) -> usize {
-        self.data.len() / 2
+        self.data.len()
     }
 
     fn new(data: &Vec<Vec<i32>>) -> Result<Self, GraphError> {
@@ -105,7 +105,66 @@ impl<D: Direction> Graph<usize> for IncidenceMatrix<D> {
     }
 
     fn biparted(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut adj = vec![Vec::new(); n];
+
+        for edge in &self.data() {
+            let endpoints: Vec<usize> = edge
+                .iter()
+                .enumerate()
+                .filter_map(|(v, &x)| if x != 0 { Some(v) } else { None })
+                .collect();
+
+            match endpoints.as_slice() {
+                [u, v] => {
+                    adj[*u].push(*v);
+                    adj[*v].push(*u);
+                }
+                [u] => {
+                    adj[*u].push(*u);
+                }
+                _ => {}
+            }
+        }
+
+        let mut partition = vec![None; n];
+        let mut queue = std::collections::VecDeque::new();
+
+        for start in 0..n {
+            if partition[start].is_some() {
+                continue;
+            }
+
+            partition[start] = Some(0);
+            queue.push_back(start);
+
+            while let Some(u) = queue.pop_front() {
+                let u_side = partition[u].unwrap();
+
+                for &v in &adj[u] {
+                    if partition[v].is_none() {
+                        partition[v] = Some(1 - u_side);
+                        queue.push_back(v);
+                    } else if partition[v] == Some(u_side) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        true
+    }
+
+    fn new_empty() -> Self {
+        IncidenceMatrix::new(&vec![]).unwrap()
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
     }
 
     fn underlying_graph(&self) -> Self {
@@ -134,6 +193,10 @@ impl<D: Direction> Graph<usize> for IncidenceMatrix<D> {
     where
         Self: Sized,
     {
+        todo!()
+    }
+
+    fn node_degrees(&self, n: usize) -> (usize, usize) {
         todo!()
     }
 }
@@ -184,12 +247,32 @@ impl<D: Direction> FromGraph<usize, AdjacencyMatrix<D>> for IncidenceMatrix<D> {
                         edge[j] = g.data()[i][j];
                     }
 
-                    incidence_matrix.push(edge);
+                    if !incidence_matrix.iter().any(|e| *e == edge) {
+                        incidence_matrix.push(edge);
+                    }
                 }
             }
         }
 
         Self::new(&incidence_matrix).unwrap()
+    }
+}
+
+impl<D: Direction> UndirectedGraph<usize> for IncidenceMatrix<D> {
+    fn connected(&self) -> bool {
+        todo!()
+    }
+
+    fn undirected_node_degree(&self, vertex: usize) -> usize {
+        if self.data().is_empty() || vertex >= self.data()[0].len() {
+            return 0;
+        }
+
+        self.data().iter().filter(|row| row[vertex] != 0).count()
+    }
+
+    fn undirected_size(&self) -> usize {
+        self.data().len()
     }
 }
 
@@ -286,6 +369,7 @@ mod tests {
         let matrix: AdjacencyMatrix<Undirected> = AdjacencyMatrix::new(&g).unwrap();
 
         let incidence = IncidenceMatrix::from_graph(&matrix);
+        dbg!(&incidence);
 
         assert_eq!(incidence.node_degree(0), 2);
         assert_eq!(incidence.node_degree(1), 1);
@@ -293,7 +377,28 @@ mod tests {
     }
 
     #[test]
-    fn test_order_incidence_matrix() {
+    fn test_undirected_node_degree() {
+        // Graph: 0 ── 1 ── 2
+        //
+        // Edges:
+        // e1: 0–1 → [1, 1, 0]
+        // e2: 1–2 → [0, 1, 1]
+        //
+        // IncidenceMatrix:
+        // [
+        //   [1, 1, 0],
+        //   [0, 1, 1]
+        // ]
+        let incidence: IncidenceMatrix<Undirected> =
+            IncidenceMatrix::new(&vec![vec![1, 1, 0], vec![0, 1, 1]]).unwrap();
+
+        assert_eq!(incidence.undirected_node_degree(0), 1); // connected (0–1)
+        assert_eq!(incidence.undirected_node_degree(1), 2); // connected (0–1) e (1–2)
+        assert_eq!(incidence.undirected_node_degree(2), 1); // connected to edge (1–2)
+    }
+
+    #[test]
+    fn test_size_incidence_matrix_direct() {
         // Graph: 0 ── 1 ── 2
         let g = vec![vec![0, 1, 0], vec![1, 0, 1], vec![0, 1, 0]];
         let adj: AdjacencyMatrix<Undirected> = AdjacencyMatrix::new(&g).unwrap();
@@ -309,9 +414,12 @@ mod tests {
         let g = vec![vec![0, 1, 0], vec![1, 0, 1], vec![0, 1, 0]];
         let adj: AdjacencyMatrix<Undirected> = AdjacencyMatrix::new(&g).unwrap();
 
-        let inc = IncidenceMatrix::from_graph(&adj);
+        let incidence = IncidenceMatrix::from_graph(&adj);
 
-        assert_eq!(inc.size(), 2);
+        assert_eq!(incidence.size(), 2);
+        assert_eq!(incidence.undirected_node_degree(0), 1);
+        assert_eq!(incidence.undirected_node_degree(1), 2);
+        assert_eq!(incidence.undirected_node_degree(2), 1);
     }
 
     #[test]

@@ -4,49 +4,21 @@ use std::io::{self, Write};
 use std::marker::PhantomData;
 
 use crate::graph::{Directed, Direction, FromGraph, GraphError, Undirected};
+use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
-use crate::{Graph, UndirectedGraph};
+use crate::{Graph, GraphIO, UndirectedGraph};
 
-#[derive(Debug)]
-pub struct Node {
-    value: usize,
-    ancestor: Option<usize>,
-}
-
-// #[derive(Debug, Clone)]
-// pub struct AdjacencyMatrix(pub Vec<Vec<usize>>);
 #[derive(Debug, PartialEq, Clone)]
 pub struct AdjacencyMatrix<D: Direction> {
     data: Vec<Vec<i32>>,
     _marker: PhantomData<D>,
 }
 
-impl<D: Direction> AdjacencyMatrix<D> {
-    // TODO: Investigate why this is dead and when we should use it.
-    #[allow(dead_code)]
-    fn write_graph_to_dot(graph: &Vec<Node>, path: String) -> io::Result<()> {
-        let mut file: File = File::create(path)?;
-
-        writeln!(file, "digraph G {{")?;
-        writeln!(file, "  rankdir=LR;")?;
-        writeln!(file, "  node [shape=circle];")?;
-
-        for node in graph {
-            writeln!(file, "  {}", node.value)?;
-        }
-
-        for node in graph {
-            if let Some(ancestor_idx) = node.ancestor {
-                writeln!(file, "  {} -> {};", graph[ancestor_idx].value, node.value)?;
-            }
-        }
-
-        writeln!(file, " }}")?;
-        Ok(())
-    }
-}
-
 impl<D: Direction> Graph<usize> for AdjacencyMatrix<D> {
+    fn new_empty() -> Self {
+        AdjacencyMatrix::new(&vec![]).unwrap()
+    }
+
     fn order(&self) -> usize {
         self.data.len()
     }
@@ -57,6 +29,10 @@ impl<D: Direction> Graph<usize> for AdjacencyMatrix<D> {
             .enumerate()
             .map(|(i, _)| self.neighbors(i).count())
             .sum()
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
     }
 
     fn underlying_graph(&self) -> Self {
@@ -139,7 +115,48 @@ impl<D: Direction> Graph<usize> for AdjacencyMatrix<D> {
     }
 
     fn biparted(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut side = vec![None; n]; // None = uncolored, Some(0/1) = partition
+        let mut queue = std::collections::VecDeque::new();
+
+        for start in 0..n {
+            // skip already colored components
+            if side[start].is_some() {
+                continue;
+            }
+
+            side[start] = Some(0);
+            queue.push_back(start);
+
+            while let Some(u) = queue.pop_front() {
+                let u_side = side[u].unwrap();
+
+                for (v, &is_edge) in self.data()[u].iter().enumerate() {
+                    if is_edge == 0 {
+                        continue;
+                    }
+
+                    if side[v].is_none() {
+                        side[v] = Some(1 - u_side);
+                        queue.push_back(v);
+                    } else if side[v] == Some(u_side) {
+                        return false; // adjacent nodes with same color
+                    }
+                }
+            }
+        }
+
+        true
+    }
+
+    fn node_degrees(&self, n: usize) -> (usize, usize) {
+        let out_deg = self.data()[n].iter().filter(|&&v| v != 0).count();
+        let in_deg = self.data().iter().filter(|row| row[n] != 0).count();
+        (in_deg, out_deg)
     }
 
     fn new(data: &Vec<Vec<i32>>) -> Result<Self, GraphError> {
@@ -196,7 +213,25 @@ impl UndirectedGraph<usize> for AdjacencyMatrix<Undirected> {
     }
 
     fn connected(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut visited = vec![false; n];
+        let mut stack = vec![0];
+        visited[0] = true;
+
+        while let Some(u) = stack.pop() {
+            for (v, &is_edge) in self.data()[u].iter().enumerate() {
+                if is_edge > 0 && !visited[v] {
+                    visited[v] = true;
+                    stack.push(v);
+                }
+            }
+        }
+
+        visited.into_iter().all(|v| v)
     }
 
     fn undirected_node_degree(&self, node: usize) -> usize {
@@ -205,10 +240,6 @@ impl UndirectedGraph<usize> for AdjacencyMatrix<Undirected> {
         } else {
             0
         }
-    }
-
-    fn undirected_order(&self) -> usize {
-        self.data.len()
     }
 }
 
@@ -261,11 +292,96 @@ impl<D: Direction> FromGraph<usize, AdjacencyList<D>> for AdjacencyMatrix<D> {
     }
 }
 
+impl<D: Direction> GraphIO<usize> for AdjacencyMatrix<D> {}
+
+impl<D: Direction> UndirectedGraphIO<usize> for AdjacencyMatrix<D> {}
+
 #[cfg(test)]
 mod tests {
-    use std::vec;
+    use std::{
+        io::{Error, ErrorKind},
+        vec,
+    };
 
     use super::*;
+
+    static PATH: &str = "examples/data/";
+
+    #[test]
+    fn new_digraph_1() {
+        let result: Result<AdjacencyMatrix<Directed>, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
+
+        assert!(result.is_ok());
+
+        match result {
+            Ok(matrix) => {
+                let g: AdjacencyMatrix<Directed> = matrix;
+
+                assert!(g.order() == 13);
+                assert!(g.size() == 16);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_digraph_2() {
+        let result: Result<AdjacencyMatrix<Directed>, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
+
+        assert!(result.is_ok());
+
+        match result {
+            Ok(matrix) => {
+                let g: AdjacencyMatrix<Directed> = matrix;
+
+                assert!(g.order() == 13);
+                assert!(g.size() == 17);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_digraph_error_1() {
+        let result: Result<AdjacencyMatrix<Undirected>, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(result.is_err());
+
+        match result {
+            Ok(_) => {}
+            Err(err) => {
+                assert!(err.kind() == ErrorKind::InvalidData);
+                assert!(err.to_string().contains("Invalid data was found"));
+            }
+        }
+    }
+
+    #[test]
+    fn new_undirected_graph_1() {
+        let res: Result<AdjacencyMatrix<Undirected>, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+
+        assert!(res.is_ok());
+
+        match res {
+            Ok(list) => {
+                assert!(list.order() == 11);
+                assert!(list.undirected_size() == 13);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_undirected_graph_2() {
+        let res: Result<AdjacencyMatrix<Undirected>, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(res.is_err());
+    }
 
     #[test]
     fn undirected_graph_matrix_size() {
@@ -355,7 +471,6 @@ mod tests {
 
     #[test]
     fn graph_add_new_node() {
-        // Graph: 0 -> 2 <- 1
         let m = vec![vec![0, 0, 1], vec![0, 0, 1], vec![0, 0, 0]];
         let mut g: AdjacencyMatrix<Directed> = AdjacencyMatrix::new(&m).unwrap();
         g.add_node(3);
@@ -503,8 +618,45 @@ mod tests {
 
     #[test]
     fn adjacency_matrix_order() {
+        // Graph: 0 ── 1
+        //        │
+        //        2
         let m = vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]];
         let g: AdjacencyMatrix<Undirected> = AdjacencyMatrix::new(&m).unwrap();
-        assert_eq!(g.undirected_order(), 3);
+        assert_eq!(g.order(), 3);
+    }
+
+    #[test]
+    fn test_connected_graph() {
+        // Graph: 0 ─ 1
+        //        │ /
+        //        2
+        let matrix: AdjacencyMatrix<Undirected> =
+            AdjacencyMatrix::new(&vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]).unwrap();
+        assert!(matrix.connected());
+    }
+
+    #[test]
+    fn test_disconnected_graph() {
+        // Graph: 0 ─ 1     2
+        let matrix: AdjacencyMatrix<Undirected> =
+            AdjacencyMatrix::new(&vec![vec![0, 1, 0], vec![1, 0, 0], vec![0, 0, 0]]).unwrap();
+        assert!(!matrix.connected());
+    }
+
+    #[test]
+    fn test_node_degrees_matrix() {
+        // Graph: 0 -> 1 -> 2
+        //        ^--------´
+        let mut matrix: AdjacencyMatrix<Directed> =
+            AdjacencyMatrix::new(&vec![vec![0, 1, 0], vec![0, 0, 1], vec![1, 0, 0]]).unwrap();
+
+        let degrees_0 = matrix.node_degrees(0);
+        let degrees_1 = matrix.node_degrees(1);
+        let degrees_2 = matrix.node_degrees(2);
+
+        assert_eq!(degrees_0, (1, 1)); // in: 2->0, out: 0->1
+        assert_eq!(degrees_1, (1, 1)); // in: 0->1, out: 1->2
+        assert_eq!(degrees_2, (1, 1)); // in: 1->2, out: 2->0
     }
 }

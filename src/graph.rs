@@ -1,11 +1,15 @@
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::hash::Hash;
 
 pub trait Graph<Node: Eq + Hash + Copy> {
+    fn new_empty() -> Self;
+
     fn order(&self) -> usize;
 
     fn size(&self) -> usize;
+
+    fn nodes(&self) -> impl Iterator<Item = Node>;
 
     fn add_node(&mut self, n: Node);
 
@@ -29,6 +33,7 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         self.neighbors(n).any(|neighbor| neighbor == m)
     }
 
+    // FIX: This should be the sum of the internal and external degree of `n`.
     fn node_degree(&self, n: Node) -> usize {
         self.neighbors(n).count()
     }
@@ -59,6 +64,8 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         Self: Sized;
 
     fn data(&self) -> Vec<Vec<i32>>;
+
+    fn node_degrees(&self, n: Node) -> (usize, usize);
 }
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
@@ -86,8 +93,6 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
     fn undirected_node_degree(&self, n: Node) -> usize {
         self.neighbors(n).count()
     }
-
-    fn undirected_order(&self) -> usize;
 
     fn classify_undirected_edges<'a>(&'a self, start: Node) -> impl Iterator<Item = Edge<Node>>
     where
@@ -255,10 +260,17 @@ where
     }
 }
 
+#[derive(Debug)]
+pub enum BfsEvent<Node> {
+    Discover(Node, Vec<Node>),
+    CrossEdge(Node, Node),
+}
+
 pub struct BfsIter<'a, Node, G> {
     graph: &'a G,
     queue: VecDeque<Node>,
     visited: HashSet<Node>,
+    parent: HashMap<Node, Option<Node>>,
 }
 
 impl<'a, Node, G> BfsIter<'a, Node, G>
@@ -269,29 +281,43 @@ where
     fn new(graph: &'a G, start: Node) -> Self {
         let mut visited = HashSet::with_capacity(graph.order());
         visited.insert(start);
+
+        let mut parent: HashMap<Node, Option<Node>> = HashMap::with_capacity(graph.order());
+        parent.insert(start, None);
+
         Self {
             graph,
             queue: VecDeque::from(vec![start]),
             visited,
+            parent,
         }
     }
 }
 
 impl<'a, Node, G> Iterator for BfsIter<'a, Node, G>
 where
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
     G: Graph<Node>,
 {
-    type Item = Node;
+    type Item = Vec<BfsEvent<Node>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let node = self.queue.pop_front()?;
+        let mut children: Vec<Node> = Vec::new();
+        let mut events: Vec<BfsEvent<Node>> = Vec::new();
+
         for neighbor in self.graph.neighbors(node) {
             if self.visited.insert(neighbor) {
                 self.queue.push_back(neighbor);
+                self.parent.insert(neighbor, Some(node));
+                children.push(neighbor);
+            } else if Some(node) != self.parent.get(&neighbor).copied().flatten() {
+                events.push(BfsEvent::CrossEdge(node, neighbor));
             }
         }
-        Some(node)
+
+        events.push(BfsEvent::Discover(node, children));
+        Some(events)
     }
 }
 
@@ -306,14 +332,14 @@ where
 /// - `Back(u, v)`: An edge from a node `u` to its ancestor `v` in the DFS tree. This indicates a cycle.
 /// - `ParentBack(u, v)`: A special case of a back edge where `v` is the direct parent of `u`.
 ///   This is common in undirected graphs.
-/// - `Foward(u, v)`: An edge from a node `u` to its descendant `v` that is not a tree edge.
+/// - `Forward(u, v)`: An edge from a node `u` to its descendant `v` that is not a tree edge.
 /// - `Cross(u, v)`: An edge between two nodes `u` and `v` such that neither is an ancestor of the other.
 #[derive(Debug)]
 pub enum Edge<Node> {
     Tree(Node, Node),
     Back(Node, Node),
     ParentBack(Node, Node),
-    Foward(Node, Node),
+    Forward(Node, Node),
     Cross(Node, Node),
 }
 
@@ -444,7 +470,7 @@ where
                         .get(&node)
                         .is_some_and(|t1| self.discovery.get(&neighbor).is_some_and(|t2| t1 < t2))
                     {
-                        return Some(Edge::Foward(node, neighbor));
+                        return Some(Edge::Forward(node, neighbor));
                     } else {
                         return Some(Edge::Cross(node, neighbor));
                     }
@@ -540,7 +566,7 @@ where
 impl<'a, Node, G> Iterator for BiconnectedComponentsIter<'a, Node, G>
 where
     G: Graph<Node>,
-    Node: Eq + Hash + Copy,
+    Node: Eq + Hash + Copy + Display,
 {
     type Item = Vec<(Node, Node)>;
 

@@ -3,10 +3,15 @@ name = "graphs-algorithms"
 version = "0.1.0"
 edition = "2024"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dev-dependencies]
+cpp-api = { version = "*", path = "crates/cpp-api" }
 criterion = "0.7.0"
+gungraun = "0.17.0"
 
 [[bench]]
-name = "dfs_bench"
+name = "macro_dfs_adjacency_list"
+harness = false
+
+[[bench]]
+name = "micro_dfs_adjacency_list"
 harness = false

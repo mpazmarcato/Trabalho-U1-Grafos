@@ -1,10 +1,11 @@
 use std::marker::PhantomData;
 
-use crate::Graph;
 use crate::graph::{
     DfsEvent, Directed, Direction, FromGraph, GraphError, Undirected, UndirectedGraph,
 };
+use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
+use crate::{Graph, GraphIO};
 
 // #[derive(Debug,  Clone, Default)]
 // pub struct AdjacencyList(pub Vec<Vec<usize>>);
@@ -25,12 +26,20 @@ impl<D: Direction> Default for AdjacencyList<D> {
 }
 
 impl<D: Direction> Graph<usize> for AdjacencyList<D> {
+    fn new_empty() -> Self {
+        AdjacencyList::new(&vec![]).unwrap()
+    }
+
     fn order(&self) -> usize {
         self.data.len()
     }
 
     fn size(&self) -> usize {
         self.data.iter().map(|neighbors| neighbors.len()).sum()
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
     }
 
     fn underlying_graph(&self) -> Self {
@@ -97,7 +106,45 @@ impl<D: Direction> Graph<usize> for AdjacencyList<D> {
     }
 
     fn biparted(&self) -> bool {
-        todo!()
+        let n = self.order();
+        if n == 0 {
+            return true;
+        }
+
+        let mut side = vec![None; n];
+
+        for start in 0..n {
+            if side[start].is_some() {
+                continue;
+            }
+            side[start] = Some(0);
+            let mut queue = std::collections::VecDeque::new();
+            queue.push_back(start);
+
+            while let Some(u) = queue.pop_front() {
+                let u_side = side[u].unwrap();
+                for v in self.neighbors(u) {
+                    if side[v].is_none() {
+                        side[v] = Some(1 - u_side);
+                        queue.push_back(v);
+                    } else if side[v] == Some(u_side) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        true
+    }
+
+    fn node_degrees(&self, n: usize) -> (usize, usize) {
+        let out_deg = self.data().get(n).map_or(0, |neighbors| neighbors.len());
+        let in_deg = self
+            .data()
+            .iter()
+            .filter(|neighbors| neighbors.contains(&(n as i32)))
+            .count();
+        (in_deg, out_deg)
     }
 
     fn new(data: &Vec<Vec<i32>>) -> Result<Self, GraphError> {
@@ -181,10 +228,6 @@ impl<D: Direction> UndirectedGraph<usize> for AdjacencyList<D> {
             .map(|neighbors| neighbors.len())
             .unwrap_or(0)
     }
-
-    fn undirected_order(&self) -> usize {
-        self.data.len()
-    }
 }
 
 impl<D: Direction> FromGraph<usize, IncidenceMatrix<D>> for AdjacencyList<D> {
@@ -238,9 +281,95 @@ impl<D: Direction> FromGraph<usize, AdjacencyMatrix<D>> for AdjacencyList<D> {
     }
 }
 
+impl<D: Direction> GraphIO<usize> for AdjacencyList<D> {}
+impl<D: Direction> UndirectedGraphIO<usize> for AdjacencyList<D> {}
+
 #[cfg(test)]
 mod tests {
+
+    use std::io::{Error, ErrorKind};
+
     use super::*;
+
+    static PATH: &str = "examples/data/";
+
+    #[test]
+    fn new_digraph_1() {
+        let result: Result<AdjacencyList<Directed>, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
+
+        assert!(result.is_ok());
+
+        match result {
+            Ok(matrix) => {
+                let g: AdjacencyList<Directed> = matrix;
+
+                assert!(g.order() == 13);
+                assert!(g.size() == 16);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_digraph_2() {
+        let result: Result<AdjacencyList<Directed>, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
+
+        assert!(result.is_ok());
+
+        match result {
+            Ok(matrix) => {
+                let g: AdjacencyList<Directed> = matrix;
+
+                assert!(g.order() == 13);
+                assert!(g.size() == 17);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_digraph_error_1() {
+        let result: Result<AdjacencyList<Undirected>, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(result.is_err());
+
+        match result {
+            Ok(_) => {}
+            Err(err) => {
+                assert!(err.kind() == ErrorKind::InvalidData);
+                assert!(err.to_string().contains("Invalid data was found"));
+            }
+        }
+    }
+
+    #[test]
+    fn new_undirected_graph_1() {
+        let res: Result<AdjacencyList<Directed>, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+
+        assert!(res.is_ok());
+
+        match res {
+            Ok(list) => {
+                let g: AdjacencyList<Directed> = list;
+
+                assert!(g.order() == 11);
+                assert!(g.undirected_size() == 13);
+            }
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn new_undirected_graph_2() {
+        let res: Result<AdjacencyList<Directed>, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(res.is_err());
+    }
 
     #[test]
     fn connected_undirected_graph() {
@@ -281,7 +410,7 @@ mod tests {
         //       /
         //      4
         assert_eq!(original_list.order(), underlying_list.order());
-        // assert_eq!(original_list.size(), underlying_list.size()); // FIXME: uncomment when size duplication is fixed!
+        assert_eq!(original_list.size(), underlying_list.undirected_size());
         assert!(underlying_list.connected());
     }
 
@@ -302,7 +431,7 @@ mod tests {
         //       \   |
         //        -  4
         assert_eq!(original_list.order(), underlying_list.order());
-        // assert_eq!(original_list.size(), underlying_list.size()); // FIXME: uncomment when size duplication is fixed!
+        assert_eq!(original_list.size(), underlying_list.undirected_size());
         assert!(underlying_list.connected());
 
         underlying_list.remove_node(2);
@@ -360,7 +489,7 @@ mod tests {
         assert!(list.order() == 6);
         assert!(list.size() == 5);
         assert!(list.has_edge(3, 5));
-        // assert!(list.connected()); // FIXME: implementar uma conversão de digrafo para seu subjacente para que funcione
+        assert!(list.underlying_graph().connected());
     }
 
     #[test]
@@ -387,6 +516,7 @@ mod tests {
         assert!(list.size() == 6);
         assert!(list.has_edge(3, 5));
         assert!(list.has_edge(2, 2));
+        assert!(list.underlying_graph().connected());
     }
 
     #[test]
@@ -411,7 +541,7 @@ mod tests {
         assert!(list.size() == 4);
         assert!(!list.has_edge(0, 3));
         assert!(list.has_edge(4, 3));
-        assert!(!list.connected());
+        assert!(!list.underlying_graph().connected());
     }
 
     #[test]
@@ -442,7 +572,7 @@ mod tests {
         assert!(list.size() == 5);
         assert!(!list.has_edge(2, 2));
         assert!(list.has_edge(1, 2));
-        // assert!(list.connected()); // FIXME: implementar uma conversão de digrafo para seu subjacente para que funcione
+        assert!(list.underlying_graph().connected());
     }
 
     #[test]
@@ -468,7 +598,7 @@ mod tests {
         assert!(list.size() == 1);
         assert!(!list.has_edge(0, 3));
         assert!(list.has_edge(1, 2));
-        assert!(!list.connected());
+        assert!(!list.underlying_graph().connected());
     }
 
     #[test]
@@ -491,7 +621,7 @@ mod tests {
         //       /
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 4);// TODO: uncomment when fixed
+        assert!(list.undirected_size() == 4);
         assert!(!list.connected());
     }
 
@@ -516,7 +646,7 @@ mod tests {
         //       /   \
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 5); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 5);
         assert!(list.has_edge(3, 5));
         assert!(list.connected());
     }
@@ -543,7 +673,7 @@ mod tests {
         //       /   \      \    /
         //      4     5       -
         assert!(list.order() == 6);
-        // assert!(list.size() == 6);// TODO: uncomment when fixed
+        assert!(list.undirected_size() == 6);
         assert!(list.connected());
         assert!(list.has_edge(3, 5));
         assert!(list.has_edge(2, 2));
@@ -575,7 +705,7 @@ mod tests {
         //       /   \
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 4); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 4);
         assert!(!list.has_edge(3, 1));
         assert!(!list.connected());
     }
@@ -606,7 +736,7 @@ mod tests {
         //       /   \
         //      4     5
         assert!(list.order() == 6);
-        // assert!(list.size() == 5); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 5);
         assert!(!list.has_edge(2, 2));
         assert!(list.has_edge(2, 1));
         assert!(list.connected());
@@ -638,11 +768,12 @@ mod tests {
         //
         //       3    4
         assert!(list.order() == 5);
-        // assert!(list.size() == 1); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 1);
         assert!(!list.has_edge(0, 3));
         assert!(list.has_edge(2, 1));
         assert!(!list.connected());
     }
+
     #[test]
     fn undirected_graph_remove_node_4() {
         // Graph:
@@ -669,7 +800,7 @@ mod tests {
         //          \
         //           4
         assert!(list.order() == 5);
-        // assert!(list.size() == 4); // TODO: uncomment when fixed
+        assert!(list.undirected_size() == 4);
         assert!(list.has_edge(0, 3));
         assert!(list.connected());
     }
@@ -692,7 +823,7 @@ mod tests {
         //        2
         let list: AdjacencyList<Undirected> =
             AdjacencyList::new(&vec![vec![1, 2], vec![0], vec![0]]).unwrap();
-        assert_eq!(list.undirected_order(), 3);
+        assert_eq!(list.order(), 3);
     }
 
     #[test]
@@ -704,5 +835,24 @@ mod tests {
             AdjacencyList::new(&vec![vec![1, 2], vec![0], vec![0]]).unwrap();
 
         assert_eq!(list.undirected_size(), 2);
+    }
+
+    #[test]
+    fn test_node_degrees_list() {
+        let mut list: AdjacencyList<Directed> = AdjacencyList::default();
+        list.add_node(0);
+        list.add_node(1);
+        list.add_node(2);
+        list.add_edge(0, 1);
+        list.add_edge(1, 2);
+        list.add_edge(2, 0);
+
+        let degrees_0 = list.node_degrees(0);
+        let degrees_1 = list.node_degrees(1);
+        let degrees_2 = list.node_degrees(2);
+
+        assert_eq!(degrees_0, (1, 1)); // in: 2->0, out: 0->1
+        assert_eq!(degrees_1, (1, 1)); // in: 0->1, out: 1->2
+        assert_eq!(degrees_2, (1, 1)); // in: 1->2, out: 2->0
     }
 }
