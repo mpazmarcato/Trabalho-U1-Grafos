@@ -64,6 +64,10 @@ impl IncidenceMatrix {
 }
 
 impl Graph<usize> for IncidenceMatrix {
+    fn new_empty() -> Self {
+        IncidenceMatrix(Vec::new())
+    }
+
     fn order(&self) -> usize {
         if self.0.is_empty() {
             0
@@ -74,6 +78,14 @@ impl Graph<usize> for IncidenceMatrix {
 
     fn size(&self) -> usize {
         self.0.len()
+    }
+
+    fn node_degrees(&self, _n: usize) -> (usize, usize) {
+        todo!()
+    }
+
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
     }
 
     fn add_node(&mut self, _n: usize) {
@@ -98,10 +110,6 @@ impl Graph<usize> for IncidenceMatrix {
     >;
 
     fn neighbors<'a>(&'a self, _n: usize) -> Self::Neighbors<'a> {
-        todo!()
-    }
-
-    fn node_degrees(&self, _n: usize) -> (usize, usize) {
         todo!()
     }
 
@@ -163,17 +171,13 @@ impl Graph<usize> for IncidenceMatrix {
     fn underlying_graph(&self) -> Self {
         todo!()
     }
-
-    fn new_empty() -> Self {
-        IncidenceMatrix(Vec::new())
-    }
-
-    fn nodes(&self) -> impl Iterator<Item = usize> {
-        0..self.order()
-    }
 }
 
 impl UndirectedGraph<usize> for IncidenceMatrix {
+    fn undirected_size(&self) -> usize {
+        self.0.len()
+    }
+
     fn connected(&self) -> bool {
         todo!()
     }
@@ -184,10 +188,6 @@ impl UndirectedGraph<usize> for IncidenceMatrix {
         }
 
         self.0.iter().filter(|row| row[vertex] != 0).count()
-    }
-
-    fn undirected_size(&self) -> usize {
-        self.0.len()
     }
 }
 
