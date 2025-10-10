@@ -1,5 +1,5 @@
-use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
 use graphs_algorithms::utils::print_tip;
+use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
 
 static PATH: &str = "examples/dot/graph_exports_example/";
 

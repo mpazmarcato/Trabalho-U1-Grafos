@@ -1,5 +1,5 @@
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
-use graphs_algorithms::{print_list, print_matrix, DfsEvent, Graph};
+use graphs_algorithms::{DfsEvent, Graph, print_list, print_matrix};
 
 fn main() {
     let m1 = AdjacencyMatrix(vec![

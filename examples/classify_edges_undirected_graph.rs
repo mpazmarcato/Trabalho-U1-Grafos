@@ -1,9 +1,9 @@
 use core::panic;
 
-use graphs_algorithms::{print_list, Edge, UndirectedGraphIO};
 use graphs_algorithms::UndirectedGraph;
 use graphs_algorithms::graphs::AdjacencyList;
 use graphs_algorithms::utils::print_tip;
+use graphs_algorithms::{Edge, UndirectedGraphIO, print_list};
 
 fn main() {
     let undirected_graph = AdjacencyList(vec![
@@ -34,6 +34,5 @@ fn main() {
     let _ = undirected_graph.export_undirected_dfs_to_dot(0, path.to_string());
 
     println!("Graph was exported to dot file on path {}! ", path);
-
     print_tip();
 }

@@ -1,7 +1,7 @@
-use graphs_algorithms::{print_list, print_matrix, Graph};
 use graphs_algorithms::UndirectedGraph;
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
 use graphs_algorithms::utils::print_incidence_matrix;
+use graphs_algorithms::{Graph, print_list, print_matrix};
 
 fn main() {
     let dg1 = AdjacencyList(vec![vec![1, 3], vec![2], vec![1], vec![2, 4], vec![]]);
@@ -14,7 +14,10 @@ fn main() {
     println!("Degree calculation!");
     for i in 0..dg1.order() {
         let degree = dg1.node_degrees(i);
-        println!("Vertex {} has internal degree {} and external degree {}", i, degree.0, degree.1);
+        println!(
+            "Vertex {} has internal degree {} and external degree {}",
+            i, degree.0, degree.1
+        );
     }
 
     let ug1 = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]);

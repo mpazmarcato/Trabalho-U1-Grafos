@@ -1,7 +1,7 @@
 use std::io::Error;
 
-use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
 use graphs_algorithms::utils::print_tip;
+use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
 
 static PATH: &str = "examples/dot/";
 fn main() {
@@ -23,7 +23,10 @@ fn main() {
 
     let path1 = PATH.to_owned() + "bfs/bfs_1.dot";
     let _ = g1.export_undirected_bfs_to_dot(1, path1.to_owned());
-    println!("Undirected graph was exported to dot file on path {}! ", path1);
+    println!(
+        "Undirected graph was exported to dot file on path {}! ",
+        path1
+    );
 
     let res: Result<AdjacencyList, Error> =
         GraphIO::import_from_file("examples/data/DIGRAFO1.txt".to_owned());

@@ -1,7 +1,7 @@
-use graphs_algorithms::{print_list, Edge, GraphIO};
 use graphs_algorithms::Graph;
 use graphs_algorithms::graphs::AdjacencyList;
 use graphs_algorithms::utils::print_tip;
+use graphs_algorithms::{Edge, GraphIO, print_list};
 
 fn main() {
     let digraph = AdjacencyList(vec![

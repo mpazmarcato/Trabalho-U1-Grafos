@@ -1,4 +1,4 @@
-use graphs_algorithms::{graphs::AdjacencyList, print_list, Graph, UndirectedGraph};
+use graphs_algorithms::{Graph, UndirectedGraph, graphs::AdjacencyList, print_list};
 
 fn main() {
     println!("===== DIGRAPH OPERATIONS =====");

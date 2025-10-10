@@ -55,7 +55,6 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     {
         DfsEdgesIter::new(self, start)
     }
-
 }
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {

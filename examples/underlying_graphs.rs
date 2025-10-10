@@ -1,4 +1,8 @@
-use graphs_algorithms::{Graph, graphs::{AdjacencyList, AdjacencyMatrix}, print_matrix, print_list};
+use graphs_algorithms::{
+    Graph,
+    graphs::{AdjacencyList, AdjacencyMatrix},
+    print_list, print_matrix,
+};
 
 fn main() {
     let digraph = AdjacencyMatrix(vec![
