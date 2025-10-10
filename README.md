@@ -10,10 +10,16 @@ Unidade1-Grafos/
 ├── benches # Testes de benchmark
 │   └── dfs_bench.rs
 │   ...
-├── examples # Programas exemplo para testar implementações
-│   └── test.rs
+├── crates # Crates auxiliares
+│   └── cpp_api 
+├── examples # Programas de exemplo para testar implementações
+│   └── simple_tests.rs
+│   ...
+│   └── data/ # Arquivos .txt com grafos
+│   └── dot/ # Diagramas de grafos em .dot
+│   └── output/ # Imagens de grafos geradas através dos .dot
 ├── latex # Código fonte do documento latex
-│   ├── chapters
+│   ├── chapters/
 │   ├── CS_report.sty   # Definições e import de biblioteca
 │   ├── figures         # Imagens usadas no documento
 │   ├── main.tex        # Entry point do código fonte
@@ -24,6 +30,8 @@ Unidade1-Grafos/
     ├── adjacency_matrix.rs # Implementação de um grafo como matriz de adjacência
     ├── incidence_matrix.rs # Implementação de um grafo como matriz de incidência
     ├── graph.rs            # Trait (Interface) de um grafo
+    ├── graph.rs            # Trait (Interface) de operações de leitura/escrita de grafos em arquivos
+    ├── utils.rs            # Funções de utilidade usadas nos examples
     └── lib.rs              # Re-exportação dos items da crate
     ...
 ```
@@ -33,8 +41,10 @@ Unidade1-Grafos/
 ### Pré-requisitos
 
 - [Cargo 1.90.0 (com rustc 1.90.0 stable)](https://rust-lang.org/learn/get-started/)
-- [Texlive (full)](https://tug.org/texlive/) e Texlive-lang-portuguese. (pode ser encontrado nos gerenciadores de pacote)
-- [Docker](https://www.docker.com/) (Para compilar o latex se não quiser instalar diretamente o texlive)
+- [Texlive (full)](https://tug.org/texlive/) e Texlive-lang-portuguese: pode ser encontrado nos gerenciadores de pacote comuns.
+- [Docker](https://www.docker.com/): Alternativa para compilar o $\LaTeX$, caso não queira instalar o `texlive`
+- [Graphviz](https://www.graphviz.org/download/): Para converter os arquivos `.dot` em imagens `.png`
+- TODO
 
 ### Compilação e testes
 
@@ -45,7 +55,7 @@ Unidade1-Grafos/
 cargo b
 
 # Executa binários na pasta examples/
-cargo r --example test
+cargo r --example [example]
 
 # Executa testes unitários
 cargo t
@@ -95,11 +105,27 @@ docker build -t latex-compiler latex/
 docker run --rm latex-compiler > main.pdf
 ```
 
-Existe uma imagem compilada em `vleema/latex-compiler` (não garanto que esteja atualizada). Podes substituir `docker build...` por
+Existe uma imagem compilada em `vleema/latex-compiler` (não garantimos que esteja atualizada). Podes substituir `docker build...` por
 
 ```bash
 docker pull vleema/latex-compiler:latest
 ```
+
+## Exemplos
+
+  No diretório `examples/` estão presentes diversos scripts que demonstram os usos da biblioteca principal. Estes são:
+- `adjacency_list_operations.rs`: cria grafos em uma Lista de Adjacência e adiciona/exclui vértices e arestas;
+- `adjacency_matrix_operations.rs`: cria grafos em uma Matriz de Adjacência e adiciona/exclui vértices e arestas;
+- `classify_edges_graph.rs`: executa a DFS em um digrafo, salvando a árvore resultante no diretório `dot/classify_edges`
+- `classify_edges_undirected_graph.rs`: executa a DFS em um grafo não orientado, salvando a árvore resultante no diretório `dot/classify_edges`
+- `graph_bfs.rs`: executa a BFS em grafos orientados e não orientados, salvando a árvore resultante no diretório `dot/bfs`;
+- `graph_creation.rs`: importa alguns arquivos `.txt` e cria ou não o grafo correspondente;
+- `graph_exports.rs`: cria grafos, executa operações diversas e salva os resultados em `dot/graph_exports_example`;
+- `node_checks.rs`: cria grafos e calcula a ordem, tamanho e grau de cada vértice;
+- `underlying_graphs.rs`: cria digrafos e encontra seus grafos subjacentes;
+- `simple_tests.rs`: outras operações simples com grafos.
+
+Para executá-los, veja a seção anterior.
 
 ## TODOs
 
