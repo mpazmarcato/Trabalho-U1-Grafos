@@ -1,10 +1,11 @@
-use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
+use graphs_algorithms::{
+    Directed, Graph, GraphIO, Undirected, UndirectedGraphIO, graphs::AdjacencyList, print_list,
+};
 
 static PATH: &str = "examples/dot/";
 
 fn main() {
-    // UNDIRECTED GRAPHS
-    let graph1 = AdjacencyList(vec![
+    let graph1: AdjacencyList<Undirected> = AdjacencyList::new(&vec![
         vec![1, 2],
         vec![2, 3, 7, 10],
         vec![0, 1, 4, 3],
@@ -16,7 +17,8 @@ fn main() {
         vec![3, 10],
         vec![6, 10],
         vec![1, 6, 9, 8],
-    ]);
+    ])
+    .unwrap();
 
     println!("[UNDIRECTED] Graph 1: ");
     print_list(&graph1);
@@ -40,7 +42,7 @@ fn main() {
     }
 
     // DIGRAPHS
-    let graph2 = AdjacencyList(vec![
+    let graph2: AdjacencyList<Directed> = AdjacencyList::new(&vec![
         vec![1, 3],
         vec![4],
         vec![4, 0],
@@ -49,7 +51,8 @@ fn main() {
         vec![2, 6],
         vec![7],
         vec![8],
-    ]);
+    ])
+    .unwrap();
 
     println!("[DIRECTED] Graph 2: ");
     print_list(&graph2);

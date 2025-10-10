@@ -1,23 +1,34 @@
-use graphs_algorithms::Graph;
 use graphs_algorithms::UndirectedGraph;
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
+use graphs_algorithms::{FromGraph, Graph, Undirected};
 
 fn main() {
-    let graph = AdjacencyList(vec![vec![1], vec![0, 2], vec![1]]);
+    let graph: AdjacencyList<Undirected> =
+        AdjacencyList::new(&vec![vec![1], vec![0, 2], vec![1]]).unwrap();
 
     println!("Grau de cada vértice:");
     for i in 0..graph.order() {
         println!("Vértice {}: {}", i, graph.undirected_node_degree(i));
     }
 
-    let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]);
+    let adjacency_matrix: AdjacencyMatrix<Undirected> = AdjacencyMatrix::new(&vec![
+        vec![0, 1, 1], // 0 conectado a 1 e 2
+        vec![1, 0, 0], // 1 conectado a 0
+        vec![1, 0, 0], // 2 conectado a 0
+    ])
+    .unwrap();
 
     println!("Grau de cada vértice:");
-    for i in 0..matrix.order() {
-        println!("Vértice {}: {}", i, matrix.undirected_node_degree(i));
+    for i in 0..adjacency_matrix.order() {
+        println!(
+            "Vértice {}: {}",
+            i,
+            adjacency_matrix.undirected_node_degree(i)
+        );
     }
 
-    let incidence = IncidenceMatrix(vec![vec![1, 1, 0], vec![0, 1, 1]]);
+    let incidence: IncidenceMatrix<Undirected> =
+        IncidenceMatrix::new(&vec![vec![1, 1, 0], vec![0, 1, 1]]).unwrap();
 
     println!("Grau de cada vértice (Matriz de Incidência):");
     for i in 0..incidence.order() {

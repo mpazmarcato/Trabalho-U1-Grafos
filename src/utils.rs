@@ -1,13 +1,16 @@
-use crate::graphs::{AdjacencyList, AdjacencyMatrix};
+use crate::{
+    Direction, Graph,
+    graphs::{AdjacencyList, AdjacencyMatrix},
+};
 
-pub fn print_list(list: &AdjacencyList) {
-    for (i, neighbors) in list.0.iter().enumerate() {
+pub fn print_list<D: Direction>(list: &AdjacencyList<D>) {
+    for (i, neighbors) in list.data().iter().enumerate() {
         println!("{}: {:?}", i, neighbors);
     }
 }
 
-pub fn print_matrix(m: &AdjacencyMatrix) {
-    for row in &m.0 {
+pub fn print_matrix<D: Direction>(m: &AdjacencyMatrix<D>) {
+    for row in &m.data() {
         print!("[ ");
         for col in row {
             print!("{col} ");

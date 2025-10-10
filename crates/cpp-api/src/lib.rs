@@ -1,5 +1,5 @@
-use graphs_algorithms::Graph;
 use graphs_algorithms::graphs::AdjacencyMatrix;
+use graphs_algorithms::{Direction, Graph};
 
 unsafe extern "C" {
     fn mk_adjacency_list(node_amt: usize) -> *mut std::ffi::c_void;
@@ -18,10 +18,10 @@ impl AdjacencyListCpp {
         Self { ptr }
     }
 
-    pub fn from_adjacency_matrix(matrix: &AdjacencyMatrix) -> Self {
+    pub fn from_adjacency_matrix<D: Direction>(matrix: &AdjacencyMatrix<D>) -> Self {
         let adj_list = Self::new(matrix.order());
 
-        for (i, row) in matrix.0.iter().enumerate() {
+        for (i, row) in matrix.data().iter().enumerate() {
             for (j, &val) in row.iter().enumerate() {
                 if val == 1 {
                     adj_list.add_edge_unchecked(i, j);
