@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <unordered_set>
 #include <vector>
+#include <queue>
 
 class AdjacencyList {
    private:
@@ -40,6 +41,28 @@ class AdjacencyList {
             for (const auto& neighbor : neighbors(current)) {
                 if (visited.insert(neighbor).second) {
                     stack.push_back(neighbor);
+                }
+            }
+        }
+    }
+
+    void bfs(const size_t start) {
+        std::vector<size_t> res;
+        std::queue<size_t> q;
+        std::vector<bool> visited(order(), false);
+
+        visited[start] = true;
+        q.push(start);
+
+        while (!q.empty()) {
+            const auto current = q.front();
+            q.pop();
+            res.push_back(current);
+
+            for (const auto& neighbor : neighbors(current)) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
                 }
             }
         }

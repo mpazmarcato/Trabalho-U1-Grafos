@@ -4,7 +4,7 @@ mod adjacency_list;
 mod adjacency_matrix;
 mod graph_io;
 mod incidence_matrix;
-mod utils;
+pub mod utils;
 
 pub use graph::DfsEvent;
 pub use graph::Edge;
