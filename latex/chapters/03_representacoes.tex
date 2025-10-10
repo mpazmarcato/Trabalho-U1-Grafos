@@ -1,0 +1,62 @@
+\chapter{Representações de Grafos}
+\label{ch:representation} % Label for method chapter
+
+Existem diversas formas de representar um grafo computacionalmente. Nesta seção serão explanadas as 3 estruturas que usamos ao decorrer do projeto, suas características e casos em que selecionar cada tipo é interessante.
+As representações de Lista de Adjacência, Matriz de Adjacência e Matriz de Incidência foram retiradas de \cite{skiena2008algo} e de \cite{cormenEtAl2009algo}.
+
+\begin{mydef}[Matriz de Adjacência]
+  Uma matriz quadrada $M$ é uma Matriz de Adjacência de um Grafo $G := \{V, A\}$ quando:
+  \begin{align*}
+      M_{ij} ={}& \left\{
+      \begin{array}{ll}
+        1 & \text{se a aresta } (i, j) \in A, \\
+        0 & \text{caso contrário}
+      \end{array}
+      \right.
+    \end{align*}
+\end{mydef}
+
+\begin{mydef}[Matriz de Incidência]
+  Uma matriz $M$ de dimensões $|V| \times |A|$ é uma Matriz de Incidência de um Grafo $G := \{V, A\}$ quando:
+    \begin{align*}
+    M_{ij} ={}& \left\{
+    \begin{array}{ll}
+      -1 & \text{se a aresta } j \text{ sai do vértice } i, \\
+      1 & \text{se a aresta } j \text{ entra no vértice } i, \\
+      0 & \text{caso contrário}.
+    \end{array}
+    \right.
+  \end{align*}
+\end{mydef}
+
+\begin{mydef}[Lista de Adjacência]
+  Uma Lista de Adjacência $L$ de um Grafo $G := \{V, A \}$ consiste em um vetor de $n$ vetores, um para cada $v \in V$,
+  onde cada "sub-vetor" guarda os vértices $u$ com os quais $(v, u) \in A$.
+  Assim, cada $L[v]$ contém todos os vértices adjacentes a $v$.
+\end{mydef}
+
+Em \cite{skiena2008algo} a definição de Lista de Adjacência obriga que os "sub-vetores" armazenem ponteiros para vértices. Contudo, neste projeto optamos por simplificar a estrutura destes "sub-vetores" para armazenar diretamente os vértices. \\
+
+\section{Comparação}
+Nesta seção iremos analisar a eficiência das diferentes representações de grafos, utilizando as notações abstratas de Big O e Theta.
+Nesta comparação será excluída a representação por Matriz de Incidência, tendo em vista sua pouca utilização e praticidade para o andamento do projeto.
+\begin{table}[H]
+\centering
+\caption{Representações de grafos}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Aspecto} & \textbf{L.A} & \textbf{M.A} \\ \hline
+\textbf{Busca de aresta} $(x, y)$ & $O(n)$ & $\Theta(1)$  \\ \hline
+\textbf{Inserção / Remoção de aresta} & $O(n)$ & $\Theta(1)$  \\ \hline
+\textbf{Busca em grafo} & $\Theta(V + E)$ & $\Theta(V^2)$  \\ \hline
+\textbf{Grau de um vértice} & $\Theta(1)$ & $O(V)$ \\ \hline
+\textbf{Uso de memória} & $\Theta(V + E)$ & $\Theta(V^2)$ \\ \hline
+\end{tabular}
+\vspace{0.3em}
+\end{table}
+
+Podemos concluir, portanto, que a Matriz de Adjacência tem como vantagem a eficiência para busca, inserção e deleção de arestas ($\Theta(1)$) pois acessa diretamente a posição em memória, mas não é adequada para grafos grandes dado o custo exponencial de espaço.
+
+Por outro lado, a Lista de Adjacência tem como vantagem o melhor desempenho para travessia e maior economia em espaço, sendo uma escolha adequada para grafos de diversos tamanhos, mas apresenta desempenho pior para operações que alteram a estrutura do grafo.
+
+A Matriz de Incidência, em geral, acaba sendo a escolha menos eficiente para qualquer situação.
