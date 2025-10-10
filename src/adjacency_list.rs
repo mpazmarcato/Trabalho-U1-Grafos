@@ -94,7 +94,7 @@ impl Graph<usize> for AdjacencyList {
         }
     }
 
-    fn biparted(&self) -> bool {
+    fn bipartite(&self) -> bool {
         let n = self.order();
         if n == 0 {
             return true;

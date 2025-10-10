@@ -2,39 +2,183 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
 
+/// Defines a generic interface for a graph data structure.
+///
+/// The [`Graph`] trait represents a **directed graph**, where each node can have
+/// zero or more outgoing edges to other nodes.
+/// It defines the essential operations for graph construction, traversal, and analysis.
+///
+/// Types implementing this trait can represent any kind of graph structure, such as
+/// adjacency lists, adjacency matrices, ...
+///
+/// # Type Parameters
+/// - `Node`: The type used to represent graph nodes.
+///   Must implement [`Eq`], [`Hash`], and [`Copy`] to ensure efficient lookups.
+///
+/// # Examples
+///
+/// ```rust
+/// use graphs_algorithms::Graph;
+/// use graphs_algorithms::graphs::AdjacencyList;
+///
+/// let mut graph = AdjacencyList::default();
+///
+/// graph.add_node(0);
+/// graph.add_node(1);
+/// graph.add_edge(0, 1);
+///
+/// assert_eq!(graph.order(), 2);
+/// assert_eq!(graph.size(), 1);
+/// assert!(graph.has_edge(0, 1));
+/// ```
 pub trait Graph<Node: Eq + Hash + Copy> {
+    /// Creates a new and empty graph.
+    ///
+    /// # Examples
+    /// ```
+    /// use graphs_algorithms::Graph;
+    /// use graphs_algorithms::graphs::AdjacencyList;
+    ///
+    /// let graph = AdjacencyList::<usize>::new_empty();
+    /// assert_eq!(graph.order(), 0);
+    /// ```
     fn new_empty() -> Self;
 
+    /// Returns the number of nodes (vertices) in the graph.
+    ///
+    /// # Examples
+    /// ```
+    /// use graphs_algorithms::Graph;
+    /// use graphs_algorithms::graphs::AdjacencyList;
+    ///
+    /// let mut g = AdjacencyList::default();
+    /// g.add_node(0);
+    /// g.add_node(1);
+    /// assert_eq!(g.order(), 2);
+    /// ```
     fn order(&self) -> usize;
 
+    /// Returns the number of edges in the graph.
+    ///
+    /// This includes all directed edges, so in a directed graph,
+    /// an edge `(u, v)` counts as a single edge.
     fn size(&self) -> usize;
 
+    /// Returns the **in-degree** and **out-degree** of a given node.
+    ///
+    /// # Arguments
+    /// * `n` — The node whose degrees are being queried.
+    ///
+    /// # Returns
+    /// A tuple `(usize, usize)` where:
+    /// - The first element is the number of **incoming** edges.
+    /// - The second element is the number of **outgoing** edges.
     fn node_degrees(&self, n: Node) -> (usize, usize);
 
+    /// Returns an iterator over all nodes in the graph.
+    ///
+    /// The iterator yields each node exactly once.
+    ///
+    /// # Examples
+    /// ```
+    /// use graphs_algorithms::Graph;
+    /// use graphs_algorithms::graphs::AdjacencyList;
+    ///
+    /// let mut g = AdjacencyList::default();
+    /// g.add_node(1);
+    /// g.add_node(2);
+    /// let nodes: Vec<_> = g.nodes().collect();
+    /// assert_eq!(nodes, vec![0, 1]);
+    /// ```
     fn nodes(&self) -> impl Iterator<Item = Node>;
 
+    /// Adds a new node to the graph.
+    ///
+    /// If the node already exists, this operation has no effect.
     fn add_node(&mut self, n: Node);
 
+    /// Removes a node and all edges connected to it.
+    ///
+    /// If the node does not exist, this operation has no effect.
     fn remove_node(&mut self, n: Node);
 
+    /// Adds a **directed edge** from node `n` to node `m`.
+    ///
+    /// If either node does not exist, this operation has no effect.
     fn add_edge(&mut self, n: Node, m: Node);
 
+    /// Removes a **directed edge** from node `n` to node `m`, if it exists.
+    ///
+    /// If either node does not exist, this operation has no effect.
     fn remove_edge(&mut self, n: Node, m: Node);
 
+    /// The associated iterator type for the neighbors of a given node.
     type Neighbors<'a>: Iterator<Item = Node>
     where
         Self: 'a,
         Node: 'a;
+
+    /// Returns an iterator over all **neighbors** (adjacent nodes) of a given node.
+    ///
+    /// # Arguments
+    /// * `n` — The node whose outgoing neighbors are to be listed.
+    ///
+    /// # Examples
+    /// ```
+    /// use graphs_algorithms::Graph;
+    /// use graphs_algorithms::graphs::AdjacencyList;
+    ///
+    /// let mut g = AdjacencyList(vec![vec![], vec![], vec![]]);
+    /// g.add_edge(0, 1);
+    /// g.add_edge(0, 2);
+    ///
+    /// let neighbors: Vec<_> = g.neighbors(0).collect();
+    /// assert_eq!(neighbors, vec![1, 2]);
+    /// ```
     fn neighbors<'a>(&'a self, n: Node) -> Self::Neighbors<'a>;
 
-    fn biparted(&self) -> bool;
+    /// Checks whether the graph is **bipartite** and returns `true` or `false`
+    fn bipartite(&self) -> bool;
 
+    /// Returns the **underlying graph** of the current structure.
+    ///
+    /// This removes edge directionality, making each edge bidirectional.
     fn underlying_graph(&self) -> Self;
 
+    /// Returns `true` if there is a directed edge from node `n` to node `m`.
+    ///
+    /// # Examples
+    /// ```
+    /// use graphs_algorithms::Graph;
+    /// use graphs_algorithms::graphs::AdjacencyList;
+    ///
+    /// let mut g = AdjacencyList(vec![vec![], vec![]]);
+    /// g.add_edge(0, 1);
+    /// assert!(g.has_edge(0, 1));
+    /// assert!(!g.has_edge(1, 0));
+    /// ```
     fn has_edge(&self, n: Node, m: Node) -> bool {
         self.neighbors(n).any(|neighbor| neighbor == m)
     }
 
+    /// Returns an iterator that performs a **depth-first search (DFS)** starting from `start`.
+    ///
+    /// The iterator yields [`DfsEvent`] values that represent the traversal steps.
+    ///
+    /// # Examples
+    /// ```
+    /// use graphs_algorithms::{Graph, DfsEvent};
+    /// use graphs_algorithms::graphs::AdjacencyList;
+    ///
+    /// let mut g = AdjacencyList::default();
+    /// g.add_edge(0, 1);
+    /// g.add_edge(1, 2);
+    ///
+    /// let mut dfs = g.dfs(0);
+    /// while let Some(event) = dfs.next() {
+    ///     println!("{:?}", event);
+    /// }
+    /// ```
     fn dfs(&self, start: Node) -> DfsIter<'_, Node, Self>
     where
         Self: Sized,
@@ -42,6 +186,9 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         DfsIter::new(self, start)
     }
 
+    /// Returns an iterator that performs a **breadth-first search (BFS)** starting from `start`.
+    ///
+    /// The iterator yields [`BfsEvent`] values for each level of the search.
     fn bfs(&self, start: Node) -> BfsIter<'_, Node, Self>
     where
         Self: Sized,
@@ -49,6 +196,24 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         BfsIter::new(self, start)
     }
 
+    /// Returns an iterator that classifies all edges encountered during a DFS traversal.
+    ///
+    /// The classification follows standard DFS rules, producing edges of types:
+    /// [`Tree`], [`Back`], [`ParentBack`], [`Forward`], and [`Cross`].
+    ///
+    /// # Examples
+    /// ```
+    /// use graphs_algorithms::{Graph, Edge};
+    /// use graphs_algorithms::graphs::AdjacencyList;
+    ///
+    /// let mut g = AdjacencyList::default();
+    /// g.add_edge(0, 1);
+    /// g.add_edge(1, 0);
+    ///
+    /// for edge in g.classify_edges(0) {
+    ///     println!("{:?}", edge);
+    /// }
+    /// ```
     fn classify_edges(&self, start: Node) -> DfsEdgesIter<'_, Node, Self>
     where
         Self: Sized,
@@ -56,6 +221,7 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         DfsEdgesIter::new(self, start)
     }
 }
+
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
     fn undirected_size(&self) -> usize;

@@ -113,7 +113,7 @@ impl Graph<usize> for IncidenceMatrix {
         todo!()
     }
 
-    fn biparted(&self) -> bool {
+    fn bipartite(&self) -> bool {
         let n = self.order();
         if n == 0 {
             return true;
