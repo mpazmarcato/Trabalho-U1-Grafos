@@ -1,10 +1,10 @@
 use std::io::Error;
 
-use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList};
+use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
+use graphs_algorithms::utils::print_tip;
 
-static PATH: &str = "examples/output/dot/";
+static PATH: &str = "examples/dot/";
 fn main() {
-    // UNDIRECTED GRAPH
     let g1 = AdjacencyList(vec![
         vec![1, 7, 2],
         vec![3, 4, 0],
@@ -18,16 +18,27 @@ fn main() {
         vec![8],
     ]);
 
-    // print_list(&g1);
-    let _ = g1.export_undirected_bfs_to_dot(1, PATH.to_owned() + "bfs/bfs_1.dot");
+    println!("BFS on following undirected graph: ");
+    print_list(&g1);
+
+    let path1 = PATH.to_owned() + "bfs/bfs_1.dot";
+    let _ = g1.export_undirected_bfs_to_dot(1, path1.to_owned());
+    println!("Undirected graph was exported to dot file on path {}! ", path1);
 
     let res: Result<AdjacencyList, Error> =
         GraphIO::import_from_file("examples/data/DIGRAFO1.txt".to_owned());
 
     match res {
         Ok(dg) => {
-            let _ = dg.export_directed_bfs_to_dot(1, PATH.to_owned() + "bfs/bfs_2.dot");
+            println!("BFS on following digraph: ");
+            print_list(&g1);
+
+            let path2 = PATH.to_owned() + "bfs/bfs_2.dot";
+            let _ = dg.export_directed_bfs_to_dot(1, path2.to_owned());
+            println!("Digraph was exported to dot file on path {}! ", path2);
         }
-        Err(_) => todo!(),
+        Err(_) => println!("oops.. shouldn't fall here"),
     }
+
+    print_tip();
 }

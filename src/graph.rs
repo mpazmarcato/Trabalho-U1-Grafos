@@ -9,6 +9,8 @@ pub trait Graph<Node: Eq + Hash + Copy> {
 
     fn size(&self) -> usize;
 
+    fn node_degrees(&self, n: Node) -> (usize, usize);
+
     fn nodes(&self) -> impl Iterator<Item = Node>;
 
     fn add_node(&mut self, n: Node);
@@ -33,11 +35,6 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         self.neighbors(n).any(|neighbor| neighbor == m)
     }
 
-    // FIX: This should be the sum of the internal and external degree of `n`.
-    fn node_degree(&self, n: Node) -> usize {
-        self.neighbors(n).count()
-    }
-
     fn dfs(&self, start: Node) -> DfsIter<'_, Node, Self>
     where
         Self: Sized,
@@ -59,7 +56,6 @@ pub trait Graph<Node: Eq + Hash + Copy> {
         DfsEdgesIter::new(self, start)
     }
 
-    fn node_degrees(&self, n: Node) -> (usize, usize);
 }
 
 pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {

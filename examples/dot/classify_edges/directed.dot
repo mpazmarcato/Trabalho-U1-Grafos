@@ -1,0 +1,21 @@
+digraph G {
+  node [shape=circle];
+ 1 
+ 0 -> 1 
+ 3 
+ 1 -> 3 
+ 2 
+ 3 -> 2 
+ 4 
+ 3 -> 4 
+ 4 -> 1 [color=green, style=dashed]; 
+ 5 
+ 4 -> 5 
+ 5 -> 3 [color=green, style=dashed]; 
+ 0 -> 2 [color=pink, style=dashed]; 
+ 7 
+ 0 -> 7 
+ 6 
+ 7 -> 6 
+ 6 -> 5 [color=purple, style=dashed]; 
+ }

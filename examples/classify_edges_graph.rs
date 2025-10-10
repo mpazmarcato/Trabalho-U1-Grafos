@@ -1,6 +1,7 @@
-use graphs_algorithms::Edge;
+use graphs_algorithms::{print_list, Edge, GraphIO};
 use graphs_algorithms::Graph;
 use graphs_algorithms::graphs::AdjacencyList;
+use graphs_algorithms::utils::print_tip;
 
 fn main() {
     let digraph = AdjacencyList(vec![
@@ -15,27 +16,18 @@ fn main() {
         vec![4, 9],
         vec![],
     ]);
-    let to_ch = |i| match i {
-        0 => 's',
-        1 => 'a',
-        2 => 'b',
-        3 => 'c',
-        4 => 'd',
-        5 => 'e',
-        6 => 'f',
-        7 => 'g',
-        8 => 'h',
-        9 => 'i',
-        _ => panic!(),
-    };
+    println!("Digraph: ");
+    print_list(&digraph);
+
     let print_edge = |e| match e {
-        Edge::Tree(v, u) => println!("Tree: {} -> {}", to_ch(v), to_ch(u)),
+        Edge::Tree(v, u) => println!("Tree: {} -> {}", v, u),
         Edge::Back(v, u) | Edge::ParentBack(v, u) => {
-            println!("Back: {} -> {}", to_ch(v), to_ch(u))
+            println!("Back: {} -> {}", v, u)
         }
-        Edge::Forward(v, u) => println!("Forward: {} -> {}", to_ch(v), to_ch(u)),
-        Edge::Cross(v, u) => println!("Cross: {} -> {}", to_ch(v), to_ch(u)),
+        Edge::Forward(v, u) => println!("Forward: {} -> {}", v, u),
+        Edge::Cross(v, u) => println!("Cross: {} -> {}", v, u),
     };
+
     let mut iter = digraph.classify_edges(0);
     for e in &mut iter {
         print_edge(e);
@@ -44,4 +36,11 @@ fn main() {
     for e in &mut iter {
         print_edge(e)
     }
+
+    let path = "examples/dot/classify_edges/directed.dot";
+    let _ = digraph.export_directed_dfs_to_dot(0, path.to_string());
+
+    println!("Graph was exported to dot file on path {}! ", path);
+
+    print_tip();
 }

@@ -1,6 +1,7 @@
 use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
+use graphs_algorithms::utils::print_tip;
 
-static PATH: &str = "examples/dot/";
+static PATH: &str = "examples/dot/graph_exports_example/";
 
 fn main() {
     // UNDIRECTED GRAPHS
@@ -27,13 +28,13 @@ fn main() {
         Err(e) => println!("{e}"),
     }
 
-    let result2 = graph1.export_undirected_bfs_to_dot(6, PATH.to_owned() + "bfs/bfs_graph1.dot");
+    let result2 = graph1.export_undirected_bfs_to_dot(6, PATH.to_owned() + "bfs_graph1.dot");
     match result2 {
         Ok(_) => println!("Created BFS tree with 6 as root for the graph above!"),
         Err(e) => println!("{e}"),
     }
 
-    let result3 = graph1.export_undirected_dfs_to_dot(6, PATH.to_owned() + "dfs/dfs_graph1.dot");
+    let result3 = graph1.export_undirected_dfs_to_dot(6, PATH.to_owned() + "dfs_graph1.dot");
     match result3 {
         Ok(_) => println!("Created DFS tree with 6 as root for the graph above!"),
         Err(e) => println!("{e}"),
@@ -60,15 +61,17 @@ fn main() {
         Err(e) => println!("{e}"),
     }
 
-    let result5 = graph2.export_directed_bfs_to_dot(5, PATH.to_owned() + "bfs/bfs_graph2.dot");
+    let result5 = graph2.export_directed_bfs_to_dot(5, PATH.to_owned() + "bfs_graph2.dot");
     match result5 {
         Ok(_) => println!("Created BFS tree with 5 as root for the graph above!"),
         Err(e) => println!("{e}"),
     }
 
-    let result6 = graph2.export_directed_dfs_to_dot(5, PATH.to_owned() + "dfs/dfs_graph2.dot");
+    let result6 = graph2.export_directed_dfs_to_dot(5, PATH.to_owned() + "dfs_graph2.dot");
     match result6 {
         Ok(_) => println!("Created DFS tree with 5 as root for the graph above!"),
         Err(e) => println!("{e}"),
     }
+
+    print_tip();
 }
