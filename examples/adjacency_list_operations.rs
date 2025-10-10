@@ -1,76 +1,39 @@
 use graphs_algorithms::{Graph, UndirectedGraph, graphs::AdjacencyList, print_list};
 
-fn digraph_add() {
-    println!("Digraph!");
-    let mut directed_g = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
+fn main() {
+    println!("===== DIGRAPH OPERATIONS =====");
+    println!("Creating a digraph on adjacency list...");
+    let mut dg1 = AdjacencyList(vec![vec![3], vec![], vec![1], vec![1, 4], vec![5], vec![2]]);
+    print_list(&dg1);
 
-    println!("New node");
-    directed_g.add_node(3);
-    print_list(&directed_g);
+    println!("Adding new node: 6");
+    dg1.add_node(6);
+    print_list(&dg1);
 
-    println!("Edge 0 - 3");
-    directed_g.add_edge(0, 3);
-    print_list(&directed_g);
+    println!("Adding new edge 0 -> 6");
+    dg1.add_edge(0, 6);
+    print_list(&dg1);
 
-    println!("Edge 1 - 3");
-    directed_g.add_edge(1, 3);
-    print_list(&directed_g);
+    println!("Adding new edges 1 -> 6 and 1 -> 4");
+    dg1.add_edge(1, 6);
+    dg1.add_edge(1, 4);
+    print_list(&dg1);
 
-    println!("Edge 1 - 2");
-    directed_g.add_edge(1, 2);
-    print_list(&directed_g);
+    println!("Adding new edge 6 - 6");
+    dg1.add_edge(6, 6);
+    print_list(&dg1);
 
-    println!("Edge 3 - 3");
-    directed_g.add_edge(3, 3);
-    print_list(&directed_g);
-}
+    println!("Deleting edge 3 -> 1");
+    dg1.remove_edge(3, 1);
+    print_list(&dg1);
 
-fn digraph_delete() {
-    println!("Digraph!");
+    println!("Delete Node 6");
+    dg1.remove_node(6);
+    print_list(&dg1);
 
-    let mut directed_g =
-        AdjacencyList(vec![vec![3], vec![], vec![1], vec![1, 4], vec![5], vec![2]]);
-
-    print_list(&directed_g);
-
-    println!("Delete edge 3 -> 1");
-    directed_g.remove_edge(3, 1);
-    print_list(&directed_g);
-
-    println!("Delete Node 2");
-    directed_g.remove_node(2);
-    print_list(&directed_g);
-}
-
-fn undirected_graph_add() {
-    println!("Undirected graph!");
-    let mut undirected_g = AdjacencyList(vec![vec![1, 2], vec![0], vec![0]]);
-
-    println!("New node");
-    undirected_g.add_node(3);
-    print_list(&undirected_g);
-
-    println!("Edge 0 - 3");
-    undirected_g.add_undirected_edge(0, 3);
-    print_list(&undirected_g);
-
-    println!("Edge 1 - 3");
-    undirected_g.add_undirected_edge(1, 3);
-    print_list(&undirected_g);
-
-    println!("Edge 1 - 2");
-    undirected_g.add_undirected_edge(1, 2);
-    print_list(&undirected_g);
-
-    println!("Edge 3 - 3");
-    undirected_g.add_undirected_edge(3, 3);
-    print_list(&undirected_g);
-}
-
-fn undirected_graph_delete() {
-    println!("Undirected graph!");
-
-    let mut undirected_g = AdjacencyList(vec![
+    println!("===== UNDIRECTED GRAPH OPERATIONS =====");
+    println!("Creating an undirected graph on adjacency list...");
+    let mut ug1 = AdjacencyList(vec![
         vec![1, 2],
         vec![0, 2],
         vec![0, 1, 3, 4],
@@ -78,17 +41,25 @@ fn undirected_graph_delete() {
         vec![2],
     ]);
 
-    print_list(&undirected_g);
+    print_list(&ug1);
 
-    println!("Delete edge 2 -> 1");
-    undirected_g.remove_undirected_edge(2, 1);
-    print_list(&undirected_g);
+    println!("Adding new node: 6");
+    ug1.add_node(6);
+    print_list(&ug1);
+
+    println!("Adding edge 0 - 6");
+    ug1.add_undirected_edge(0, 6);
+    print_list(&ug1);
+
+    println!("Adding edge 5 - 6");
+    ug1.add_undirected_edge(5, 6);
+    print_list(&ug1);
+
+    println!("Deleting edge 2 -> 1");
+    ug1.remove_undirected_edge(2, 1);
+    print_list(&ug1);
 
     println!("Delete Node 2");
-    undirected_g.remove_node(2);
-    print_list(&undirected_g);
-}
-
-fn main() {
-    undirected_graph_delete();
+    ug1.remove_node(2);
+    print_list(&ug1);
 }

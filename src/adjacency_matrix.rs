@@ -40,23 +40,14 @@ impl Graph<usize> for AdjacencyMatrix {
             .sum()
     }
 
-    fn nodes(&self) -> impl Iterator<Item = usize> {
-        0..self.order()
+    fn node_degrees(&self, n: usize) -> (usize, usize) {
+        let out_deg = self.0[n].iter().filter(|&&v| v != 0).count();
+        let in_deg = self.0.iter().filter(|row| row[n] != 0).count();
+        (in_deg, out_deg)
     }
 
-    fn underlying_graph(&self) -> Self {
-        let mut matrix: AdjacencyMatrix =
-            AdjacencyMatrix(vec![vec![0; self.0.len()]; self.0.len()]);
-
-        for (idx_r, row) in self.0.iter().enumerate() {
-            for (idx_c, col) in row.iter().enumerate() {
-                if *col == 1 && !matrix.has_edge(idx_c, idx_r) {
-                    matrix.add_undirected_edge(idx_r, idx_c);
-                }
-            }
-        }
-
-        matrix
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
     }
 
     fn add_node(&mut self, _n: usize) {
@@ -70,18 +61,6 @@ impl Graph<usize> for AdjacencyMatrix {
         }
     }
 
-    /// Adds a new edge between two nodes `n` and `m`
-    fn add_edge(&mut self, n: usize, m: usize) {
-        if let Some(edges) = self.0.get_mut(n)
-            && let Some(edge) = edges.get_mut(m)
-        {
-            if *edge == 1 {
-                return;
-            }
-            *edge = 1;
-        }
-    }
-
     // Removes a node and its edges by its index
     fn remove_node(&mut self, n: usize) {
         if n < self.0.len() {
@@ -92,6 +71,18 @@ impl Graph<usize> for AdjacencyMatrix {
                 }
                 row.pop();
             }
+        }
+    }
+
+    /// Adds a new edge between two nodes `n` and `m`
+    fn add_edge(&mut self, n: usize, m: usize) {
+        if let Some(edges) = self.0.get_mut(n)
+            && let Some(edge) = edges.get_mut(m)
+        {
+            if *edge == 1 {
+                return;
+            }
+            *edge = 1;
         }
     }
 
@@ -157,10 +148,19 @@ impl Graph<usize> for AdjacencyMatrix {
         true
     }
 
-    fn node_degrees(&self, n: usize) -> (usize, usize) {
-        let out_deg = self.0[n].iter().filter(|&&v| v != 0).count();
-        let in_deg = self.0.iter().filter(|row| row[n] != 0).count();
-        (in_deg, out_deg)
+    fn underlying_graph(&self) -> Self {
+        let mut matrix: AdjacencyMatrix =
+            AdjacencyMatrix(vec![vec![0; self.0.len()]; self.0.len()]);
+
+        for (idx_r, row) in self.0.iter().enumerate() {
+            for (idx_c, col) in row.iter().enumerate() {
+                if *col == 1 && !matrix.has_edge(idx_c, idx_r) {
+                    matrix.add_undirected_edge(idx_r, idx_c);
+                }
+            }
+        }
+
+        matrix
     }
 }
 

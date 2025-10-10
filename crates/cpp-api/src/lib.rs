@@ -5,6 +5,7 @@ unsafe extern "C" {
     fn mk_adjacency_list(node_amt: usize) -> *mut std::ffi::c_void;
     fn add_edge_unchecked(graph: *mut std::ffi::c_void, n: usize, m: usize);
     fn dfs(graph: *mut std::ffi::c_void, start: usize);
+    fn bfs(graph: *mut std::ffi::c_void, start: usize);
 }
 
 pub struct AdjacencyListCpp {
@@ -39,5 +40,10 @@ impl AdjacencyListCpp {
     #[inline]
     pub fn dfs(&self, start: usize) {
         unsafe { dfs(self.ptr, start) }
+    }
+
+    #[inline]
+    pub fn bfs(&self, start: usize) {
+        unsafe { bfs(self.ptr, start) }
     }
 }

@@ -1,5 +1,5 @@
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
-use graphs_algorithms::{DfsEvent, Graph};
+use graphs_algorithms::{DfsEvent, Graph, print_list, print_matrix};
 
 fn main() {
     let m1 = AdjacencyMatrix(vec![
@@ -39,24 +39,18 @@ fn main() {
     let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
 
     println!("\nOriginal adjacency matrix:");
-    for row in &matrix.0 {
-        println!("{:?}", row);
-    }
+    print_matrix(&matrix);
 
     let list = AdjacencyList::from_adjacency_matrix(&matrix);
     println!("\nAdjacency matrix to adjacency list:");
-    for (i, neighbors) in list.0.iter().enumerate() {
-        println!("{}: {:?}", i, neighbors);
-    }
+    print_list(&list);
 
     let matrix2 = AdjacencyMatrix::from_adjacency_list(&list);
     println!("\nConverted back to adjacency matrix:");
-    for row in &matrix2.0 {
-        println!("{:?}", row);
-    }
+    print_matrix(&matrix2);
 
     println!(
-        "DFS visit count: {}",
+        "\nDFS visit count: {}",
         matrix
             .dfs(0)
             .filter(|e| matches!(e, DfsEvent::Discover(_, _)))
@@ -76,5 +70,8 @@ fn main() {
         vec![0],    // 2 → 0
     ]);
 
-    println!("Visitados no BFS: {}", list.bfs(0).count());
+    println!("\nNew list: ");
+    print_list(&list);
+
+    println!("BFS visit count on start 0: {}", list.bfs(0).count());
 }

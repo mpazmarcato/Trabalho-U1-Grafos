@@ -38,21 +38,18 @@ impl Graph<usize> for AdjacencyList {
         self.0.iter().map(|neighbors| neighbors.len()).sum()
     }
 
-    fn nodes(&self) -> impl Iterator<Item = usize> {
-        0..self.order()
+    fn node_degrees(&self, n: usize) -> (usize, usize) {
+        let out_deg = self.0.get(n).map_or(0, |neighbors| neighbors.len());
+        let in_deg = self
+            .0
+            .iter()
+            .filter(|neighbors| neighbors.contains(&n))
+            .count();
+        (in_deg, out_deg)
     }
 
-    fn underlying_graph(&self) -> Self {
-        let mut list = AdjacencyList(vec![Vec::new(); self.0.len()]);
-
-        for (idx_r, row) in self.0.iter().enumerate() {
-            for &col in row.iter() {
-                if !list.has_edge(idx_r, col) {
-                    list.add_undirected_edge(idx_r, col);
-                }
-            }
-        }
-        list
+    fn nodes(&self) -> impl Iterator<Item = usize> {
+        0..self.order()
     }
 
     fn add_node(&mut self, _n: usize) {
@@ -129,14 +126,17 @@ impl Graph<usize> for AdjacencyList {
         true
     }
 
-    fn node_degrees(&self, n: usize) -> (usize, usize) {
-        let out_deg = self.0.get(n).map_or(0, |neighbors| neighbors.len());
-        let in_deg = self
-            .0
-            .iter()
-            .filter(|neighbors| neighbors.contains(&n))
-            .count();
-        (in_deg, out_deg)
+    fn underlying_graph(&self) -> Self {
+        let mut list = AdjacencyList(vec![Vec::new(); self.0.len()]);
+
+        for (idx_r, row) in self.0.iter().enumerate() {
+            for &col in row.iter() {
+                if !list.has_edge(idx_r, col) {
+                    list.add_undirected_edge(idx_r, col);
+                }
+            }
+        }
+        list
     }
 }
 

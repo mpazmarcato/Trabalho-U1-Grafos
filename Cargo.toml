@@ -15,3 +15,11 @@ harness = false
 [[bench]]
 name = "micro_dfs_adjacency_list"
 harness = false
+
+[[bench]]
+name = "macro_bfs_adjacency_list"
+harness = false
+
+[[bench]]
+name = "micro_bfs_adjacency_list"
+harness = false
