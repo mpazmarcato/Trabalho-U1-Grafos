@@ -119,8 +119,6 @@ pub trait Graph<Node: Eq + Hash + Copy> {
     }
 }
 
-
-
 /// Trait defining operations for **undirected graphs**.
 ///
 /// Extends [`Graph`], treating each edge as a bidirectional connection `(n <-> m)`.
