@@ -2,15 +2,22 @@ use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyList, IncidenceMatrix};
 use crate::{Graph, GraphIO, UndirectedGraph};
 
+/// Represents a graph using an adjacency matrix.
+/// Each row corresponds to a node, and each cell of it contains 0 or 1,
+/// indicating whether an edge exists between the row's node and the column's node.
 #[derive(Debug, Clone)]
 pub struct AdjacencyMatrix(pub Vec<Vec<usize>>);
 
 impl AdjacencyMatrix {
-    pub fn from_adjacency_list(_list: &AdjacencyList) -> Self {
-        let n = _list.0.len();
+    /// Converts an adjacency list into an adjacency matrix.
+    ///
+    /// # Arguments
+    /// * `list` - Reference to the adjacency list.
+    pub fn from_adjacency_list(list: &AdjacencyList) -> Self {
+        let n = list.0.len();
         let mut adjacency_matrix: Vec<Vec<usize>> = vec![vec![0; n]; n];
 
-        for (i, neighbors) in _list.0.iter().enumerate() {
+        for (i, neighbors) in list.0.iter().enumerate() {
             for &j in neighbors {
                 adjacency_matrix[i][j] = 1;
             }
@@ -18,6 +25,12 @@ impl AdjacencyMatrix {
         AdjacencyMatrix(adjacency_matrix)
     }
 
+    /// Constructs an adjacency matrix from an incidence matrix.
+    ///
+    /// # Arguments
+    /// * `_matrix` - Reference to the incidence matrix.
+    /// # Note
+    /// This function is currently unimplemented and definitely will panic if you call it.
     pub fn from_incidency_matrix(_matrix: &IncidenceMatrix) -> Self {
         todo!()
     }
@@ -61,7 +74,6 @@ impl Graph<usize> for AdjacencyMatrix {
         }
     }
 
-    // Removes a node and its edges by its index
     fn remove_node(&mut self, n: usize) {
         if n < self.0.len() {
             self.0.remove(n);
@@ -74,7 +86,6 @@ impl Graph<usize> for AdjacencyMatrix {
         }
     }
 
-    /// Adds a new edge between two nodes `n` and `m`
     fn add_edge(&mut self, n: usize, m: usize) {
         if let Some(edges) = self.0.get_mut(n)
             && let Some(edge) = edges.get_mut(m)
@@ -109,7 +120,7 @@ impl Graph<usize> for AdjacencyMatrix {
         }
     }
 
-    fn biparted(&self) -> bool {
+    fn bipartite(&self) -> bool {
         let n = self.order();
         if n == 0 {
             return true;

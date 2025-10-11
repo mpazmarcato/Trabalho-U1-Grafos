@@ -1,10 +1,21 @@
 use crate::graphs::{AdjacencyList, AdjacencyMatrix};
 use crate::{Graph, UndirectedGraph};
 
+/// Represents a graph using an incidence matrix.
+/// Each row corresponds to an edge, and each column corresponds to a node.
+/// Cell values indicate the relationship between the edge and the node:
+/// `-1` for the source node, `1` for the target node, and `0` otherwise.
+/// # Note
+/// Many functions in this struct are currently `to-do`.
+/// The focus is on adjacency list and adjacency matrix for now.
 #[derive(Debug, Clone)]
 pub struct IncidenceMatrix(pub Vec<Vec<i32>>);
 
 impl IncidenceMatrix {
+    /// Constructs an incidence matrix from an adjacency matrix.
+    ///
+    /// # Arguments
+    /// * `matrix` - The adjacency matrix representing the graph.
     pub fn from_adjacency_matrix(matrix: &AdjacencyMatrix) -> Self {
         let n = matrix.0.len();
 
@@ -28,7 +39,11 @@ impl IncidenceMatrix {
         IncidenceMatrix(inc)
     }
 
-    pub fn from_adjacency_list_digraph(adj_list: &AdjacencyList) -> Self {
+    /// Constructs an incidence matrix from an adjacency list representing a directed graph.
+    ///
+    /// # Arguments
+    /// * `adj_list` - The adjacency list of a directed graph.
+    pub fn from_directed_adjacency_list(adj_list: &AdjacencyList) -> Self {
         let mut incidence_matrix: Vec<Vec<i32>> = Vec::new();
 
         for (c_out, v) in adj_list.0.iter().enumerate() {
@@ -45,7 +60,11 @@ impl IncidenceMatrix {
         IncidenceMatrix(incidence_matrix)
     }
 
-    pub fn from_adjacency_list_graph(adj_list: &AdjacencyList) -> Self {
+    /// Constructs an incidence matrix from an adjacency list representing an undirected graph.
+    ///
+    /// # Arguments
+    /// * `adj_list` - The adjacency list of an undirected graph.
+    pub fn from_undirected_adjacency_list(adj_list: &AdjacencyList) -> Self {
         let mut incidence_matrix: Vec<Vec<i32>> = Vec::new();
 
         for (c_out, v) in adj_list.0.iter().enumerate() {
@@ -113,7 +132,7 @@ impl Graph<usize> for IncidenceMatrix {
         todo!()
     }
 
-    fn biparted(&self) -> bool {
+    fn bipartite(&self) -> bool {
         let n = self.order();
         if n == 0 {
             return true;
@@ -244,7 +263,7 @@ mod tests {
             vec![0, 0, 0, 1, -1],
         ];
 
-        let incidence_matrix = IncidenceMatrix::from_adjacency_list_digraph(&adj_list);
+        let incidence_matrix = IncidenceMatrix::from_directed_adjacency_list(&adj_list);
 
         assert_eq!(incidence_matrix.0, answer);
     }
@@ -264,7 +283,7 @@ mod tests {
             vec![0, 0, 0, 1, 1],
         ];
 
-        let inc = IncidenceMatrix::from_adjacency_list_graph(&adjlist);
+        let inc = IncidenceMatrix::from_undirected_adjacency_list(&adjlist);
 
         assert_eq!(inc.0, answer);
     }
