@@ -6,6 +6,7 @@ mod graph_io;
 mod incidence_matrix;
 pub mod utils;
 
+pub use graph::BfsEvent;
 pub use graph::DfsEvent;
 pub use graph::Edge;
 pub use graph::Graph;

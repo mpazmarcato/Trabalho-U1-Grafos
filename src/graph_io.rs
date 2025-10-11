@@ -14,9 +14,9 @@ use crate::{DfsEvent, Edge, Graph, UndirectedGraph};
 /// (BFS and DFS) to DOT files for visualization and analysis.
 /// # Type Parameters
 /// - `Node`: The trait is generic over the node type `Node`,
-/// which must implement basic traits like `Copy`,
-/// `Eq`, `Hash`, `Display`, and `From<usize>` (the `From<usize>` requirement will be removed
-// /// in the future when non-integer node types are supported).
+///   which must implement basic traits like `Copy`,
+///   `Eq`, `Hash`, `Display`, and `From<usize>` (the `From<usize>` requirement will be removed
+///   in the future when non-integer node types are supported).
 pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     /// Imports a graph from a file. The file should define the number of nodes
     /// on the first line and edges on subsequent lines.
@@ -126,7 +126,6 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         Ok(())
     }
 
-
     /// Exports a directed DFS traversal with edge classification to a DOT file.
     ///
     /// # Arguments
@@ -183,10 +182,9 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
 /// to undirected-specific operations.
 /// # Type Parameters
 /// - `Node`: The trait is generic over the node type `Node`,
-/// which must implement basic traits like `Copy`,
-/// `Eq`, `Hash`, `Display`, and `From<usize>` (the `From<usize>` requirement will be removed
-// /// in the future when non-integer node types are supported).
-
+///   which must implement basic traits like `Copy`,
+///   `Eq`, `Hash`, `Display`, and `From<usize>` (the `From<usize>` requirement will be removed
+///   in the future when non-integer node types are supported).
 pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: GraphIO<Node> {
     /// Imports an undirected graph from a file. The file should define the number
     /// of nodes on the first line and edges on subsequent lines.
@@ -269,7 +267,6 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
 
         Ok(())
     }
-
 
     /// Exports an undirected DFS traversal to a DOT file.
     ///

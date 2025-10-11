@@ -14,7 +14,6 @@ use std::hash::Hash;
 /// # Type Parameters
 /// - `Node`: The type used to represent graph nodes.
 ///   Must implement [`Eq`], [`Hash`], and [`Copy`] to ensure efficient lookups.
-/// ```
 pub trait Graph<Node: Eq + Hash + Copy> {
     /// Creates a new and empty graph.
     fn new_empty() -> Self;
@@ -111,8 +110,7 @@ pub trait Graph<Node: Eq + Hash + Copy> {
 
     /// Returns an iterator that classifies all edges encountered during a DFS traversal.
     ///
-    /// The classification follows standard DFS rules, producing edges of types:
-    /// [`Tree`], [`Back`], [`ParentBack`], [`Forward`], and [`Cross`].
+    /// The classification follows standard DFS rules, producing edges of type ['Edge']
     fn classify_edges(&self, start: Node) -> DfsEdgesIter<'_, Node, Self>
     where
         Self: Sized,
