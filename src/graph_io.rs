@@ -7,7 +7,22 @@ use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 use crate::graph::BfsEvent;
 use crate::{DfsEvent, Edge, Graph, UndirectedGraph};
 
+/// Provides input/output capabilities for a directed graph.
+///
+/// This trait extends `Graph` with methods for importing a graph from a file
+/// and exporting it to DOT format. It also supports exporting traversal results
+/// (BFS and DFS) to DOT files for visualization and analysis.
+/// # Type Parameters
+/// - `Node`: The trait is generic over the node type `Node`,
+/// which must implement basic traits like `Copy`,
+/// `Eq`, `Hash`, `Display`, and `From<usize>` (the `From<usize>` requirement will be removed
+// /// in the future when non-integer node types are supported).
 pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
+    /// Imports a graph from a file. The file should define the number of nodes
+    /// on the first line and edges on subsequent lines.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the input file containing the graph.
     fn import_from_file(path: String) -> Result<Self, Error>
     where
         Self: Sized,
@@ -46,6 +61,10 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         Ok(graph)
     }
 
+    /// Exports the graph to a DOT file for visualization.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
     fn export_to_dot(&self, mut path: String) -> Result<(), Error> {
         if !path.contains(".dot") {
             path += ".dot";
@@ -69,6 +88,10 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         Ok(())
     }
 
+    /// Exports a directed BFS traversal starting from `start` to a DOT file.
+    /// # Arguments
+    /// * `start` - The starting node for the BFS traversal.
+    /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
     fn export_directed_bfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
     where
         Self: Sized,
@@ -103,6 +126,12 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         Ok(())
     }
 
+
+    /// Exports a directed DFS traversal with edge classification to a DOT file.
+    ///
+    /// # Arguments
+    /// * `start` - The starting node for the DFS traversal.
+    /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
     fn export_directed_dfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
     where
         Self: Sized,
@@ -146,38 +175,24 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     }
 }
 
+/// Provides input/output capabilities for an undirected graph.
+///
+/// This trait extends `GraphIO` with additional methods specific to undirected graphs,
+/// including importing/exporting undirected edges and traversals (BFS/DFS) to DOT files.
+/// It requires that the implementor also implements `UndirectedGraph`, ensuring access
+/// to undirected-specific operations.
+/// # Type Parameters
+/// - `Node`: The trait is generic over the node type `Node`,
+/// which must implement basic traits like `Copy`,
+/// `Eq`, `Hash`, `Display`, and `From<usize>` (the `From<usize>` requirement will be removed
+// /// in the future when non-integer node types are supported).
+
 pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: GraphIO<Node> {
-    fn export_undirected_to_dot(&self, mut path: String) -> Result<(), Error>
-    where
-        Self: Sized + UndirectedGraph<Node>,
-    {
-        if !path.contains(".dot") {
-            path += ".dot";
-        }
-
-        let mut file: File = File::create(&path)?;
-
-        let mut visited: Vec<Node> = vec![];
-
-        writeln!(file, "graph G {{")?;
-        writeln!(file, "  rankdir=LR;")?;
-        writeln!(file, "  node [shape=circle];")?;
-
-        for node in self.nodes() {
-            writeln!(file, " {} ", node)?;
-            for neighbor in self.neighbors(node) {
-                if !visited.contains(&neighbor) {
-                    writeln!(file, " {} -- {} ", node, neighbor)?;
-                }
-            }
-            visited.push(node);
-        }
-
-        writeln!(file, " }}")?;
-
-        Ok(())
-    }
-
+    /// Imports an undirected graph from a file. The file should define the number
+    /// of nodes on the first line and edges on subsequent lines.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the input file containing the undirected graph.
     fn import_undirected_from_file(path: String) -> Result<Self, Error>
     where
         Self: Sized + UndirectedGraph<Node>,
@@ -220,6 +235,47 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         Ok(graph)
     }
 
+    /// Exports an undirected graph to a DOT file.
+    ///
+    /// # Arguments
+    /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
+    fn export_undirected_to_dot(&self, mut path: String) -> Result<(), Error>
+    where
+        Self: Sized + UndirectedGraph<Node>,
+    {
+        if !path.contains(".dot") {
+            path += ".dot";
+        }
+
+        let mut file: File = File::create(&path)?;
+
+        let mut visited: Vec<Node> = vec![];
+
+        writeln!(file, "graph G {{")?;
+        writeln!(file, "  rankdir=LR;")?;
+        writeln!(file, "  node [shape=circle];")?;
+
+        for node in self.nodes() {
+            writeln!(file, " {} ", node)?;
+            for neighbor in self.neighbors(node) {
+                if !visited.contains(&neighbor) {
+                    writeln!(file, " {} -- {} ", node, neighbor)?;
+                }
+            }
+            visited.push(node);
+        }
+
+        writeln!(file, " }}")?;
+
+        Ok(())
+    }
+
+
+    /// Exports an undirected DFS traversal to a DOT file.
+    ///
+    /// # Arguments
+    /// * `start` - The starting node for the DFS traversal.
+    /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
     fn export_undirected_dfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
     where
         Self: Sized + UndirectedGraph<Node>,
@@ -272,6 +328,11 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
         Ok(())
     }
 
+    /// Exports an undirected BFS traversal to a DOT file.
+    ///
+    /// # Arguments
+    /// * `start` - The starting node for the BFS traversal.
+    /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
     fn export_undirected_bfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
     where
         Self: Sized + UndirectedGraph<Node>,
