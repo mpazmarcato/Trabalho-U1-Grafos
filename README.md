@@ -1,5 +1,7 @@
 # Trabalho Unidade 1 Grafos
 
+Vídeo que explica o funcionamento do projeto: https://drive.google.com/file/d/1dWUMXOR_W2P-UAwmElS3u4a4tlCy-9oE/view?usp=sharing 
+
 ## Estrutura do repositório em Rust 🦀
 
 ```bash
@@ -30,7 +32,7 @@ Unidade1-Grafos/
     ├── adjacency_matrix.rs # Implementação de um grafo como matriz de adjacência
     ├── incidence_matrix.rs # Implementação de um grafo como matriz de incidência
     ├── graph.rs            # Trait (Interface) de um grafo
-    ├── graph.rs            # Trait (Interface) de operações de leitura/escrita de grafos em arquivos
+    ├── graph_io.rs         # Trait (Interface) de operações de leitura/escrita de grafos em arquivos
     ├── utils.rs            # Funções de utilidade usadas nos examples
     └── lib.rs              # Re-exportação dos items da crate
     ...
