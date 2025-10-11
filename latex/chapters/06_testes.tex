@@ -9,7 +9,7 @@ flexibilidade da nossa implementação, o desempenho ainda fica próximo
 de versões tradicionais do algoritmo que não tem a mesma
 flexibilidade, implementadas em C++.
 
-\section{Metodologia de testes}
+\section{Metodologia}
 
 Os testes realizados vivem sob duas principais categorias,
 \textit{Micro Benchmarking} de alta precisão e \textit{Micro
@@ -98,7 +98,7 @@ quantidade estimada de ciclos da CPU, quantidade de instruções
 realizadas, quantos acertos de cache L1 e L2 e outros. O processo de
 configuração e uso é praticamente idêntico ao do Criterion.
 
-\section{Testes realizados}
+\section{Implementação dos testes}
 
 Vamos realizar testes apenas para a Busca em
 profundidade. Todos os testes serão realizados numa lista de
@@ -170,7 +170,7 @@ pub fn create_complete_graph(size: usize) -> AdjacencyMatrix {
 }
 \end{lstlisting}
 
-\subsubsection{Micro Benchmarking estatístico}
+\subsection{Micro Benchmarking estatístico}
 
 Realizamos 3 testes performando a busca num grafo completo, os testes
 se diferenciam pela ordem do grafo gerado. Foram gerados grafos com
@@ -213,7 +213,7 @@ criterion_group! {
 criterion_main!(benches);
 \end{lstlisting}
 
-\subsubsection{Micro Benchmarking de alta precisão}
+\subsection{Micro Benchmarking de alta precisão}
 
 No Micro Benchmark de alta precisão, foi realizado apenas um teste da busca em
 profundidade para um grafo completo com 1000 nós. É importante
