@@ -1,0 +1,189 @@
+\chapter{Descrição em Pseudocódigo dos Algoritmos da API}
+\label{ch:pseudocode}
+
+Neste capítulo, apresentamos a descrição, em linguagem de pseudocódigo, dos principais algoritmos definidos na especificação da API. O objetivo é proporcionar uma visão clara do funcionamento lógico das rotinas antes de sua implementação em Rust, estabelecendo um elo entre o modelo conceitual e o código-fonte.
+
+Os algoritmos apresentados baseiam-se em uma abstração comum de estruturas de grafos, contemplando tanto grafos não dirigidos quanto grafos dirigidos (dígrafos). Enquanto os primeiros modelam relações bidirecionais entre vértices, os dígrafos representam relações assimétricas, nas quais as arestas possuem direção definida. 
+
+\section{Dígrafos}
+O \texttt{trait} \texttt{Graph} é responsável por explicitar qual assinatura as funções que devem ser implementadas. Tal abordagem é coerente pois, como grafo se trata de um Tipo Abstrato de Dado, a implementação é uma particularização de cada Estrutura de Dados. E dentre a funções solicitadas para que uma estrutura possa implementar o trait grafo temos:
+
+\begin{itemize}
+  \item Criar um grafo vazio
+  \item Ordem e tamanho do grafo
+  \item Nós do grafo(através de um iterador)
+  \item Adicionar vértices e arestas
+  \item Remover nós e arestas
+  \item Vizinhos de um nós(através de um iterador)
+  \item Determinar se o grafo é bipartido
+  \item Grafo subjacente
+  \item Se dois nós compartilham uma aresta
+  \item Grau de um nó
+  \item Iterador a partir de uma BFS
+  \item Iterador a partir de uma DFS
+  \item Classificar arestas
+\end{itemize}
+
+\section{Grafos Não Direcionados}
+
+O \texttt{trait} \texttt{UndirectedGraph} estende o conceito de \texttt{Graph}, representando grafos em que as arestas não possuem direção. E uma vez que só se pode implementar caso \texttt{Graph} já tenha sido implementado anteriormente, a implementação das novas funções é trivial na maioria dos casos, pois recorre às implementações de \texttt{Graph}. A API define métodos específicos para:
+
+\begin{itemize}
+    \item Adicionar vértices e arestas;
+    \item Remover vértices e arestas;
+    \item Obter vizinhos de um vértice;
+    \item Determinar se o grafo é conexo
+    \item Grau de um nó
+    \item Iterador a partir de uma BFS
+    \item Iterador a partir de uma DFS
+    \item Identificar componentes biconexas(através de um iterador)
+\end{itemize}
+
+\section{Descrição em Pseudocódigo dos Algoritmos}
+
+A seguir, apresentamos os algoritmos da API em pseudocódigo. O objetivo é destacar sua lógica fundamental, sem referência direta à sintaxe de Rust, mas mantendo correspondência com o comportamento esperado dos iteradores.
+
+\subsection{Busca em Profundidade (DFS)}
+
+A busca em profundidade percorre o grafo a partir de um vértice inicial, explorando recursivamente os caminhos até o limite de cada ramo. 
+
+\begin{algorithm}
+  \caption{Busca em Profundidade}
+  \label{algo:algo_example}
+  \begin{algorithmic}[0]
+    \Require{$ \mathbf{G(V,A)}$, $v \in \mathbf{V}$}
+    \Ensure{$predecessor$ = [ ] (Lista do vizinho de cada vértice)}
+    \Statex
+    \Function{DFS}{$\mathbf{G(V,A), v}$}
+    \State {$predecessor$ $\gets$ [ ]}
+    \State {$predecessor[v]$ $\gets$ nulo}
+    \Statex
+    \State {$visitado$ $\gets$ [ ]}
+    \State {$visitado[v]$ $\gets$ $\mathbf{1}$}
+    \Statex
+    \State {$pilha$ $\gets$ [ ]}
+    \State {$pilha$ $\gets$ $empilhar(\mathbf{v})$}
+    \Statex
+    \While{pilha.tamanho() > 0}
+    \State {$u$ $\gets$ $topo(\mathbf{pilha})$}
+    \If{$ \exists$ uw $\in A(G)$ $\textbf{e}$ $visitado[w] \neq 1$}
+    \State {$predecessor[w]$ $\gets$ $\mathbf{u}$}
+    \State {$visitado[w]$ $\gets$ $\mathbf{1}$}
+    \State {$pilha$ $\gets$ {$empilhar(\textbf{w})$}}
+    \Else
+    \State {$pilha$ $\gets$ $desempilhar()$}
+    \EndIf
+    \EndWhile
+    \State \Return {$predecessor$}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+Essa lógica permite identificar ciclos, classificar arestas e analisar conectividade de forma eficiente.
+
+\subsection{Busca em Largura (BFS)}
+
+A busca em largura percorre o grafo por camadas, processando primeiro todos os vértices a uma mesma distância do ponto inicial antes de avançar para os níveis seguintes. O pseudocódigo é apresentado abaixo:
+
+\begin{algorithm}
+  \caption{Busca em Largura}
+  \label{algo:algo_example}
+  \begin{algorithmic}[1]
+    \Require{$ \mathbf{G(V,A)}$, $v \in \mathbf{V}$}
+    \Ensure{$predecessor$ = [ ] (Lista do vizinho de cada vértice)}
+    \Statex
+    \Function{BFS}{$\mathbf{G(V,A), v}$}
+    \State {$predecessor$ $\gets$ [ ]}
+    \State {$predecessor[v]$ $\gets$ nulo}
+    \Statex
+    \State {$visitado$ $\gets$ [ ]}
+    \State {$visitado[v]$ $\gets$ $\mathbf{1}$}
+    \Statex
+    \State {$fila$ $\gets$ [ ]}
+    \State {$fila$ $\gets$ $enfileirar(\mathbf{v})$}
+    \Statex
+    \While{fila.tamanho() > 0}
+    \State {$u$ $\gets$ $começo(\mathbf{fila})$}
+    \State {$fila$ $\gets$ $desenfileirar()$}
+    \For{$v \in $ u.vizinhos()}
+    \If{$visitado[v] \neq 1$}
+    \State {$predecessor[v]$ $\gets$ $\mathbf{u}$}
+    \State {$visitado[v]$ $\gets$ $\mathbf{1}$}
+    \State {$fila$ $\gets$ {$enfileirar(\textbf{v})$}}
+    \EndIf
+    \EndFor
+    \EndWhile
+    \State \Return {$predecessor$}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+O BFS é útil em problemas que requerem a descoberta de caminhos mínimos ou a análise de níveis de distância em grafos.
+
+\subsection{Classificação de Arestas}
+
+Durante a DFS, é possível classificar as arestas em diferentes categorias, que auxiliam na análise estrutural de dígrafos (grafos orientados):
+
+\begin{itemize}
+    \item \textbf{Tree Edge (Árvore):} Conecta um vértice a um filho na DFS.
+    \item \textbf{Back Edge (Retorno):} Conecta um vértice a um ancestral, indicando ciclo.
+    \item \textbf{Forward Edge (Avanço):} Conecta um vértice a um descendente não filho.
+    \item \textbf{Cross Edge (Cruzamento):} Conecta vértices em diferentes ramos da DFS.
+\end{itemize}
+
+\subsection{Componentes Biconexas}
+
+O algoritmo permite identificar componentes biconexas em grafos não direcionados. Mantém pilhas de arestas e tempos de descoberta para determinar subconjuntos de vértices que formam componentes biconexas.
+
+\begin{algorithm}
+  \caption{Componentes Bicônexas}
+  \label{algo:biconnected}
+  \begin{algorithmic}[1]
+    \Require{$\mathbf{G(V,A)}$}
+    \Ensure{Conjunto das componentes bicônexas de $\mathbf{G}$}
+    \Statex
+    \State {$visitado \gets [\,]$}
+    \State {$descoberta \gets [\,]$}
+    \State {$baixo \gets [\,]$}
+    \State {$pilha \gets [\,]$}
+    \State {$componentes \gets [\,]$}
+    \State {$tempo \gets 0$}
+    \Statex
+    \Function{biconnected}{$\mathbf{G(V,A)}$}
+      \For{$v \in \mathbf{V}$}
+        \If{$visitado[v] \neq 1$}
+          \State \Call{dfs\_biconnected}{$\mathbf{G, v, pai = nulo}$}
+        \EndIf
+      \EndFor
+      \State \Return{$componentes$}
+    \EndFunction
+    \Statex
+    \Function{dfs\_biconnected}{$\mathbf{G, v, pai}$}
+      \State {$visitado[v] \gets 1$}
+      \State {$tempo \gets tempo + 1$}
+      \State {$descoberta[v] \gets tempo$}
+      \State {$baixo[v] \gets tempo$}
+      \Statex
+      \For{$u \in v.vizinhos()$}
+        \If{$visitado[u] \neq 1$}
+          \State {$pilha$ $\gets$ {$empilhar(\textbf{(v,u)})$}}
+          \State \Call{dfs\_biconnected}{$\mathbf{G, u, v}$}
+          \State {$baixo[v] \gets \min(baixo[v], baixo[u])$}
+          \If{$baixo[u] \geq descoberta[v]$}
+            \State {$temp \gets [\,]$}
+            \While{$pilha.topo() \neq (v, u)$}
+              \State {$pilha$ $\gets$ {$desempilhar()$}}
+              \State {$temp$ $\gets$ {$adicionar(\textbf{(v',u')})$}}
+            \EndWhile
+            \State {$componentes$ $\gets$ temp}
+          \EndIf
+        \ElsIf{$u \neq pai$ \textbf{ e } $descoberta[u] < descoberta[v]$}
+          \State {$pilha$ $\gets$ {$empilhar(\textbf{(v,u)})$}}
+          \State {$baixo[v] \gets \min(baixo[v], descoberta[u])$}
+        \EndIf
+      \EndFor
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+No capítulo seguinte os conceitos abordados neste serão implementados para Lista de Adjacência, Matrix de Adjacência e Matriz de Incidência.
