@@ -11,7 +11,7 @@ Unidade1-Grafos/
 │   └── dfs_bench.rs
 │   ...
 ├── crates # Crates auxiliares
-│   └── cpp_api 
+│   └── cpp_api
 ├── examples # Programas de exemplo para testar implementações
 │   └── simple_tests.rs
 │   ...
@@ -44,11 +44,14 @@ Unidade1-Grafos/
 - [Texlive (full)](https://tug.org/texlive/) e Texlive-lang-portuguese: pode ser encontrado nos gerenciadores de pacote comuns.
 - [Docker](https://www.docker.com/): Alternativa para compilar o $\LaTeX$, caso não queira instalar o `texlive`
 - [Graphviz](https://www.graphviz.org/download/): Para converter os arquivos `.dot` em imagens `.png`
-- TODO
+- [Valgrind](https://valgrind.org/): Para prover informações para o Gungraun.
+- [Gungraun-runner](https://gungraun.github.io/gungraun/latest/html/installation/gungraun.html): Para executar os testes com o Gungraun.
+- [Gnuplot](http://gnuplot.info/) (opcional): Para a geração de gráficos do Criterion-rs.
+- [Clang](https://clang.llvm.org/): Compilador C++ para conseguir compilar API em C++.
 
 ### Compilação e testes
 
-#### Rust
+#### : Compilador C++ para conseguir compilar API de C++Rust
 
 ```bash
 # Compila o projeto
@@ -113,7 +116,8 @@ docker pull vleema/latex-compiler:latest
 
 ## Exemplos
 
-  No diretório `examples/` estão presentes diversos scripts que demonstram os usos da biblioteca principal. Estes são:
+No diretório `examples/` estão presentes diversos scripts que demonstram os usos da biblioteca principal. Estes são:
+
 - `adjacency_list_operations.rs`: cria grafos em uma Lista de Adjacência e adiciona/exclui vértices e arestas;
 - `adjacency_matrix_operations.rs`: cria grafos em uma Matriz de Adjacência e adiciona/exclui vértices e arestas;
 - `classify_edges_graph.rs`: executa a DFS em um digrafo, salvando a árvore resultante no diretório `dot/classify_edges`
