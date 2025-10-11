@@ -3,10 +3,17 @@ use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
 use crate::{Graph, GraphIO};
 
+/// Represents a graph using an adjacency list.
+/// Each index in the inner vector corresponds to a node, and the vector at that index
+/// contains the neighbors of that node.
 #[derive(Debug, Clone, Default)]
 pub struct AdjacencyList(pub Vec<Vec<usize>>);
 
 impl AdjacencyList {
+    /// Constructs an adjacency list from an adjacency matrix.
+    ///
+    /// # Arguments
+    /// * `matrix` - Reference to the adjacency matrix.
     pub fn from_adjacency_matrix(matrix: &AdjacencyMatrix) -> Self {
         let mut adjacency_list = vec![Vec::new(); matrix.0.len()];
 
@@ -20,6 +27,12 @@ impl AdjacencyList {
         AdjacencyList(adjacency_list)
     }
 
+    /// Constructs an adjacency list from an incidence matrix.
+    ///
+    /// # Arguments
+    /// * `matrix` - Reference to the incidence matrix.
+    /// # Note
+    /// This function is currently unimplemented and definitely will panic if you call it.
     pub fn from_incidence_matrix(_matrix: &IncidenceMatrix) -> Self {
         todo!()
     }
