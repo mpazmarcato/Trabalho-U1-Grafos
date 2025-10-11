@@ -14,8 +14,9 @@ fn bench_dfs_comparison(c: &mut Criterion) {
     let mut group = c.benchmark_group("dfs");
 
     for size in sizes {
-        let rust_list = AdjacencyList::from_adjacency_matrix(&create_complete_graph(size));
-        let cpp_list = AdjacencyListCpp::from_adjacency_matrix(&create_complete_graph(size));
+        let g = create_complete_graph(size);
+        let rust_list = AdjacencyList::from_adjacency_matrix(&g);
+        let cpp_list = AdjacencyListCpp::from_adjacency_matrix(&g);
 
         group.bench_with_input(BenchmarkId::new("rust", size), &size, |b, _| {
             b.iter(|| rust_list.dfs(0).for_each(|_| ()))
@@ -31,7 +32,8 @@ fn bench_dfs_comparison(c: &mut Criterion) {
 
 criterion_group! {
     name = benches;
-    config = Criterion::default().measurement_time(std::time::Duration::from_secs(30));
+    config = Criterion::default()
+        .measurement_time(std::time::Duration::from_secs(30));
     targets = bench_dfs_comparison
 }
 

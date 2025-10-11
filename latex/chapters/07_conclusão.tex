@@ -1,0 +1,79 @@
+\chapter{Conclusão e Melhorias}
+\label{ch:conclusão}
+
+Implementar uma API de Grafos em Rust sem dúvidas oferece diversas
+vantagens, além da segurança de memória, as abstrações permitem
+flexibilidade e reutilização de código, enquanto o baixo nível da
+linguagem permite um alto nível de controle e de performance sobre a
+implementação.
+
+Os traços permitem que as implementações sejam fiéis a especificação
+algébrica de grafos e permitem que as diversas representações
+compartilhem comportamento entre si.
+
+As implementações padrões nos traços permitem que
+os algoritmos sejam reutilizados dentre as representações sem
+oferecer nenhum custo adicional.
+
+A implementação de travessias como iteradores dá flexibilidade
+ao usuário por se integrar com a biblioteca padrão, e consequentemente
+permitir a composição com funções já existentes.
+
+O uso do Cargo permite que a biblioteca seja facilmente exportada
+publicamente e também permite que exemplos e benchmarks de código
+sejam facilmente configurados e executados independentemente da
+aplicação principal.
+
+Entretanto, naturalmente ainda há diversas possíveis melhorias que
+poderiam ser testadas e incorporadas na nossa implementação, dentre
+elas teríamos:
+
+\begin{itemize}
+  \item \textbf{Representação de um grafo usando tabelas hash}: Uma
+    coisa a se testar que pode ser interessante, é implementar um
+    grafo como uma tabela hash, isto é:
+    \begin{lstlisting}[language=Rust]
+      struct AdjacencyList<T>(HashMap<T, HashSet<T>>);
+    \end{lstlisting}
+    Uma implementação como essa poderia se aproveitar do acesso e
+    remoção médio em $O(1)$. Além disso, tal abordagem poderia se
+    valer da visitação de nós adjacentes de maneira rápida em grafos
+    esparsos, aproveitando tanto as vantagens do uso de uma lista de
+    adjacência quanto as de uma matriz de adjacência.
+  \item \textbf{Mapear usos ótimos do iterador na DFS}: Nos testes de
+    performance da DFS, apenas comparamos estatísticas relacionadas a
+    execução de uma busca num grafo completo, sem nenhuma aplicação
+    específica e sem que o compilador possa fazer suposições e
+    realizar otimizações mais agressivas. Seria interessante
+    identificar, trazer e analisar cenários em que o compilador
+    consiga fazer essas previsões e otimizar o código mais
+    agressivamente. É possível, inclusive, que tais otimizações tornem
+    o código com o iterador mais veloz que a versão tradicional em C++ ou Rust.
+  \item \textbf{Testes de performance para a busca em largura e
+    classificação de arestas}: Seria interessante trazer testes de
+    benchmark para outras travessias implementadas na base de código,
+    como a Busca em Largura, Classificação de Arestas e iteração sobre
+    vizinhos de um nó.
+  \item \textbf{Restrições estruturais sobre um grafo}: Na nossa
+    implementação o usuário tem total liberdade sobre se as funções
+    que vai usar num grafo não direcionado ou direcionado, podendo
+    possivelmente invalidar a estrutura interna dessas
+    representações. Adicionando arestas direcionadas num grafo não
+    direcionado, por exemplo. Seria interessante investigar se é
+    possível impor restrições nesse tipo de uso, para garantir a
+    consistência da estrutura em tempo de compilação. Um caminho para
+    alcançar esse objetivo talvez seja tipos de tamanho 0 e
+    \textit{type state patterns}.
+  \item \textbf{Iterador da DFS/BFS sem eventos de aresta de restorno
+    e de finalização:} Uma possibilidade a se considerar seria
+    implementar separadamente uma BFS e uma DFS que não se importam
+    com eventos de encontro de arestas de retorno e finalização de um
+    nó. Implementar um algoritmo separado dessa forma emplacaria
+    melhor performance e manteria a flexibilidade que um iterador
+    promove, mas perderia em termos do que pode ser feito durante uma busca.
+\end{itemize}
+
+% Sobre implementar a API de Grafos em Rust
+% Vantagens
+% Desvantagens
+% Melhorias
