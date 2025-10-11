@@ -3,7 +3,7 @@
 
 Neste capítulo, apresentamos a descrição, em linguagem de pseudocódigo, dos principais algoritmos definidos na especificação da API. O objetivo é proporcionar uma visão clara do funcionamento lógico das rotinas antes de sua implementação em Rust, estabelecendo um elo entre o modelo conceitual e o código-fonte.
 
-Cada algoritmo é expresso de forma estruturada e independente de linguagem, destacando apenas o fluxo essencial das operações. Essa abordagem facilita a compreensão dos procedimentos, sem se prender a detalhes sintáticos da linguagem de implementação.
+Os algoritmos apresentados baseiam-se em uma abstração comum de estruturas de grafos, contemplando tanto grafos não dirigidos quanto grafos dirigidos (dígrafos). Enquanto os primeiros modelam relações bidirecionais entre vértices, os dígrafos representam relações assimétricas, nas quais as arestas possuem direção definida. 
 
 \section{Dígrafos}
 O \texttt{trait} \texttt{Graph} é responsável por explicitar qual assinatura as funções que devem ser implementadas. Tal abordagem é coerente pois, como grafo se trata de um Tipo Abstrato de Dado, a implementação é uma particularização de cada Estrutura de Dados. E dentre a funções solicitadas para que uma estrutura possa implementar o trait grafo temos:
@@ -38,8 +38,6 @@ O \texttt{trait} \texttt{UndirectedGraph} estende o conceito de \texttt{Graph}, 
     \item Iterador a partir de uma DFS
     \item Identificar componentes biconexas(através de um iterador)
 \end{itemize}
-
-Grafos não direcionados são fundamentais para modelar problemas onde a direção não é relevante.
 
 \section{Descrição em Pseudocódigo dos Algoritmos}
 
@@ -124,7 +122,7 @@ O BFS é útil em problemas que requerem a descoberta de caminhos mínimos ou a 
 
 \subsection{Classificação de Arestas}
 
-Durante a DFS, é possível classificar as arestas em diferentes categorias, que auxiliam na análise estrutural do dígrafo:
+Durante a DFS, é possível classificar as arestas em diferentes categorias, que auxiliam na análise estrutural de dígrafos (grafos orientados):
 
 \begin{itemize}
     \item \textbf{Tree Edge (Árvore):} Conecta um vértice a um filho na DFS.
@@ -187,7 +185,5 @@ O algoritmo permite identificar componentes biconexas em grafos não direcionado
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
-
-O algoritmo também permite analisar a conectividade crítica do grafo, identificando vértices e arestas cuja remoção aumentaria o número de componentes conectadas.
 
 No capítulo seguinte os conceitos abordados neste serão implementados para Lista de Adjacência, Matrix de Adjacência e Matriz de Incidência.
