@@ -1,10 +1,92 @@
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
 use graphs_algorithms::utils::print_incidence_matrix;
-use graphs_algorithms::{Graph, UndirectedGraph, UndirectedGraphIO, print_list, print_matrix};
-use std::io::Error;
+use graphs_algorithms::{
+    Graph, GraphIO, UndirectedGraph, UndirectedGraphIO, print_list, print_matrix,
+};
+use std::io;
+use std::io::{Error, Write, stdin};
+
+fn clear() {
+    print!("\x1B[2J\x1B[1;1H");
+}
+
 
 fn main() {
-    println!("Bem vindo/a à demo! Aqui, vamos passar por cada questão do trabalho de grafos.");
+    loop {
+        println!("========================================");
+        println!("Bem-vindo/a à DEMO do trabalho de Grafos!");
+        println!("Escolha a execução que deseja visualizar:");
+        println!("1 - Grafos Não Orientados");
+        println!("2 - Digrafos");
+        println!("0 - Sair");
+        print!("> ");
+        io::stdout().flush().unwrap();
+
+        let mut opt = String::new();
+        io::stdin().read_line(&mut opt).unwrap();
+        let opt = opt.trim();
+
+        match opt {
+            "1" => demo_undirected(),
+            "2" => demo_directed(),
+            "0" => {
+                println!("Encerrando a execução...");
+                break;
+            }
+            _ => println!("Opção inválida. Tente novamente."),
+        }
+    }
+}
+
+fn demo_directed() {
+    println!("SEÇÃO DE DIGRAFOS!");
+
+    println!("1 - Representação do digrafo a partir da Matriz de Adjacência");
+    println!("- Importando do arquivo DIGRAFO1.txt...");
+    let res1: Result<AdjacencyMatrix, Error> =
+        GraphIO::import_from_file("examples/data/DIGRAFO1.txt".to_string());
+    let am1 = res1.unwrap();
+    println!("- Temos a seguinte matriz: ");
+    print_matrix(&am1);
+
+    println!("2 - Representação do digrafo a partir da Matriz de Incidência");
+    println!("- Importando do arquivo DIGRAFO1.txt...");
+    let im1 = IncidenceMatrix::from_adjacency_matrix(&am1);
+    println!("- Temos a seguinte matriz: ");
+    print_incidence_matrix(&im1);
+
+    println!("3 - Determinação do grafo subjacente");
+    println!("- Criando lista de Adjacência a partir do DIGRAFO2.txt...");
+    let res3: Result<AdjacencyList, Error> =
+        GraphIO::import_from_file("examples/data/DIGRAFO2.txt".to_string());
+    let l3 = res3.unwrap();
+    println!("- Temos o seguinte digrafo: ");
+    print_list(&l3);
+    println!("- Seu grafo subjacente é, portanto: ");
+    print_list(&l3.underlying_graph());
+
+    println!("4 - Busca em Largura");
+    println!("- Vamos aplicar a BFS na lista anterior a partir de dois vértices.");
+    println!("- Vértice 0: resultado salvo em examples/dot/demo/digraph/bfs1.dot");
+    let _ = l3.export_directed_bfs_to_dot(0, "examples/dot/demo/digraph/bfs1.dot".to_string());
+    println!("- Vértice 9: resultado salvo em examples/dot/demo/digraph/bfs2.dot");
+    let _ = l3.export_directed_bfs_to_dot(9, "examples/dot/demo/digraph/bfs2.dot".to_string());
+    println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
+
+    println!(
+        "5 - Busca em Profundidade com determinação de profundidade de entrada e saída e classificação de arestas"
+    );
+    println!(
+        "- Vamos aplicar a DFS com classificação de arestas na lista anterior a partir de dois vértices."
+    );
+    println!("- Vértice 0: resultado salvo em examples/dot/demo/digraph/dfs1.dot");
+    let _ = l3.export_directed_dfs_to_dot(0, "examples/dot/demo/digraph/dfs1.dot".to_string());
+    println!("- Vértice 9: resultado salvo em examples/dot/demo/digraph/dfs2.dot");
+    let _ = l3.export_directed_dfs_to_dot(9, "examples/dot/demo/digraph/dfs2.dot".to_string());
+    println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
+}
+
+fn demo_undirected() {
     println!("SEÇÃO DE GRAFOS NÃO ORIENTADOS!");
 
     println!("1 - Criação do grafo a partir da Lista de Adjacências");
@@ -126,18 +208,22 @@ fn main() {
 
     println!("13 - Busca em Largura");
     println!("- Vamos aplicar a BFS na lista anterior a partir de dois vértices.");
-    println!("- Vértice 0: resultado salvo em examples/dot/demo/bfs1.dot");
-    let _ = l9.export_undirected_bfs_to_dot(0, "examples/dot/demo/bfs1.dot".to_string());
-    println!("- Vértice 9: resultado salvo em examples/dot/demo/bfs2.dot");
-    let _ = l9.export_undirected_bfs_to_dot(9, "examples/dot/demo/bfs2.dot".to_string());
+    println!("- Vértice 0: resultado salvo em examples/dot/demo/undirected_graph/bfs1.dot");
+    let _ = l9
+        .export_undirected_bfs_to_dot(0, "examples/dot/demo/undirected_graph/bfs1.dot".to_string());
+    println!("- Vértice 9: resultado salvo em examples/dot/demo/undirected_graph/bfs2.dot");
+    let _ = l9
+        .export_undirected_bfs_to_dot(9, "examples/dot/demo/undirected_graph/bfs2.dot".to_string());
     println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
 
     println!("14 - Busca em Profundidade com Arestas de Retorno");
     println!("- Vamos aplicar a DFS na lista anterior a partir de dois vértices.");
-    println!("- Vértice 0: resultado salvo em examples/dot/demo/dfs1.dot");
-    let _ = l9.export_undirected_dfs_to_dot(0, "examples/dot/demo/dfs1.dot".to_string());
-    println!("- Vértice 9: resultado salvo em examples/dot/demo/dfs2.dot");
-    let _ = l9.export_undirected_dfs_to_dot(9, "examples/dot/demo/dfs2.dot".to_string());
+    println!("- Vértice 0: resultado salvo em examples/dot/demo/undirected_graph/dfs1.dot");
+    let _ = l9
+        .export_undirected_dfs_to_dot(0, "examples/dot/demo/undirected_graph/dfs1.dot".to_string());
+    println!("- Vértice 9: resultado salvo em examples/dot/demo/undirected_graph/dfs2.dot");
+    let _ = l9
+        .export_undirected_dfs_to_dot(9, "examples/dot/demo/undirected_graph/dfs2.dot".to_string());
     println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
 
     println!("15 - Determinação de articulações e blocos (biconectividade)");
