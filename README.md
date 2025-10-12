@@ -1,6 +1,6 @@
 # Trabalho Unidade 1 Grafos
 
-Vídeo que explica o funcionamento do projeto: https://drive.google.com/file/d/1dWUMXOR_W2P-UAwmElS3u4a4tlCy-9oE/view?usp=sharing 
+Vídeo que explica o funcionamento do projeto: <https://drive.google.com/file/d/1dWUMXOR_W2P-UAwmElS3u4a4tlCy-9oE/view?usp=sharing>
 
 ## Estrutura do repositório em Rust 🦀
 
@@ -13,7 +13,8 @@ Unidade1-Grafos/
 │   └── dfs_bench.rs
 │   ...
 ├── crates # Crates auxiliares
-│   └── cpp_api
+│   └── cpp_api # Crate que implementa grafos em C++
+│   └── graph-io # Crate que implementa operações de leitura/escrita de grafos em arquivos
 ├── examples # Programas de exemplo para testar implementações
 │   └── simple_tests.rs
 │   ...
@@ -32,8 +33,6 @@ Unidade1-Grafos/
     ├── adjacency_matrix.rs # Implementação de um grafo como matriz de adjacência
     ├── incidence_matrix.rs # Implementação de um grafo como matriz de incidência
     ├── graph.rs            # Trait (Interface) de um grafo
-    ├── graph_io.rs         # Trait (Interface) de operações de leitura/escrita de grafos em arquivos
-    ├── utils.rs            # Funções de utilidade usadas nos examples
     └── lib.rs              # Re-exportação dos items da crate
     ...
 ```
