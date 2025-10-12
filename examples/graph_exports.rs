@@ -1,5 +1,6 @@
-use graphs_algorithms::utils::print_tip;
-use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
+use graph_io::print;
+use graph_io::{GraphIO, UndirectedGraphIO};
+use graphs_algorithms::graphs::AdjacencyList;
 
 static PATH: &str = "examples/dot/graph_exports_example/";
 
@@ -20,7 +21,7 @@ fn main() {
     ]);
 
     println!("[UNDIRECTED] Graph 1: ");
-    print_list(&graph1);
+    print::list(&graph1);
 
     let result1 = graph1.export_undirected_to_dot(PATH.to_owned() + "graph1.dot");
     match result1 {
@@ -53,7 +54,7 @@ fn main() {
     ]);
 
     println!("[DIRECTED] Graph 2: ");
-    print_list(&graph2);
+    print::list(&graph2);
 
     let result4 = graph2.export_to_dot(PATH.to_owned() + "graph2.dot");
     match result4 {
@@ -73,5 +74,5 @@ fn main() {
         Err(e) => println!("{e}"),
     }
 
-    print_tip();
+    print::tip();
 }

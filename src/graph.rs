@@ -14,10 +14,7 @@ use std::hash::Hash;
 /// # Type Parameters
 /// - `Node`: The type used to represent graph nodes.
 ///   Must implement [`Eq`], [`Hash`], and [`Copy`] to ensure efficient lookups.
-pub trait Graph<Node: Eq + Hash + Copy> {
-    /// Creates a new and empty graph.
-    fn new_empty() -> Self;
-
+pub trait Graph<Node: Eq + Hash + Copy>: Default {
     /// Returns the number of nodes (vertices) in the graph.
     fn order(&self) -> usize;
 

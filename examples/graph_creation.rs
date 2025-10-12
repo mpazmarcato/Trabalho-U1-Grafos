@@ -1,6 +1,8 @@
 use std::io::Error;
 
-use graphs_algorithms::{UndirectedGraphIO, graphs::AdjacencyMatrix, print_matrix};
+use graph_io::UndirectedGraphIO;
+use graph_io::print;
+use graphs_algorithms::graphs::AdjacencyMatrix;
 
 static PATH: &str = "examples/data/";
 fn main() {
@@ -12,7 +14,7 @@ fn main() {
         UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
 
     let m1 = res.unwrap();
-    print_matrix(&m1);
+    print::matrix(&m1);
 
     println!(
         "Trying to import graph without integer nodes from {} ",

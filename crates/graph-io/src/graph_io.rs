@@ -4,8 +4,8 @@ use std::fs::File;
 use std::hash::Hash;
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 
-use crate::graph::BfsEvent;
-use crate::{DfsEvent, Edge, Graph, UndirectedGraph};
+use graphs_algorithms::BfsEvent;
+use graphs_algorithms::{DfsEvent, Edge, Graph, UndirectedGraph};
 
 /// Provides input/output capabilities for a directed graph.
 ///
@@ -27,7 +27,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     where
         Self: Sized,
     {
-        let mut graph = Self::new_empty();
+        let mut graph = Self::default();
         let file = File::open(path).unwrap();
         let reader = BufReader::new(file);
 
@@ -195,7 +195,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
     where
         Self: Sized + UndirectedGraph<Node>,
     {
-        let mut graph = Self::new_empty();
+        let mut graph = Self::default();
         let file = File::open(path).unwrap();
         let reader = BufReader::new(file);
 
@@ -378,5 +378,144 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
 
         writeln!(file, "}}")?;
         Ok(())
+    }
+}
+
+impl<N: Copy + Eq + Hash + Display + From<usize>, G: Graph<N>> GraphIO<N> for G {}
+
+impl<N: Copy + Eq + Hash + Display + From<usize>, G: GraphIO<N>> UndirectedGraphIO<N> for G {}
+
+#[cfg(test)]
+mod test {
+    use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix};
+
+    use super::*;
+
+    static PATH: &str = "../../examples/data/";
+
+    #[test]
+    fn adj_list_new_digraph_1() {
+        let result: std::io::Result<AdjacencyList> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
+
+        assert!(result.is_ok());
+
+        if let Ok(matrix) = result {
+            assert!(matrix.order() == 13);
+            assert!(matrix.size() == 16);
+        }
+    }
+
+    #[test]
+    fn adj_list_new_digraph_2() {
+        let result: Result<AdjacencyList, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
+
+        assert!(result.is_ok());
+
+        if let Ok(matrix) = result {
+            assert!(matrix.order() == 13);
+            assert!(matrix.size() == 17);
+        }
+    }
+
+    #[test]
+    fn adj_list_new_digraph_error_1() {
+        let result: Result<AdjacencyList, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(result.is_err());
+
+        match result {
+            Ok(_) => {}
+            Err(err) => {
+                assert!(err.kind() == ErrorKind::InvalidData);
+                assert!(err.to_string().contains("Invalid data was found"));
+            }
+        }
+    }
+
+    #[test]
+    fn adj_list_new_undirected_graph_1() {
+        let res: Result<AdjacencyList, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+
+        assert!(res.is_ok());
+
+        if let Ok(list) = res {
+            assert!(list.order() == 11);
+            assert!(list.undirected_size() == 13);
+        }
+    }
+
+    #[test]
+    fn adj_list_new_undirected_graph_2() {
+        let res: Result<AdjacencyList, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn adj_matrix_new_digraph_1() {
+        let result: Result<AdjacencyMatrix, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
+
+        assert!(result.is_ok());
+
+        if let Ok(matrix) = result {
+            assert!(matrix.order() == 13);
+            assert!(matrix.size() == 16);
+        }
+    }
+
+    #[test]
+    fn adj_matrix_new_digraph_2() {
+        let result: Result<AdjacencyMatrix, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
+
+        assert!(result.is_ok());
+
+        if let Ok(matrix) = result {
+            assert!(matrix.order() == 13);
+            assert!(matrix.size() == 17);
+        }
+    }
+
+    #[test]
+    fn adj_matrix_new_digraph_error_1() {
+        let result: Result<AdjacencyMatrix, Error> =
+            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(result.is_err());
+
+        match result {
+            Ok(_) => {}
+            Err(err) => {
+                assert!(err.kind() == ErrorKind::InvalidData);
+                assert!(err.to_string().contains("Invalid data was found"));
+            }
+        }
+    }
+
+    #[test]
+    fn adj_matrix_new_undirected_graph_1() {
+        let res: Result<AdjacencyMatrix, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+
+        assert!(res.is_ok());
+
+        if let Ok(list) = res {
+            assert!(list.order() == 11);
+            assert!(list.undirected_size() == 13);
+        }
+    }
+
+    #[test]
+    fn adj_matrix_new_undirected_graph_2() {
+        let res: Result<AdjacencyMatrix, Error> =
+            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
+
+        assert!(res.is_err());
     }
 }

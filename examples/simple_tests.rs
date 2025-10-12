@@ -1,5 +1,6 @@
+use graph_io::print;
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
-use graphs_algorithms::{DfsEvent, Graph, print_list, print_matrix};
+use graphs_algorithms::{DfsEvent, Graph};
 
 fn main() {
     let m1 = AdjacencyMatrix(vec![
@@ -39,15 +40,15 @@ fn main() {
     let matrix = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 0], vec![1, 0, 0]]);
 
     println!("\nOriginal adjacency matrix:");
-    print_matrix(&matrix);
+    print::matrix(&matrix);
 
     let list = AdjacencyList::from_adjacency_matrix(&matrix);
     println!("\nAdjacency matrix to adjacency list:");
-    print_list(&list);
+    print::list(&list);
 
     let matrix2 = AdjacencyMatrix::from_adjacency_list(&list);
     println!("\nConverted back to adjacency matrix:");
-    print_matrix(&matrix2);
+    print::matrix(&matrix2);
 
     println!(
         "\nDFS visit count: {}",
@@ -71,7 +72,7 @@ fn main() {
     ]);
 
     println!("\nNew list: ");
-    print_list(&list);
+    print::list(&list);
 
     println!("BFS visit count on start 0: {}", list.bfs(0).count());
 }
