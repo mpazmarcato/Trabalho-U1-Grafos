@@ -72,4 +72,90 @@ fn main() {
         "- Para a matriz da questão 04, temos que o tamanho do grafo é {}",
         m4.undirected_size()
     );
+
+    println!("9 - Inclusão de um novo vértice");
+    println!("9.1 - Lista de Adjacência");
+    let mut l9 = l4.clone();
+    println!("- Temos a seguinte lista: ");
+    print_list(&l9);
+    println!("- Adicionemos dois novos vértices inicialmente sem arestas: ");
+    l9.add_node(11);
+    l9.add_node(12);
+    println!("- Agora, a lista é: ");
+    print_list(&l9);
+
+    println!("9.2 - Matriz de Adjacência");
+    let mut m9 = m4.clone();
+    println!("Temos a seguinte matriz: ");
+    print_matrix(&m9);
+    println!("- Adicionemos dois novos vértices inicialmente sem arestas.");
+    m9.add_node(11);
+    m9.add_node(12);
+    println!("- Agora, a matriz é: ");
+    print_matrix(&m9);
+
+    println!("10 - Exclusão de um vértice");
+    println!("10.1 - Lista de Adjacência");
+    println!("- Considerando a lista passada, vamos eliminar os nós 5 e 11. ");
+    l9.remove_node(5);
+    l9.remove_node(11);
+    println!("- Agora, a lista com os nós atualizados é: ");
+    print_list(&l9);
+
+    println!("10.2 - Matriz de Adjacência");
+    println!("- Considerando a matriz passada, vamos eliminar os nós 5 e 11. ");
+    m9.remove_node(5);
+    m9.remove_node(11);
+    println!("- Agora, a matriz com os nós atualizados é: ");
+    print_matrix(&m9);
+
+    println!("11 - Função que determina se um grafo é conexo");
+    println!("- Considerando a lista do tópico 10, vamos investigar. ");
+    println!("- O grafo é conexo: {}", l9.connected());
+    println!("- Adicionando arestas para os nós 5, 9 e 10.");
+    l9.add_undirected_edge(1, 5);
+    l9.add_undirected_edge(4, 5);
+    l9.add_undirected_edge(5, 10);
+    l9.add_undirected_edge(9, 0);
+    println!("- O grafo é conexo: {}", l9.connected());
+
+    println!("12 - Determinar se um grafo é bipartido");
+    println!("- Considerando a seguinte lista: ");
+    print_list(&l9);
+    println!("- O grafo é bipartido: {}", l9.bipartite());
+
+    println!("13 - Busca em Largura");
+    println!("- Vamos aplicar a BFS na lista anterior a partir de dois vértices.");
+    println!("- Vértice 0: resultado salvo em examples/dot/demo/bfs1.dot");
+    let _ = l9.export_undirected_bfs_to_dot(0, "examples/dot/demo/bfs1.dot".to_string());
+    println!("- Vértice 9: resultado salvo em examples/dot/demo/bfs2.dot");
+    let _ = l9.export_undirected_bfs_to_dot(9, "examples/dot/demo/bfs2.dot".to_string());
+    println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
+
+    println!("14 - Busca em Profundidade com Arestas de Retorno");
+    println!("- Vamos aplicar a DFS na lista anterior a partir de dois vértices.");
+    println!("- Vértice 0: resultado salvo em examples/dot/demo/dfs1.dot");
+    let _ = l9.export_undirected_dfs_to_dot(0, "examples/dot/demo/dfs1.dot".to_string());
+    println!("- Vértice 9: resultado salvo em examples/dot/demo/dfs2.dot");
+    let _ = l9.export_undirected_dfs_to_dot(9, "examples/dot/demo/dfs2.dot".to_string());
+    println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
+
+    println!("15 - Determinação de articulações e blocos (biconectividade)");
+    println!(
+        "- Vamos aplicar o algoritmo de biconectividade na lista anterior a partir do vértice 0."
+    );
+    let mut iter = l9.biconnected_components(0);
+    let mut components = Vec::new();
+    while let Some(component) = iter.next() {
+        components.push(component);
+    }
+    println!("Componentes biconectados (arestas):");
+    for (i, comp) in components.iter().enumerate() {
+        println!("  Componente {}:", i + 1);
+        for (u, v) in comp {
+            println!("    ({}, {})", u, v);
+        }
+    }
+
+    println!("FIM DA SEÇÃO DE GRAFOS NÃO ORIENTADOS");
 }
