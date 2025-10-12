@@ -1,13 +1,12 @@
-use graphs_algorithms::UndirectedGraph;
+use graph_io::print;
 use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix};
-use graphs_algorithms::utils::print_incidence_matrix;
-use graphs_algorithms::{Graph, print_list, print_matrix};
+use graphs_algorithms::{Graph, UndirectedGraph};
 
 fn main() {
     let dg1 = AdjacencyList(vec![vec![1, 3], vec![2], vec![1], vec![2, 4], vec![]]);
 
     println!("Current digraph on adjacency list:");
-    print_list(&dg1);
+    print::list(&dg1);
 
     println!("Graph order: {} ", dg1.order());
     println!("Graph size: {} ", dg1.size());
@@ -22,7 +21,7 @@ fn main() {
 
     let ug1 = AdjacencyMatrix(vec![vec![0, 1, 1], vec![1, 0, 1], vec![1, 1, 0]]);
     println!("Current undirected graph on adjacency matrix:");
-    print_matrix(&ug1);
+    print::matrix(&ug1);
 
     println!("Graph order: {} ", ug1.order());
     println!("Graph size: {} ", ug1.undirected_size());
@@ -34,7 +33,7 @@ fn main() {
     let ug2 = IncidenceMatrix(vec![vec![1, 1, 0], vec![0, 1, 1]]);
 
     println!("Current undirected graph on incidence matrix: ");
-    print_incidence_matrix(&ug2);
+    print::incidence_matrix(&ug2);
 
     println!("Graph order: {} ", ug2.order());
     println!("Graph size: {} ", ug2.undirected_size());

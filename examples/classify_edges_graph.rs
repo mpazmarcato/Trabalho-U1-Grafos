@@ -1,7 +1,8 @@
+use graph_io::GraphIO;
+use graph_io::print;
+use graphs_algorithms::Edge;
 use graphs_algorithms::Graph;
 use graphs_algorithms::graphs::AdjacencyList;
-use graphs_algorithms::utils::print_tip;
-use graphs_algorithms::{Edge, GraphIO, print_list};
 
 fn main() {
     let digraph = AdjacencyList(vec![
@@ -17,7 +18,7 @@ fn main() {
         vec![],
     ]);
     println!("Digraph: ");
-    print_list(&digraph);
+    print::list(&digraph);
 
     let print_edge = |e| match e {
         Edge::Tree(v, u) => println!("Tree: {} -> {}", v, u),
@@ -42,5 +43,5 @@ fn main() {
 
     println!("Graph was exported to dot file on path {}! ", path);
 
-    print_tip();
+    print::tip();
 }

@@ -8,7 +8,7 @@ use crate::{Graph, UndirectedGraph};
 /// # Note
 /// Many functions in this struct are currently `to-do`.
 /// The focus is on adjacency list and adjacency matrix for now.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct IncidenceMatrix(pub Vec<Vec<i32>>);
 
 impl IncidenceMatrix {
@@ -83,10 +83,6 @@ impl IncidenceMatrix {
 }
 
 impl Graph<usize> for IncidenceMatrix {
-    fn new_empty() -> Self {
-        IncidenceMatrix(Vec::new())
-    }
-
     fn order(&self) -> usize {
         if self.0.is_empty() {
             0

@@ -1,13 +1,13 @@
-use crate::graphs::{AdjacencyList, AdjacencyMatrix};
-use crate::incidence_matrix::IncidenceMatrix;
+use graphs_algorithms::graphs::IncidenceMatrix;
+use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix};
 
-pub fn print_list(list: &AdjacencyList) {
+pub fn list(list: &AdjacencyList) {
     for (i, neighbors) in list.0.iter().enumerate() {
         println!("{}: {:?}", i, neighbors);
     }
 }
 
-pub fn print_matrix(m: &AdjacencyMatrix) {
+pub fn matrix(m: &AdjacencyMatrix) {
     for row in &m.0 {
         print!("[ ");
         for col in row {
@@ -18,7 +18,7 @@ pub fn print_matrix(m: &AdjacencyMatrix) {
     }
 }
 
-pub fn print_incidence_matrix(m: &IncidenceMatrix) {
+pub fn incidence_matrix(m: &IncidenceMatrix) {
     for row in &m.0 {
         print!("[ ");
         for col in row {
@@ -29,6 +29,6 @@ pub fn print_incidence_matrix(m: &IncidenceMatrix) {
     }
 }
 
-pub fn print_tip() {
+pub fn tip() {
     println!("[TIP]: you should try 'make png' to see these graphs!");
 }

@@ -1,7 +1,8 @@
 use std::io::Error;
 
-use graphs_algorithms::utils::print_tip;
-use graphs_algorithms::{GraphIO, UndirectedGraphIO, graphs::AdjacencyList, print_list};
+use graph_io::print;
+use graph_io::{GraphIO, UndirectedGraphIO};
+use graphs_algorithms::graphs::AdjacencyList;
 
 static PATH: &str = "examples/dot/";
 fn main() {
@@ -19,7 +20,7 @@ fn main() {
     ]);
 
     println!("BFS on following undirected graph: ");
-    print_list(&g1);
+    print::list(&g1);
 
     let path1 = PATH.to_owned() + "bfs/bfs_1.dot";
     let _ = g1.export_undirected_bfs_to_dot(1, path1.to_owned());
@@ -34,7 +35,7 @@ fn main() {
     match res {
         Ok(dg) => {
             println!("BFS on following digraph: ");
-            print_list(&g1);
+            print::list(&g1);
 
             let path2 = PATH.to_owned() + "bfs/bfs_2.dot";
             let _ = dg.export_directed_bfs_to_dot(1, path2.to_owned());
@@ -43,5 +44,5 @@ fn main() {
         Err(_) => println!("oops.. shouldn't fall here"),
     }
 
-    print_tip();
+    print::tip();
 }

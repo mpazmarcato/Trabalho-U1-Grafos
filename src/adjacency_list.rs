@@ -1,7 +1,6 @@
+use crate::Graph;
 use crate::graph::{DfsEvent, UndirectedGraph};
-use crate::graph_io::UndirectedGraphIO;
 use crate::graphs::{AdjacencyMatrix, IncidenceMatrix};
-use crate::{Graph, GraphIO};
 
 /// Represents a graph using an adjacency list.
 /// Each index in the inner vector corresponds to a node, and the vector at that index
@@ -39,10 +38,6 @@ impl AdjacencyList {
 }
 
 impl Graph<usize> for AdjacencyList {
-    fn new_empty() -> Self {
-        AdjacencyList(vec![])
-    }
-
     fn order(&self) -> usize {
         self.0.len()
     }
@@ -195,89 +190,10 @@ impl UndirectedGraph<usize> for AdjacencyList {
     }
 }
 
-impl GraphIO<usize> for AdjacencyList {}
-impl UndirectedGraphIO<usize> for AdjacencyList {}
-
 #[cfg(test)]
 mod tests {
 
-    use std::io::{Error, ErrorKind};
-
     use super::*;
-
-    static PATH: &str = "examples/data/";
-
-    #[test]
-    fn new_digraph_1() {
-        let result: Result<AdjacencyList, Error> =
-            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
-
-        assert!(result.is_ok());
-
-        match result {
-            Ok(matrix) => {
-                assert!(matrix.order() == 13);
-                assert!(matrix.size() == 16);
-            }
-            Err(_) => {}
-        }
-    }
-
-    #[test]
-    fn new_digraph_2() {
-        let result: Result<AdjacencyList, Error> =
-            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
-
-        assert!(result.is_ok());
-
-        match result {
-            Ok(matrix) => {
-                assert!(matrix.order() == 13);
-                assert!(matrix.size() == 17);
-            }
-            Err(_) => {}
-        }
-    }
-
-    #[test]
-    fn new_digraph_error_1() {
-        let result: Result<AdjacencyList, Error> =
-            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
-
-        assert!(result.is_err());
-
-        match result {
-            Ok(_) => {}
-            Err(err) => {
-                assert!(err.kind() == ErrorKind::InvalidData);
-                assert!(err.to_string().contains("Invalid data was found"));
-            }
-        }
-    }
-
-    #[test]
-    fn new_undirected_graph_1() {
-        let res: Result<AdjacencyList, Error> =
-            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
-
-        assert!(res.is_ok());
-
-        match res {
-            Ok(list) => {
-                assert!(list.order() == 11);
-                assert!(list.undirected_size() == 13);
-            }
-            Err(_) => {}
-        }
-    }
-
-    #[test]
-    fn new_undirected_graph_2() {
-        let res: Result<AdjacencyList, Error> =
-            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
-
-        assert!(res.is_err());
-    }
 
     #[test]
     fn connected_undirected_graph() {

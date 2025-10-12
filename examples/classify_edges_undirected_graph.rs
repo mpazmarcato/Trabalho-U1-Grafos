@@ -1,9 +1,10 @@
 use core::panic;
 
+use graph_io::UndirectedGraphIO;
+use graph_io::print;
+use graphs_algorithms::Edge;
 use graphs_algorithms::UndirectedGraph;
 use graphs_algorithms::graphs::AdjacencyList;
-use graphs_algorithms::utils::print_tip;
-use graphs_algorithms::{Edge, UndirectedGraphIO, print_list};
 
 fn main() {
     let undirected_graph = AdjacencyList(vec![
@@ -20,7 +21,7 @@ fn main() {
     ]);
 
     println!("Graph: ");
-    print_list(&undirected_graph);
+    print::list(&undirected_graph);
 
     for e in undirected_graph.classify_undirected_edges(0) {
         match e {
@@ -34,5 +35,5 @@ fn main() {
     let _ = undirected_graph.export_undirected_dfs_to_dot(0, path.to_string());
 
     println!("Graph was exported to dot file on path {}! ", path);
-    print_tip();
+    print::tip();
 }
