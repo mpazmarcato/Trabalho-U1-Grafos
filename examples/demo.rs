@@ -4,7 +4,7 @@ use graphs_algorithms::{
     Graph, GraphIO, UndirectedGraph, UndirectedGraphIO, print_list, print_matrix,
 };
 use std::io;
-use std::io::{Error, Write, stdin};
+use std::io::{Error, Write};
 
 fn clear() {
     print!("\x1B[2J\x1B[1;1H");
@@ -427,31 +427,26 @@ fn undirected14() {
     println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
 }
 
-// TODO: escrever um grafo mais útil para a biconectividade
 fn undirected15() {
     println!("15 - Determinação de articulações e blocos (biconectividade)");
-    println!(
-        "- Importando do arquivo GRAFO_2.txt e adicionando as arestas (1, 5), (4, 5), (5, 10), (9, 0)..."
-    );
-    let res: Result<AdjacencyList, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
-    let mut l = res.unwrap();
-    l.add_undirected_edge(1, 5);
-    l.add_undirected_edge(4, 5);
-    l.add_undirected_edge(5, 10);
-    l.add_undirected_edge(9, 0);
+    let l = AdjacencyList(vec![
+        vec![1, 2],
+        vec![0, 2],
+        vec![0, 1, 3, 4, 5],
+        vec![2, 5],
+        vec![2, 6, 7],
+        vec![2, 3],
+        vec![4, 7, 8],
+        vec![4, 6, 8],
+        vec![6, 7],
+    ]);
     print_list(&l);
     println!(
-        "- Vamos aplicar o algoritmo de biconectividade no GRAFO_2.txt a partir do vértice 5."
+        "- Vamos aplicar o algoritmo de biconectividade no grafo acima a partir do vértice 0."
     );
-    let mut iter = l.biconnected_components(5);
-    let mut components = Vec::new();
-    while let Some(component) = iter.next() {
-        components.push(component);
-    }
-    println!("Componentes biconectados (arestas):");
-    for (i, comp) in components.iter().enumerate() {
-        println!("  Componente {}:", i + 1);
+
+    for (i, comp) in l.biconnected_components(0).enumerate() {
+        println!("  Componente {}: ", i + 1);
         for (u, v) in comp {
             println!("    ({}, {})", u, v);
         }
