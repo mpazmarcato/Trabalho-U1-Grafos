@@ -3,6 +3,7 @@ use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix, IncidenceMatrix}
 use graphs_algorithms::{Graph, UndirectedGraph};
 use std::io;
 use std::io::{Error, Write};
+use std::collections::{HashMap, HashSet};
 
 fn clear() {
     print!("\x1B[2J\x1B[1;1H");
@@ -434,14 +435,39 @@ fn undirected15() {
         vec![6, 7],
     ]);
     print::list(&l);
-    println!(
-        "- Vamos aplicar o algoritmo de biconectividade no grafo acima a partir do vértice 0."
-    );
+    
+    println!("- Vamos aplicar o algoritmo de biconectividade no grafo acima a partir do vértice 0.");
+
+    let mut vertex_blocks: HashMap<usize, usize> = HashMap::new();
+    let mut block_vertices: Vec<HashSet<usize>> = Vec::new();
 
     for (i, comp) in l.biconnected_components(0).enumerate() {
-        println!("  Componente {}: ", i + 1);
-        for (u, v) in comp {
+        let mut vertices = HashSet::new();
+
+        println!("  Componente {}:", i + 1);
+        for (u, v) in &comp {
             println!("    ({}, {})", u, v);
+            vertices.insert(*u);
+            vertices.insert(*v);
         }
+
+        for v in &vertices {
+            *vertex_blocks.entry(*v).or_insert(0) += 1;
+        }
+
+        block_vertices.push(vertices);
+    }
+
+    let articulations: HashSet<usize> = vertex_blocks
+        .iter()
+        .filter(|(_, count)| **count > 1)
+        .map(|(v, _)| *v)
+        .collect();
+
+    for (i, vertices) in block_vertices.iter().enumerate() {
+        let block_articulations: Vec<_> = vertices.intersection(&articulations).copied().collect();
+        println!("Componente {} → articulações: {:?}", i + 1, block_articulations);
     }
 }
+
+

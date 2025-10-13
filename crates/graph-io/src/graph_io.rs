@@ -74,10 +74,14 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
         writeln!(file, "  rankdir=LR;")?;
         writeln!(file, "  node [shape=circle];")?;
 
+        let mut count = 1;
         for node in self.nodes() {
-            writeln!(file, " {} ", node)?;
+            writeln!(file, " {} ", count)?;
+            let this_id = count;
+            count += 1;
+
             for neighbor in self.neighbors(node) {
-                writeln!(file, " {} -> {} ", node, neighbor)?;
+                writeln!(file, " {} -> {} ", this_id, neighbor)?;
             }
         }
 
