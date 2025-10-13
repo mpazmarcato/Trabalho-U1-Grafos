@@ -114,7 +114,355 @@ pub trait UndirectedGraph<Node: Copy + Eq + Hash>: Graph<Node> {
 
 Note que o \texttt{trait} já tem várias implementações, e isso só é possível pois ele usa as funcões já implementadas em \texttt{Graph}. Por isso que implementar \texttt{UndirectedGraph}, antes, é necessário implementar esse.
 
-Mas feitas as considerações iniciais acerca da arquitetura da implementação, podemos abordar as particularidades de cada Estrutura da Dados.
+\subsection{Iteradores}
+
+Dado que Grafos são Tipos Abstratos de Dados que podem ser implementados de diversas formas diferentes, se movimentar entre seus vértices e arestas pode ser uma tarefa com um baixo nível(além de muito particular da implementação usada). E tendo em mente que percorrê-lo é um procedimento muito presente na maioria dos algoritmos, faz sentido pensar em uma forma mais alto nível de poder se movimentar dentro do grafo.
+
+Sabendo disso, iteradores são um recurso altamente presente nas linguagens de programação modernas. Este tem por objetivo oferecer a comodidade de poder se locomover dentro de uma Estrutura de Dados sem necessariamente saber dos detalhes da sua implementação em um baixo nível.
+
+Sendo assim, tendo a motivação do algoritmo de classificação de arestas, que necessita percorrer o grafo exaustivamente, foi implementado o iterador para a DFS da seguinte forma:
+
+\begin{lstlisting}[language=Rust, caption={Iterador da DFS com classificação de arestas}, label=list:dfs_event_iter]
+#[derive(Debug)]
+pub enum DfsEvent<Node> {
+    Discover(Node, Option<Node>),
+    Finish(Node),
+    NonTreeEdge(Node, Node),
+}
+
+pub struct DfsIter<'a, Node, G>
+where
+    G: Graph<Node>,
+    Node: Eq + Hash + Copy,
+    Self: 'a,
+{
+    graph: &'a G,
+    stack: Vec<(Node, G::Neighbors<'a>)>,
+    visited: HashSet<Node>,
+    start_node: Option<Node>,
+}
+
+impl<'a, Node, G> DfsIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
+    /// Creates a new DFS iterator starting from the given node.
+    fn new(graph: &'a G, start: Node) -> Self {
+        Self {
+            graph,
+            stack: vec![],
+            visited: HashSet::with_capacity(graph.order()),
+            start_node: Some(start),
+        }
+    }
+
+    /// This enables starting another DFS while maintains the
+    /// inner parts of the iterator initialized, like the `visited` dictionary.
+    pub fn new_start(&mut self, start: Node) {
+        self.start_node = Some(start)
+    }
+}
+
+impl<'a, Node, G> Iterator for DfsIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
+    type Item = DfsEvent<Node>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(start_node) = self.start_node.take()
+            && self.visited.insert(start_node)
+        {
+            self.stack
+                .push((start_node, self.graph.neighbors(start_node)));
+            return Some(DfsEvent::Discover(start_node, None));
+        }
+
+        if let Some((node, mut neighbors)) = self.stack.pop() {
+            if let Some(neighbor) = neighbors.next() {
+                self.stack.push((node, neighbors));
+
+                if self.visited.insert(neighbor) {
+                    self.stack.push((neighbor, self.graph.neighbors(neighbor)));
+                    return Some(DfsEvent::Discover(neighbor, Some(node)));
+                } else {
+                    return Some(DfsEvent::NonTreeEdge(node, neighbor));
+                }
+            } else {
+                return Some(DfsEvent::Finish(node));
+            }
+        }
+
+        None
+    }
+}
+\end{lstlisting}
+
+Note que ele, dado uma aresta, consegue classificar ela como um dos três eventos definidos no \texttt{enum}. E o mesmo também foi implementado para a BFS:
+
+\begin{lstlisting}[language=Rust, caption={Iterador da BFS com classificação de arestas}, label=list:bfs_event_iter]
+
+#[derive(Debug)]
+pub enum BfsEvent<Node> {
+    Discover(Node, Vec<Node>),
+    CrossEdge(Node, Node),
+}
+
+pub struct BfsIter<'a, Node, G> {
+    graph: &'a G,
+    queue: VecDeque<Node>,
+    visited: HashSet<Node>,
+    parent: HashMap<Node, Option<Node>>,
+}
+
+impl<'a, Node, G> BfsIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
+    /// Creates a new BFS iterator starting from the given node.
+    fn new(graph: &'a G, start: Node) -> Self {
+        let mut visited = HashSet::with_capacity(graph.order());
+        visited.insert(start);
+
+        let mut parent: HashMap<Node, Option<Node>> = HashMap::with_capacity(graph.order());
+        parent.insert(start, None);
+
+        Self {
+            graph,
+            queue: VecDeque::from(vec![start]),
+            visited,
+            parent,
+        }
+    }
+}
+
+impl<'a, Node, G> Iterator for BfsIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy + Display,
+    G: Graph<Node>,
+{
+    type Item = Vec<BfsEvent<Node>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let node = self.queue.pop_front()?;
+        let mut children: Vec<Node> = Vec::new();
+        let mut events: Vec<BfsEvent<Node>> = Vec::new();
+
+        for neighbor in self.graph.neighbors(node) {
+            if self.visited.insert(neighbor) {
+                self.queue.push_back(neighbor);
+                self.parent.insert(neighbor, Some(node));
+                children.push(neighbor);
+            } else if Some(node) != self.parent.get(&neighbor).copied().flatten() {
+                events.push(BfsEvent::CrossEdge(node, neighbor));
+            }
+        }
+
+        events.push(BfsEvent::Discover(node, children));
+        Some(events)
+    }
+}
+\end{lstlisting}
+
+Perceba que ambos os iteradores, implementam recursos que podem ser usados como funções auxiliares para a classificação das arestas de uma árvore. E tal recurso foi usado a fim de implementar classificação de arestas em uma Árvore de Profundidade:
+
+\begin{lstlisting}[language=Rust, caption={Classificação de arestas numa Árvore de Profundidade}, label=list:dfs_edge_classification]
+#[derive(Debug)]
+pub enum Edge<Node> {
+    Tree(Node, Node),
+    Back(Node, Node),
+    ParentBack(Node, Node),
+    Forward(Node, Node),
+    Cross(Node, Node),
+}
+
+pub struct DfsEdgesIter<'a, Node, G>
+where
+    G: Graph<Node>,
+    Node: Eq + Hash + Copy,
+    Self: 'a,
+{
+    iter: DfsIter<'a, Node, G>,
+    time: usize,
+    discovery: HashMap<Node, usize>,
+    finish: HashMap<Node, usize>,
+    parent: HashMap<Node, Node>,
+    stack_hash: HashSet<Node>,
+}
+
+impl<'a, Node, G> DfsEdgesIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
+    /// Creates a new DFS-with-edges iterator starting from the given node
+    fn new(graph: &'a G, start: Node) -> Self {
+        Self {
+            iter: DfsIter::new(graph, start),
+            time: 0,
+            discovery: HashMap::with_capacity(graph.order()),
+            finish: HashMap::with_capacity(graph.order()),
+            parent: HashMap::with_capacity(graph.order()),
+            stack_hash: HashSet::with_capacity(graph.order()),
+        }
+    }
+
+    pub fn new_start(&mut self, start: Node) {
+        self.iter.new_start(start);
+    }
+}
+
+impl<'a, Node, G> Iterator for DfsEdgesIter<'a, Node, G>
+where
+    Node: Eq + Hash + Copy,
+    G: Graph<Node>,
+{
+    type Item = Edge<Node>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(event) = self.iter.next() {
+            match event {
+                DfsEvent::Discover(node, maybe_parent) => {
+                    self.stack_hash.insert(node);
+                    self.discovery.insert(node, self.time);
+                    self.time += 1;
+                    if let Some(parent) = maybe_parent {
+                        self.parent.insert(node, parent);
+                        return Some(Edge::Tree(parent, node));
+                    }
+                }
+                DfsEvent::Finish(node) => {
+                    self.stack_hash.remove(&node);
+                    self.finish.insert(node, self.time);
+                    self.time += 1;
+                }
+                DfsEvent::NonTreeEdge(node, neighbor) => {
+                    if self.stack_hash.contains(&neighbor) {
+                        if self
+                            .parent
+                            .get(&node)
+                            .is_some_and(|&parent| parent == neighbor)
+                        {
+                            return Some(Edge::ParentBack(node, neighbor));
+                        } else {
+                            return Some(Edge::Back(node, neighbor));
+                        }
+                    } else if self
+                        .discovery
+                        .get(&node)
+                        .is_some_and(|t1| self.discovery.get(&neighbor).is_some_and(|t2| t1 < t2))
+                    {
+                        return Some(Edge::Forward(node, neighbor));
+                    } else {
+                        return Some(Edge::Cross(node, neighbor));
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+\end{lstlisting}
+
+Por fim, também se utilizando do iterador da DFS usado no algoritmo anterior, foi implementado um iterador para grafos não direcionados que proporciona uma forma mais alto nível para identificar componentes biconexos:
+
+\begin{lstlisting}[language=Rust, caption={Classificação de componentes biconexos através de uma DFS}, label=list:iter_biconnected_comp]
+pub struct BiconnectedComponentsIter<'a, Node, G>
+where
+    G: Graph<Node>,
+    Node: Eq + Hash + Copy,
+    Self: 'a,
+{
+    iter: DfsIter<'a, Node, G>,
+    time: usize,
+    discovery: HashMap<Node, usize>,
+    lowpt: HashMap<Node, usize>,
+    parents: HashMap<Node, Node>,
+    edge_stack: Vec<(Node, Node)>,
+}
+
+impl<'a, Node, G> BiconnectedComponentsIter<'a, Node, G>
+where
+    G: Graph<Node> + 'a,
+    Node: Eq + Hash + Copy + 'a,
+{
+    /// Creates a new iterator over the biconnected components of an undirected graph
+    fn new(graph: &'a G, start: Node) -> Self {
+        Self {
+            iter: graph.dfs(start),
+            time: 0,
+            discovery: HashMap::with_capacity(graph.order()),
+            lowpt: HashMap::with_capacity(graph.order()),
+            parents: HashMap::with_capacity(graph.order()),
+            edge_stack: Vec::with_capacity(graph.order()),
+        }
+    }
+
+    /// Extracts a biconnected component from the edge stack.
+    fn extract_component(&mut self, u: Node, v: Node) -> Option<Vec<(Node, Node)>> {
+        let mut component = Vec::new();
+        while let Some(edge) = self.edge_stack.pop() {
+            component.push(edge);
+            if edge == (u, v) || edge == (v, u) {
+                break;
+            }
+        }
+        Some(component)
+    }
+}
+
+impl<'a, Node, G> Iterator for BiconnectedComponentsIter<'a, Node, G>
+where
+    G: Graph<Node>,
+    Node: Eq + Hash + Copy + Display,
+{
+    type Item = Vec<(Node, Node)>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(event) = self.iter.next() {
+            match event {
+                DfsEvent::Discover(node, maybe_parent) => {
+                    self.discovery.insert(node, self.time);
+                    self.lowpt.insert(node, self.time);
+                    self.time += 1;
+                    if let Some(parent) = maybe_parent {
+                        self.edge_stack.push((parent, node));
+                        self.parents.insert(node, parent);
+                    }
+                }
+                DfsEvent::Finish(node) => {
+                    if let Some(&parent) = self.parents.get(&node) {
+                        let &node_low = self.lowpt.get(&node).unwrap();
+                        let parent_low = self.lowpt.get_mut(&parent).unwrap();
+
+                        *parent_low = (*parent_low).min(node_low);
+
+                        if self.discovery[&parent] <= self.lowpt[&node] {
+                            return self.extract_component(parent, node);
+                        }
+                    } else if !self.edge_stack.is_empty() {
+                        return Some(std::mem::take(&mut self.edge_stack));
+                    }
+                }
+                DfsEvent::NonTreeEdge(u, v) => {
+                    if Some(&v) != self.parents.get(&u) && self.discovery[&v] < self.discovery[&u] {
+                        self.edge_stack.push((u, v));
+                        self.lowpt
+                            .entry(u)
+                            .and_modify(|u_low| *u_low = (*u_low).min(self.discovery[&v]));
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+\end{lstlisting}
+
+Portanto, feitas as considerações iniciais acerca da arquitetura da implementação, podemos abordar as particularidades de cada Estrutura da Dados.
 
 \section{Matriz de Adjacência}
 
