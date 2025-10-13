@@ -10,8 +10,6 @@
 //! - `adjacency_list`: Implementation of graphs using adjacency lists.
 //! - `adjacency_matrix`: Implementation of graphs using adjacency matrices.
 //! - `incidence_matrix`: Implementation of graphs using incidence matrices.
-//! - `graph_io`: Traits for importing/exporting graphs.
-//! - `utils`: Helper functions for printing things on the shell.
 mod adjacency_list;
 mod adjacency_matrix;
 mod graph;

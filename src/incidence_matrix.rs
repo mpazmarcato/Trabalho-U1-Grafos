@@ -1,5 +1,5 @@
 use crate::graphs::{AdjacencyList, AdjacencyMatrix};
-use crate::{Graph, GraphIO, UndirectedGraph, UndirectedGraphIO};
+use crate::{Graph, UndirectedGraph};
 
 /// Represents a graph using an incidence matrix.
 /// Each row corresponds to an edge, and each column corresponds to a node.
@@ -205,9 +205,6 @@ impl UndirectedGraph<usize> for IncidenceMatrix {
         self.0.iter().filter(|row| row[vertex] != 0).count()
     }
 }
-
-impl GraphIO<usize> for IncidenceMatrix {}
-impl UndirectedGraphIO<usize> for IncidenceMatrix {}
 
 #[cfg(test)]
 mod tests {
