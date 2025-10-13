@@ -119,6 +119,7 @@ docker pull vleema/latex-compiler:latest
 
 No diretório `examples/` estão presentes diversos scripts que demonstram os usos da biblioteca principal. Estes são:
 
+- `demo.rs`: arquivo com as principais operações descritas na proposta de implementação do trabalho. **Comece por aqui**.
 - `adjacency_list_operations.rs`: cria grafos em uma Lista de Adjacência e adiciona/exclui vértices e arestas;
 - `adjacency_matrix_operations.rs`: cria grafos em uma Matriz de Adjacência e adiciona/exclui vértices e arestas;
 - `classify_edges_graph.rs`: executa a DFS em um digrafo, salvando a árvore resultante no diretório `dot/classify_edges`

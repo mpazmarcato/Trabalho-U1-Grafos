@@ -32,7 +32,7 @@ fn main() {
     }
 
     let path = "examples/dot/classify_edges/undirected.dot";
-    let _ = undirected_graph.export_undirected_dfs_to_dot(0, path.to_string());
+    let _ = undirected_graph.export_undirected_dfs_to_dot(0, path);
 
     println!("Graph was exported to dot file on path {}! ", path);
     print::tip();
