@@ -103,7 +103,7 @@ fn digraph3() {
     println!("- Temos o seguinte digrafo: ");
     print::list(&l);
     println!("- Seu grafo subjacente é, portanto: ");
-    print::list(&l);
+    print::list(&l.underlying_graph());
 }
 
 fn digraph4() {
