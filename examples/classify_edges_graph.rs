@@ -39,7 +39,7 @@ fn main() {
     }
 
     let path = "examples/dot/classify_edges/directed.dot";
-    let _ = digraph.export_directed_dfs_to_dot(0, path.to_string());
+    let _ = digraph.export_directed_dfs_to_dot(0, path);
 
     println!("Graph was exported to dot file on path {}! ", path);
 

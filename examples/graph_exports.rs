@@ -22,20 +22,23 @@ fn main() {
 
     println!("[UNDIRECTED] Graph 1: ");
     print::list(&graph1);
+    let path1 = format!("{PATH}graph1.dot");
 
-    let result1 = graph1.export_undirected_to_dot(PATH.to_owned() + "graph1.dot");
+    let result1 = graph1.export_undirected_to_dot(&path1);
     match result1 {
         Ok(_) => println!("Created .dot file for the graph above!"),
         Err(e) => println!("{e}"),
     }
 
-    let result2 = graph1.export_undirected_bfs_to_dot(6, PATH.to_owned() + "bfs_graph1.dot");
+    let path2 = format!("{PATH}bfs_graph1.dot");
+    let result2 = graph1.export_undirected_bfs_to_dot(6, &path2);
     match result2 {
         Ok(_) => println!("Created BFS tree with 6 as root for the graph above!"),
         Err(e) => println!("{e}"),
     }
 
-    let result3 = graph1.export_undirected_dfs_to_dot(6, PATH.to_owned() + "dfs_graph1.dot");
+    let path3 = format!("{PATH}dfs_graph1.dot");
+    let result3 = graph1.export_undirected_dfs_to_dot(6, &path3);
     match result3 {
         Ok(_) => println!("Created DFS tree with 6 as root for the graph above!"),
         Err(e) => println!("{e}"),
@@ -56,19 +59,22 @@ fn main() {
     println!("[DIRECTED] Graph 2: ");
     print::list(&graph2);
 
-    let result4 = graph2.export_to_dot(PATH.to_owned() + "graph2.dot");
+    let path4 = format!("{PATH}graph2.dot");
+    let result4 = graph2.export_to_dot(&path4);
     match result4 {
         Ok(_) => println!("Created .dot file for the graph above!"),
         Err(e) => println!("{e}"),
     }
 
-    let result5 = graph2.export_directed_bfs_to_dot(5, PATH.to_owned() + "bfs_graph2.dot");
+    let path5 = format!("{PATH}bfs_graph2.dot");
+    let result5 = graph2.export_directed_bfs_to_dot(5, &path5);
     match result5 {
         Ok(_) => println!("Created BFS tree with 5 as root for the graph above!"),
         Err(e) => println!("{e}"),
     }
 
-    let result6 = graph2.export_directed_dfs_to_dot(5, PATH.to_owned() + "dfs_graph2.dot");
+    let path6 = format!("{PATH}dfs_graph2.dot");
+    let result6 = graph2.export_directed_dfs_to_dot(5, &path6);
     match result6 {
         Ok(_) => println!("Created DFS tree with 5 as root for the graph above!"),
         Err(e) => println!("{e}"),

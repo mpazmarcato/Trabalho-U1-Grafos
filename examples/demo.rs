@@ -77,7 +77,7 @@ fn digraph1() {
     println!("1 - Representação do digrafo a partir da Matriz de Adjacência");
     println!("- Importando do arquivo DIGRAFO1.txt...");
     let res1: Result<AdjacencyMatrix, Error> =
-        GraphIO::import_from_file("examples/data/DIGRAFO1.txt".to_string());
+        GraphIO::import_from_file("examples/data/DIGRAFO1.txt");
     let am1 = res1.unwrap();
     println!("- Temos a seguinte matriz: ");
     print::matrix(&am1);
@@ -87,7 +87,7 @@ fn digraph2() {
     println!("2 - Representação do digrafo a partir da Matriz de Incidência");
     println!("- Importando do arquivo DIGRAFO1.txt...");
     let res: Result<AdjacencyMatrix, Error> =
-        GraphIO::import_from_file("examples/data/DIGRAFO1.txt".to_string());
+        GraphIO::import_from_file("examples/data/DIGRAFO1.txt");
     let im1 = IncidenceMatrix::from_adjacency_matrix(&res.unwrap());
     println!("- Temos a seguinte matriz: ");
     print::incidence_matrix(&im1);
@@ -97,7 +97,7 @@ fn digraph3() {
     println!("3 - Determinação do grafo subjacente");
     println!("- Criando lista de Adjacência a partir do DIGRAFO2.txt...");
     let res3: Result<AdjacencyList, Error> =
-        GraphIO::import_from_file("examples/data/DIGRAFO2.txt".to_string());
+        GraphIO::import_from_file("examples/data/DIGRAFO2.txt");
     let l = res3.unwrap();
     println!("- Temos o seguinte digrafo: ");
     print::list(&l);
@@ -108,16 +108,15 @@ fn digraph3() {
 fn digraph4() {
     println!("4 - Busca em Largura");
     println!("- Importando grafo do arquivo DIGRAFO2.txt e adicionando aresta (8, 10)...");
-    let res: Result<AdjacencyList, Error> =
-        GraphIO::import_from_file("examples/data/DIGRAFO2.txt".to_string());
+    let res: Result<AdjacencyList, Error> = GraphIO::import_from_file("examples/data/DIGRAFO2.txt");
     let mut l = res.unwrap();
     l.add_edge(8, 10);
     println!("- Temos a seguinte lista: ");
     print::list(&l);
     println!("- Vamos aplicar a BFS na lista a partir de dois vértices.");
-    let _ = l.export_directed_bfs_to_dot(0, "examples/dot/demo/digraph/bfs1.dot".to_string());
+    let _ = l.export_directed_bfs_to_dot(0, "examples/dot/demo/digraph/bfs1");
     println!("- Vértice 0: resultado salvo em examples/dot/demo/digraph/bfs1.dot");
-    let _ = l.export_directed_bfs_to_dot(5, "examples/dot/demo/digraph/bfs2.dot".to_string());
+    let _ = l.export_directed_bfs_to_dot(5, "examples/dot/demo/digraph/bfs2");
     println!("- Vértice 5: resultado salvo em examples/dot/demo/digraph/bfs2.dot");
     println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
 }
@@ -127,8 +126,7 @@ fn digraph5() {
         "5 - Busca em Profundidade com determinação de profundidade de entrada e saída e classificação de arestas"
     );
     println!("- Importando grafo do arquivo DIGRAFO2.txt e adicionando aresta (8, 10)...");
-    let res: Result<AdjacencyList, Error> =
-        GraphIO::import_from_file("examples/data/DIGRAFO2.txt".to_string());
+    let res: Result<AdjacencyList, Error> = GraphIO::import_from_file("examples/data/DIGRAFO2.txt");
     let mut l = res.unwrap();
     l.add_edge(8, 10);
     println!("- Temos a seguinte lista: ");
@@ -137,9 +135,9 @@ fn digraph5() {
         "- Vamos aplicar a DFS com classificação de arestas na lista a partir de dois vértices."
     );
     println!("- Vértice 0: resultado salvo em examples/dot/demo/digraph/dfs1.dot");
-    let _ = l.export_directed_dfs_to_dot(0, "examples/dot/demo/digraph/dfs1.dot".to_string());
+    let _ = l.export_directed_dfs_to_dot(0, "examples/dot/demo/digraph/dfs1");
     println!("- Vértice 5: resultado salvo em examples/dot/demo/digraph/dfs2.dot");
-    let _ = l.export_directed_dfs_to_dot(5, "examples/dot/demo/digraph/dfs2.dot".to_string());
+    let _ = l.export_directed_dfs_to_dot(5, "examples/dot/demo/digraph/dfs2");
     println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
 }
 
@@ -204,7 +202,7 @@ fn undirected1() {
     println!("- Importando do arquivo GRAFO_2.txt...");
 
     let res: Result<AdjacencyList, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     print::list(&res.unwrap());
 }
 
@@ -213,7 +211,7 @@ fn undirected2() {
     println!("Importando do arquivo GRAFO_2.txt...");
 
     let res: Result<AdjacencyMatrix, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     print::matrix(&res.unwrap());
 }
 
@@ -221,7 +219,7 @@ fn undirected3() {
     println!("3 - Criação do grafo a partir da Matriz de Incidência");
     println!("Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyMatrix, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
 
     let im = IncidenceMatrix::from_adjacency_matrix(&res.unwrap());
     print::incidence_matrix(&im);
@@ -231,7 +229,7 @@ fn undirected4() {
     println!("4 - Conversão entre Matriz de Adjacência e Lista de Adjacência");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyMatrix, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     println!("4.1 - Matriz -> Lista");
     let mut m = res.unwrap();
     println!("- Temos a seguinte matriz:");
@@ -253,7 +251,7 @@ fn undirected5() {
     println!("5 - Função que calcula o grau de cada vértice");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyMatrix, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let m = res.unwrap();
     println!("- Grau de cada vértice do grafo:");
     for i in 0..m.order() {
@@ -265,7 +263,7 @@ fn undirected6() {
     println!("6 - Função que determina a adjacência entre dois vértices");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyMatrix, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let m = res.unwrap();
     println!("Aresta (0, 1): {} ", m.has_edge(0, 1));
     println!("Aresta (5, 0): {} ", m.has_edge(5, 0));
@@ -276,7 +274,7 @@ fn undirected7() {
     println!("7 - Função que determina o número total de vértices");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyMatrix, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let m = res.unwrap();
 
     println!("- A ordem do grafo é {} ", m.order());
@@ -286,7 +284,7 @@ fn undirected8() {
     println!("8 - Função que determina o número total de arestas");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyMatrix, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let m = res.unwrap();
 
     println!("- O tamanho do grafo é {} ", m.undirected_size());
@@ -297,7 +295,7 @@ fn undirected9() {
     println!("9.1 - Lista de Adjacência");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyList, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let mut l = res.unwrap();
     println!("- Temos a seguinte lista: ");
     print::list(&l);
@@ -324,7 +322,7 @@ fn undirected10() {
     println!("10.1 - Lista de Adjacência");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyList, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let mut l = res.unwrap();
     println!("- Temos a seguinte lista: ");
     print::list(&l);
@@ -337,7 +335,7 @@ fn undirected10() {
     println!("10.2 - Matriz de Adjacência");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyMatrix, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let mut m = res.unwrap();
     println!("- Temos a seguinte matriz: ");
     print::matrix(&m);
@@ -352,7 +350,7 @@ fn undirected11() {
     println!("11 - Função que determina se um grafo é conexo");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyList, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let mut l = res.unwrap();
     println!("- Temos a seguinte lista: ");
     print::list(&l);
@@ -371,7 +369,7 @@ fn undirected12() {
     println!("12 - Determinar se um grafo é bipartido");
     println!("- Importando do arquivo GRAFO_2.txt...");
     let res: Result<AdjacencyList, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let l = res.unwrap();
     println!("- Temos a seguinte lista: ");
     print::list(&l);
@@ -384,7 +382,7 @@ fn undirected13() {
         "- Importando do arquivo GRAFO_2.txt e adicionando as arestas (1, 5), (4, 5), (5, 10), (9, 0)..."
     );
     let res: Result<AdjacencyList, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let mut l = res.unwrap();
     l.add_undirected_edge(1, 5);
     l.add_undirected_edge(4, 5);
@@ -394,11 +392,9 @@ fn undirected13() {
     print::list(&l);
     println!("- Vamos aplicar a BFS na lista acima a partir de dois vértices.");
     println!("- Vértice 0: resultado salvo em examples/dot/demo/undirected_graph/bfs1.dot");
-    let _ = l
-        .export_undirected_bfs_to_dot(0, "examples/dot/demo/undirected_graph/bfs1.dot".to_string());
+    let _ = l.export_undirected_bfs_to_dot(0, "examples/dot/demo/undirected_graph/bfs1");
     println!("- Vértice 5: resultado salvo em examples/dot/demo/undirected_graph/bfs2.dot");
-    let _ = l
-        .export_undirected_bfs_to_dot(5, "examples/dot/demo/undirected_graph/bfs2.dot".to_string());
+    let _ = l.export_undirected_bfs_to_dot(5, "examples/dot/demo/undirected_graph/bfs2");
     println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
 }
 
@@ -408,7 +404,7 @@ fn undirected14() {
         "- Importando do arquivo GRAFO_2.txt e adicionando as arestas (1, 5), (4, 5), (5, 10), (9, 0)..."
     );
     let res: Result<AdjacencyList, Error> =
-        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt".to_owned());
+        UndirectedGraphIO::import_undirected_from_file("examples/data/GRAFO_2.txt");
     let mut l = res.unwrap();
     l.add_undirected_edge(1, 5);
     l.add_undirected_edge(4, 5);
@@ -418,11 +414,9 @@ fn undirected14() {
     print::list(&l);
     println!("- Vamos aplicar a DFS na lista acima a partir de dois vértices.");
     println!("- Vértice 0: resultado salvo em examples/dot/demo/undirected_graph/dfs1.dot");
-    let _ = l
-        .export_undirected_dfs_to_dot(0, "examples/dot/demo/undirected_graph/dfs1.dot".to_string());
+    let _ = l.export_undirected_dfs_to_dot(0, "examples/dot/demo/undirected_graph/dfs1");
     println!("- Vértice 5: resultado salvo em examples/dot/demo/undirected_graph/dfs2.dot");
-    let _ = l
-        .export_undirected_dfs_to_dot(5, "examples/dot/demo/undirected_graph/dfs2.dot".to_string());
+    let _ = l.export_undirected_dfs_to_dot(5, "examples/dot/demo/undirected_graph/dfs2");
     println!("- Para visualizar, compile os .dot com 'make png' no terminal!");
 }
 

@@ -22,23 +22,22 @@ fn main() {
     println!("BFS on following undirected graph: ");
     print::list(&g1);
 
-    let path1 = PATH.to_owned() + "bfs/bfs_1.dot";
-    let _ = g1.export_undirected_bfs_to_dot(1, path1.to_owned());
+    let path1 = format!("{PATH}bfs/bfs_1");
+    let _ = g1.export_undirected_bfs_to_dot(1, &path1);
     println!(
         "Undirected graph was exported to dot file on path {}! ",
         path1
     );
 
-    let res: Result<AdjacencyList, Error> =
-        GraphIO::import_from_file("examples/data/DIGRAFO1.txt".to_owned());
+    let res: Result<AdjacencyList, Error> = GraphIO::import_from_file("examples/data/DIGRAFO1.txt");
 
     match res {
         Ok(dg) => {
             println!("BFS on following digraph: ");
             print::list(&g1);
 
-            let path2 = PATH.to_owned() + "bfs/bfs_2.dot";
-            let _ = dg.export_directed_bfs_to_dot(1, path2.to_owned());
+            let path2 = format!("{PATH}bfs/bfs_2");
+            let _ = dg.export_directed_bfs_to_dot(1, &path2);
             println!("Digraph was exported to dot file on path {}! ", path2);
         }
         Err(_) => println!("oops.. shouldn't fall here"),

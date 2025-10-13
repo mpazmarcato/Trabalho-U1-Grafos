@@ -1,11 +1,11 @@
+use graphs_algorithms::BfsEvent;
+use graphs_algorithms::{DfsEvent, Edge, Graph, UndirectedGraph};
 use std::collections::HashSet;
 use std::fmt::Display;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
-
-use graphs_algorithms::BfsEvent;
-use graphs_algorithms::{DfsEvent, Edge, Graph, UndirectedGraph};
+use std::path::PathBuf;
 
 /// Provides input/output capabilities for a directed graph.
 ///
@@ -23,7 +23,7 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     ///
     /// # Arguments
     /// * `path` - The path to the input file containing the graph.
-    fn import_from_file(path: String) -> Result<Self, Error>
+    fn import_from_file(path: &str) -> Result<Self, Error>
     where
         Self: Sized,
     {
@@ -65,12 +65,10 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     ///
     /// # Arguments
     /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
-    fn export_to_dot(&self, mut path: String) -> Result<(), Error> {
-        if !path.contains(".dot") {
-            path += ".dot";
-        }
+    fn export_to_dot(&self, path: &str) -> Result<(), Error> {
+        let new_path = get_path(path);
 
-        let mut file: File = File::create(path)?;
+        let mut file: File = File::create(new_path)?;
 
         writeln!(file, "digraph G {{")?;
         writeln!(file, "  rankdir=LR;")?;
@@ -92,16 +90,14 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     /// # Arguments
     /// * `start` - The starting node for the BFS traversal.
     /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
-    fn export_directed_bfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
+    fn export_directed_bfs_to_dot(&self, start: Node, path: &str) -> Result<(), Error>
     where
         Self: Sized,
     {
-        if !path.contains(".dot") {
-            path += ".dot";
-        }
+        let new_path = get_path(path);
 
         let iter = self.bfs(start);
-        let mut file: File = File::create(&path)?;
+        let mut file: File = File::create(&new_path)?;
 
         writeln!(file, "digraph G {{")?;
         writeln!(file, "  node [shape=circle];")?;
@@ -131,16 +127,15 @@ pub trait GraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Graph<Node> {
     /// # Arguments
     /// * `start` - The starting node for the DFS traversal.
     /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
-    fn export_directed_dfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
+    fn export_directed_dfs_to_dot(&self, start: Node, path: &str) -> Result<(), Error>
     where
         Self: Sized,
         Node: Copy + Eq + Hash + Display + From<usize>,
     {
-        if !path.contains(".dot") {
-            path += ".dot";
-        }
+        let new_path = get_path(path);
+
         let iter = self.classify_edges(start);
-        let mut file: File = File::create(&path)?;
+        let mut file: File = File::create(&new_path)?;
 
         writeln!(file, "digraph G {{")?;
         writeln!(file, "  node [shape=circle];")?;
@@ -191,7 +186,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
     ///
     /// # Arguments
     /// * `path` - The path to the input file containing the undirected graph.
-    fn import_undirected_from_file(path: String) -> Result<Self, Error>
+    fn import_undirected_from_file(path: &str) -> Result<Self, Error>
     where
         Self: Sized + UndirectedGraph<Node>,
     {
@@ -237,15 +232,13 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
     ///
     /// # Arguments
     /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
-    fn export_undirected_to_dot(&self, mut path: String) -> Result<(), Error>
+    fn export_undirected_to_dot(&self, path: &str) -> Result<(), Error>
     where
         Self: Sized + UndirectedGraph<Node>,
     {
-        if !path.contains(".dot") {
-            path += ".dot";
-        }
+        let new_path = get_path(path);
 
-        let mut file: File = File::create(&path)?;
+        let mut file: File = File::create(&new_path)?;
 
         let mut visited: Vec<Node> = vec![];
 
@@ -273,7 +266,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
     /// # Arguments
     /// * `start` - The starting node for the DFS traversal.
     /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
-    fn export_undirected_dfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
+    fn export_undirected_dfs_to_dot(&self, start: Node, path: &str) -> Result<(), Error>
     where
         Self: Sized + UndirectedGraph<Node>,
         Node: Copy + Eq + Hash + Display + From<usize> + PartialOrd,
@@ -285,12 +278,9 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
             ));
         }
 
-        if !path.contains(".dot") {
-            path += ".dot";
-        }
-
+        let new_path = get_path(path);
         let iter = self.dfs(start);
-        let mut file: File = File::create(&path)?;
+        let mut file: File = File::create(&new_path)?;
         let mut visited_edges: HashSet<(Node, Node)> = HashSet::new();
 
         writeln!(file, "graph G {{")?;
@@ -330,7 +320,7 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
     /// # Arguments
     /// * `start` - The starting node for the BFS traversal.
     /// * `path` - The path to the output DOT file. If it's inside a folder, this folder must exists earlier.
-    fn export_undirected_bfs_to_dot(&self, start: Node, mut path: String) -> Result<(), Error>
+    fn export_undirected_bfs_to_dot(&self, start: Node, path: &str) -> Result<(), Error>
     where
         Self: Sized + UndirectedGraph<Node>,
         Node: Copy + Eq + Hash + Display + From<usize> + PartialOrd,
@@ -342,12 +332,10 @@ pub trait UndirectedGraphIO<Node: Copy + Eq + Hash + Display + From<usize>>: Gra
             ));
         }
 
-        if !path.contains(".dot") {
-            path += ".dot";
-        }
+        let new_path = get_path(path);
 
         let iter = self.bfs(start);
-        let mut file: File = File::create(&path)?;
+        let mut file: File = File::create(&new_path)?;
         let mut visited_edges: HashSet<(Node, Node)> = HashSet::new();
 
         writeln!(file, "graph G {{")?;
@@ -385,6 +373,22 @@ impl<N: Copy + Eq + Hash + Display + From<usize>, G: Graph<N>> GraphIO<N> for G 
 
 impl<N: Copy + Eq + Hash + Display + From<usize>, G: GraphIO<N>> UndirectedGraphIO<N> for G {}
 
+// fn get_path(path: &str) -> &str {
+//     if !path.contains(".dot") {
+//         path.to_string().push_str(".dot");
+//         return path;
+//     }
+//     path
+// }
+
+fn get_path(path: &str) -> PathBuf {
+    let mut buf = PathBuf::from(path);
+    if buf.extension().is_none() || buf.extension().unwrap() != "dot" {
+        buf.set_extension("dot");
+    }
+    buf
+}
+
 #[cfg(test)]
 mod test {
     use graphs_algorithms::graphs::{AdjacencyList, AdjacencyMatrix};
@@ -395,8 +399,8 @@ mod test {
 
     #[test]
     fn adj_list_new_digraph_1() {
-        let result: std::io::Result<AdjacencyList> =
-            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
+        let path = format!("{PATH}DIGRAFO01.txt");
+        let result: std::io::Result<AdjacencyList> = GraphIO::import_from_file(&path);
 
         assert!(result.is_ok());
 
@@ -408,8 +412,8 @@ mod test {
 
     #[test]
     fn adj_list_new_digraph_2() {
-        let result: Result<AdjacencyList, Error> =
-            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
+        let path = format!("{PATH}DIGRAFO02.txt");
+        let result: Result<AdjacencyList, Error> = GraphIO::import_from_file(&path);
 
         assert!(result.is_ok());
 
@@ -421,8 +425,8 @@ mod test {
 
     #[test]
     fn adj_list_new_digraph_error_1() {
-        let result: Result<AdjacencyList, Error> =
-            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
+        let path = format!("{PATH}GRAFO_0.txt");
+        let result: Result<AdjacencyList, Error> = GraphIO::import_from_file(&path);
 
         assert!(result.is_err());
 
@@ -437,8 +441,9 @@ mod test {
 
     #[test]
     fn adj_list_new_undirected_graph_1() {
+        let path = format!("{PATH}GRAFO_2.txt");
         let res: Result<AdjacencyList, Error> =
-            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+            UndirectedGraphIO::import_undirected_from_file(&path);
 
         assert!(res.is_ok());
 
@@ -450,16 +455,17 @@ mod test {
 
     #[test]
     fn adj_list_new_undirected_graph_2() {
+        let path = format!("{PATH}GRAFO_0.txt");
         let res: Result<AdjacencyList, Error> =
-            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
+            UndirectedGraphIO::import_undirected_from_file(&path);
 
         assert!(res.is_err());
     }
 
     #[test]
     fn adj_matrix_new_digraph_1() {
-        let result: Result<AdjacencyMatrix, Error> =
-            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO1.txt");
+        let path = format!("{PATH}DIGRAFO1.txt");
+        let result: Result<AdjacencyMatrix, Error> = GraphIO::import_from_file(&path);
 
         assert!(result.is_ok());
 
@@ -471,8 +477,8 @@ mod test {
 
     #[test]
     fn adj_matrix_new_digraph_2() {
-        let result: Result<AdjacencyMatrix, Error> =
-            GraphIO::import_from_file(PATH.to_owned() + "DIGRAFO2.txt");
+        let path = format!("{PATH}DIGRAFO2.txt");
+        let result: Result<AdjacencyMatrix, Error> = GraphIO::import_from_file(&path);
 
         assert!(result.is_ok());
 
@@ -484,8 +490,8 @@ mod test {
 
     #[test]
     fn adj_matrix_new_digraph_error_1() {
-        let result: Result<AdjacencyMatrix, Error> =
-            GraphIO::import_from_file(PATH.to_owned() + "GRAFO_0.txt");
+        let path = format!("{PATH}GRAFO_0.txt");
+        let result: Result<AdjacencyMatrix, Error> = GraphIO::import_from_file(&path);
 
         assert!(result.is_err());
 
@@ -500,8 +506,9 @@ mod test {
 
     #[test]
     fn adj_matrix_new_undirected_graph_1() {
+        let path = format!("{PATH}GRAFO_2.txt");
         let res: Result<AdjacencyMatrix, Error> =
-            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_2.txt");
+            UndirectedGraphIO::import_undirected_from_file(&path);
 
         assert!(res.is_ok());
 
@@ -513,8 +520,9 @@ mod test {
 
     #[test]
     fn adj_matrix_new_undirected_graph_2() {
+        let path = format!("{PATH}GRAFO_0.txt");
         let res: Result<AdjacencyMatrix, Error> =
-            UndirectedGraphIO::import_undirected_from_file(PATH.to_owned() + "GRAFO_0.txt");
+            UndirectedGraphIO::import_undirected_from_file(&path);
 
         assert!(res.is_err());
     }
