@@ -1,6 +1,6 @@
 # Trabalho Unidade 1 Grafos
 
-Vídeo que explica o funcionamento do projeto: <https://drive.google.com/file/d/1dWUMXOR_W2P-UAwmElS3u4a4tlCy-9oE/view?usp=sharing>
+Vídeo que explica o funcionamento do projeto: <https://drive.google.com/file/d/1VQE7I9YegS495EJg-NsOtABBG-EZecf5/view?usp=sharing>
 
 ## Estrutura do repositório em Rust 🦀
 
